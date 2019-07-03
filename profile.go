@@ -27,7 +27,7 @@ type Profile struct {
 		SmartResize             bool `json:"smartResize"`
 	} `json:"brokerOptions"`
 	BypassBroker bool     `json:"bypassBroker"`
-	Id           string   `json:"id"`
+	ID           string   `json:"id"`
 	Name         string   `json:"name"`
 	Tags         []string `json:"tags"`
 	Timezone     string   `json:"timezone"`
@@ -42,11 +42,11 @@ type Profile struct {
 
 func (client *Client) ListProfiles() ([]Profile, error) {
 	var Profiles []Profile
-	resp, err := client.Request("GET", "profiles", nil)
+	res, err := client.Request("GET", "profiles", nil)
 	if err != nil {
 		return Profiles, err
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return Profiles, err
 	}
@@ -60,11 +60,11 @@ func (client *Client) GetProfile(id string) (Profile, error) {
 	if id == "" {
 		return Profile, errors.New("Id cannot be empty")
 	}
-	resp, err := client.Request("GET", "Profile/"+id, nil)
+	res, err := client.Request("GET", "Profile/"+id, nil)
 	if err != nil {
 		return Profile, err
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return Profile, err
 	}
@@ -75,11 +75,11 @@ func (client *Client) GetProfile(id string) (Profile, error) {
 func (client *Client) CreateProfile(Profile *Profile) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(Profile)
-	resp, err := client.Request("POST", "storage/Profiles", jsonValue)
+	res, err := client.Request("POST", "storage/Profiles", jsonValue)
 	if err != nil {
 		return result, err
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(res.Body)
 	if err == nil {
 		result = string(body)
 	}
@@ -90,11 +90,11 @@ func (client *Client) DeleteProfile(id string) error {
 	if id == "" {
 		return errors.New("Id cannot be empty")
 	}
-	resp, err := client.Request("DELETE", "storage/Profile/"+id, nil)
+	res, err := client.Request("DELETE", "storage/Profile/"+id, nil)
 	if err != nil {
 		return err
 	}
-	_, err = ioutil.ReadAll(resp.Body)
+	_, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}

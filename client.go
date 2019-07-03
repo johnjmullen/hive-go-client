@@ -28,12 +28,14 @@ type Client struct {
 	token      string
 }
 
-func checkResponse(resp *http.Response, err error) (*http.Response, error) {
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		body, _ := ioutil.ReadAll(resp.Body)
-		return resp, (fmt.Errorf("Error %d: %s", resp.StatusCode, body))
+func checkResponse(res *http.Response, err error) (*http.Response, error) {
+	if err == nil && (res.StatusCode < 200 || res.StatusCode >= 300) {
+		defer res.Body.Close()
+		body, _ := ioutil.ReadAll(res.Body)
+		err = (fmt.Errorf("Error %d: %s", res.StatusCode, body))
+		return nil, err
 	}
-	return resp, err
+	return res, err
 }
 
 func (client *Client) Request(method, path string, data []byte) (*http.Response, error) {
@@ -55,21 +57,19 @@ func (client *Client) Request(method, path string, data []byte) (*http.Response,
 	if client.token != "" {
 		req.Header.Add("Authorization", "Bearer "+client.token)
 	}
-
 	return checkResponse(client.httpClient.Do(req))
-
 }
 
 func (client *Client) Login(username, password, realm string) error {
 	jsonData := map[string]string{"username": username, "password": password, "realm": realm}
 	jsonValue, _ := json.Marshal(jsonData)
 	var err error
-	resp, err := client.Request("POST", "auth", jsonValue)
+	res, err := client.Request("POST", "auth", jsonValue)
 	if err != nil {
 		return err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}

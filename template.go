@@ -7,13 +7,13 @@ import (
 )
 
 type Template struct {
-	Vcpu                int    `json:"vcpu"`
-	Mem                 int    `json:"mem"`
-	Os                  string `json:"os"`
-	Firmware            string `json:"firmware"`
-	DitemplatelayDriver string `json:"ditemplatelayDriver"`
-	Name                string `json:"name"`
-	Interfaces          []struct {
+	Vcpu          int    `json:"vcpu"`
+	Mem           int    `json:"mem"`
+	Os            string `json:"os"`
+	Firmware      string `json:"firmware"`
+	DisplayDriver string `json:"displayDriver"`
+	Name          string `json:"name"`
+	Interfaces    []struct {
 		Network   string `json:"network"`
 		Vlan      string `json:"vlan"`
 		Emulation string `json:"emulation"`
@@ -34,11 +34,11 @@ type Template struct {
 
 func (client *Client) ListTemplates() ([]Template, error) {
 	var templates []Template
-	retemplate, err := client.Request("GET", "templates", nil)
+	res, err := client.Request("GET", "templates", nil)
 	if err != nil {
 		return templates, err
 	}
-	body, err := ioutil.ReadAll(retemplate.Body)
+	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return templates, err
 	}
@@ -49,13 +49,13 @@ func (client *Client) ListTemplates() ([]Template, error) {
 func (client *Client) GetTemplate(name string) (Template, error) {
 	var template Template
 	if name == "" {
-		return template, errors.New("id cannot be empty")
+		return template, errors.New("name cannot be empty")
 	}
-	retemplate, err := client.Request("GET", "template/"+name, nil)
+	res, err := client.Request("GET", "template/"+name, nil)
 	if err != nil {
 		return template, err
 	}
-	body, err := ioutil.ReadAll(retemplate.Body)
+	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return template, err
 	}
@@ -66,11 +66,11 @@ func (client *Client) GetTemplate(name string) (Template, error) {
 func (client *Client) CreateTemplate(template *Template) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(template)
-	resp, err := client.Request("POST", "templates", jsonValue)
+	res, err := client.Request("POST", "templates", jsonValue)
 	if err != nil {
 		return result, err
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(res.Body)
 	if err == nil {
 		result = string(body)
 	}
@@ -81,11 +81,11 @@ func (client *Client) DeleteTemplate(name string) error {
 	if name == "" {
 		return errors.New("name cannot be empty")
 	}
-	retemplate, err := client.Request("DELETE", "template/"+name, nil)
+	res, err := client.Request("DELETE", "template/"+name, nil)
 	if err != nil {
 		return err
 	}
-	_, err = ioutil.ReadAll(retemplate.Body)
+	_, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}

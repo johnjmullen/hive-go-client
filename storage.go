@@ -27,11 +27,11 @@ func (sp StoragePool) String() string {
 
 func (client *Client) ListStoragePools() ([]StoragePool, error) {
     var pools []StoragePool
-    resp, err := client.Request("GET", "storage/pools", nil)
+    res, err := client.Request("GET", "storage/pools", nil)
     if err != nil {
         return pools, err
     }
-    body, err := ioutil.ReadAll(resp.Body)
+    body, err := ioutil.ReadAll(res.Body)
     if err != nil {
         return pools, err
     }
@@ -44,11 +44,11 @@ func (client *Client) GetStoragePool(id string) (StoragePool, error) {
     if id == "" {
         return pool, errors.New("id cannot be empty")
     }
-    resp, err := client.Request("GET", "storage/pool/"+id, nil)
+    res, err := client.Request("GET", "storage/pool/"+id, nil)
     if err != nil {
         return pool, err
     }
-    body, err := ioutil.ReadAll(resp.Body)
+    body, err := ioutil.ReadAll(res.Body)
     if err != nil {
         return pool, err
     }
@@ -59,11 +59,11 @@ func (client *Client) GetStoragePool(id string) (StoragePool, error) {
 func (client *Client) CreateStoragePool(pool *StoragePool) (string, error) {
     var result string
     jsonValue, _ := json.Marshal(pool)
-    resp, err := client.Request("POST", "storage/pools", jsonValue)
+    res, err := client.Request("POST", "storage/pools", jsonValue)
     if err != nil {
         return result, err
     }
-    body, err := ioutil.ReadAll(resp.Body)
+    body, err := ioutil.ReadAll(res.Body)
     if err == nil {
         result = string(body)
     }
@@ -74,11 +74,11 @@ func (client *Client) DeleteStoragePool(id string) (error) {
     if id == "" {
         return errors.New("id cannot be empty")
     }
-    resp, err := client.Request("DELETE", "storage/pool/"+id, nil)
+    res, err := client.Request("DELETE", "storage/pool/"+id, nil)
     if err != nil {
         return err
     }
-    _, err = ioutil.ReadAll(resp.Body)
+    _, err = ioutil.ReadAll(res.Body)
     if err != nil {
         return err
     }

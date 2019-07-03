@@ -1,9 +1,8 @@
 package main
 
-import (
-	"fmt"
-	//"log"
-)
+import "fmt"
+
+//"log"
 
 func main() {
 	client := Client{Host: "hive1", Port: 8443}
@@ -14,16 +13,21 @@ func main() {
 		fmt.Println(pool)
 	}
 
-	realm, _ := client.GetRealm("default")
-	fmt.Println(realm)
+	// realm, _ := client.GetRealm("default")
+	// fmt.Println(realm)
 
-	template, _ := client.GetTemplate("kubuntu")
-	fmt.Println(template)
+	// template, _ := client.GetTemplate("kubuntu")
+	// fmt.Println(template)
 
-	profiles, _ := client.ListProfiles()
-	for _, profile := range profiles {
-		fmt.Println(profile)
-	}
+	// profiles, _ := client.ListProfiles()
+	// for _, profile := range profiles {
+	// 	fmt.Println(profile)
+	// }
+	// hosts, _ := client.ListHosts()
+	// for _, host := range hosts {
+	// 	fmt.Printf("%v", host)
+	// }
+
 	/*ryzen := StoragePool{ Name: "ryzen",
 	                        Type: "nfs",
 	                        Server: "ryzen",
