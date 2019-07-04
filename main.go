@@ -15,6 +15,11 @@ func main() {
 	version, _ := client.HostVersion()
 	fmt.Println(version.Version)
 
+	clusters, _ := client.ListClusters()
+	for _, cluster := range clusters {
+		fmt.Println(cluster.String())
+	}
+
 	confDir := "/work/hiveio/conf/"
 	fmt.Println(confDir)
 
