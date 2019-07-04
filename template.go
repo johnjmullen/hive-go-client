@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 )
 
 type Template struct {
@@ -28,17 +27,22 @@ type Template struct {
 	} `json:"disks"`
 }
 
-/*func (template Template) String() string {
-	return fmt.templaterintf("{\n Name: %s,\n Id: %s,\n Type: %s,\n Server: %s,\n Path: %s\n}\n", template.Name, template.Type, template.Server, template.Path)
-}*/
+func (template *Template) String() string {
+	json, _ := json.MarshalIndent(template, "", "  ")
+	return string(json)
+}
+
+func (template *Template) ToJson() ([]byte, error) {
+	return json.Marshal(template)
+}
+
+func (template *Template) FromJson(data []byte) error {
+	return json.Unmarshal(data, template)
+}
 
 func (client *Client) ListTemplates() ([]Template, error) {
 	var templates []Template
-	res, err := client.Request("GET", "templates", nil)
-	if err != nil {
-		return templates, err
-	}
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := client.Request("GET", "templates", nil)
 	if err != nil {
 		return templates, err
 	}
@@ -51,11 +55,7 @@ func (client *Client) GetTemplate(name string) (Template, error) {
 	if name == "" {
 		return template, errors.New("name cannot be empty")
 	}
-	res, err := client.Request("GET", "template/"+name, nil)
-	if err != nil {
-		return template, err
-	}
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := client.Request("GET", "template/"+name, nil)
 	if err != nil {
 		return template, err
 	}
@@ -66,11 +66,7 @@ func (client *Client) GetTemplate(name string) (Template, error) {
 func (client *Client) CreateTemplate(template *Template) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(template)
-	res, err := client.Request("POST", "templates", jsonValue)
-	if err != nil {
-		return result, err
-	}
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := client.Request("POST", "templates", jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -81,11 +77,7 @@ func (client *Client) DeleteTemplate(name string) error {
 	if name == "" {
 		return errors.New("name cannot be empty")
 	}
-	res, err := client.Request("DELETE", "template/"+name, nil)
-	if err != nil {
-		return err
-	}
-	_, err = ioutil.ReadAll(res.Body)
+	_, err := client.Request("DELETE", "template/"+name, nil)
 	if err != nil {
 		return err
 	}

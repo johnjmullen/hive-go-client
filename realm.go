@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 )
 
 type Realm struct {
@@ -15,17 +14,21 @@ type Realm struct {
 	Verified bool     `json:"verified"`
 }
 
-func (realm Realm) String() string {
+func (realm *Realm) String() string {
 	return fmt.Sprintf("{\n Name: %v,\n Enabled: %v,\n fqdn: %v,\n Tags: %v,\n Verified: %v\n}\n", realm.Name, realm.Enabled, realm.FQDN, realm.Tags, realm.Verified)
+}
+
+func (realm *Realm) ToJson() ([]byte, error) {
+	return json.Marshal(realm)
+}
+
+func (realm *Realm) FromJson(data []byte) error {
+	return json.Unmarshal(data, realm)
 }
 
 func (client *Client) ListRealms() ([]Realm, error) {
 	var realms []Realm
-	res, err := client.Request("GET", "realms", nil)
-	if err != nil {
-		return realms, err
-	}
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := client.Request("GET", "realms", nil)
 	if err != nil {
 		return realms, err
 	}
@@ -39,11 +42,7 @@ func (client *Client) GetRealm(name string) (Realm, error) {
 	if name == "" {
 		return realm, errors.New("Name cannot be empty")
 	}
-	res, err := client.Request("GET", "realm/"+name, nil)
-	if err != nil {
-		return realm, err
-	}
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := client.Request("GET", "realm/"+name, nil)
 	if err != nil {
 		return realm, err
 	}
@@ -54,11 +53,7 @@ func (client *Client) GetRealm(name string) (Realm, error) {
 func (client *Client) CreateRealm(realm *Realm) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(realm)
-	res, err := client.Request("POST", "storage/realms", jsonValue)
-	if err != nil {
-		return result, err
-	}
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := client.Request("POST", "storage/realms", jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -69,11 +64,7 @@ func (client *Client) DeleteRealm(name string) error {
 	if name == "" {
 		return errors.New("Name cannot be empty")
 	}
-	res, err := client.Request("DELETE", "storage/realm/"+name, nil)
-	if err != nil {
-		return err
-	}
-	_, err = ioutil.ReadAll(res.Body)
+	_, err := client.Request("DELETE", "storage/realm/"+name, nil)
 	if err != nil {
 		return err
 	}

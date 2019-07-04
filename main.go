@@ -12,6 +12,11 @@ func main() {
 	for _, pool := range pools {
 		fmt.Println(pool)
 	}
+	version, _ := client.HostVersion()
+	fmt.Println(version.Version)
+
+	confDir := "/work/hiveio/conf/"
+	fmt.Println(confDir)
 
 	// realm, _ := client.GetRealm("default")
 	// fmt.Println(realm)

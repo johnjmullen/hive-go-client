@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 )
 
 type Host struct {
@@ -169,14 +168,17 @@ func (host *Host) String() string {
 	return string(json)
 }
 
+func (host *Host) ToJson() ([]byte, error) {
+	return json.Marshal(host)
+}
+
+func (host *Host) FromJson(data []byte) error {
+	return json.Unmarshal(data, host)
+}
+
 func (client *Client) ListHosts() ([]Host, error) {
 	var hosts []Host
-	res, err := client.Request("GET", "hosts", nil)
-	if err != nil {
-		return hosts, err
-	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := client.Request("GET", "hosts", nil)
 	if err != nil {
 		return hosts, err
 	}
@@ -189,12 +191,7 @@ func (client *Client) GetHost(hostid string) (Host, error) {
 	if hostid == "" {
 		return host, errors.New("hostid cannot be empty")
 	}
-	res, err := client.Request("GET", "host/"+hostid, nil)
-	if err != nil {
-		return host, err
-	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := client.Request("GET", "host/"+hostid, nil)
 	if err != nil {
 		return host, err
 	}
@@ -206,14 +203,26 @@ func (client *Client) DeleteHost(hostid string) error {
 	if hostid == "" {
 		return errors.New("name cannot be empty")
 	}
-	res, err := client.Request("DELETE", "host/"+hostid, nil)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-	_, err = ioutil.ReadAll(res.Body)
+	_, err := client.Request("DELETE", "host/"+hostid, nil)
 	if err != nil {
 		return err
 	}
 	return err
+}
+
+type Version struct {
+	Major   uint   `json:"major"`
+	Minor   uint   `json:"minor"`
+	Patch   uint   `json:"patch"`
+	Version string `json:"version"`
+}
+
+func (client *Client) HostVersion() (Version, error) {
+	var version Version
+	body, err := client.Request("GET", "host/version", nil)
+	if err != nil {
+		return version, err
+	}
+	err = json.Unmarshal(body, &version)
+	return version, err
 }

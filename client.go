@@ -11,11 +11,10 @@ import (
 	"time"
 )
 
-// type Type interface {
-//     String() string
-//     Marshal() string
-//     UnMarshal(string)
-// }
+type Type interface {
+	ToJson() ([]byte, error)
+	FromJson([]byte) error
+}
 
 type authToken struct {
 	Token string `json:"token"`
@@ -28,17 +27,22 @@ type Client struct {
 	token      string
 }
 
-func checkResponse(res *http.Response, err error) (*http.Response, error) {
-	if err == nil && (res.StatusCode < 200 || res.StatusCode >= 300) {
-		defer res.Body.Close()
-		body, _ := ioutil.ReadAll(res.Body)
-		err = (fmt.Errorf("Error %d: %s", res.StatusCode, body))
+func checkResponse(res *http.Response, err error) ([]byte, error) {
+	if err != nil {
 		return nil, err
 	}
-	return res, err
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		err = (fmt.Errorf("Error %d: %s", res.StatusCode, body))
+	}
+	return body, err
 }
 
-func (client *Client) Request(method, path string, data []byte) (*http.Response, error) {
+func (client *Client) Request(method, path string, data []byte) ([]byte, error) {
 	url := fmt.Sprintf("https://%s:%d/api/%s", client.Host, client.Port, path)
 	log.Print(method, " ", url)
 	if client.httpClient == nil {
@@ -62,17 +66,15 @@ func (client *Client) Request(method, path string, data []byte) (*http.Response,
 
 func (client *Client) Login(username, password, realm string) error {
 	jsonData := map[string]string{"username": username, "password": password, "realm": realm}
-	jsonValue, _ := json.Marshal(jsonData)
-	var err error
-	res, err := client.Request("POST", "auth", jsonValue)
+	jsonValue, err := json.Marshal(jsonData)
+	if err != nil {
+		return err
+	}
+	body, err := client.Request("POST", "auth", jsonValue)
 	if err != nil {
 		return err
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
 	auth := authToken{}
 	err = json.Unmarshal(body, &auth)
 	if err == nil {
