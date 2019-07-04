@@ -14,7 +14,7 @@ type Realm struct {
 	Verified bool     `json:"verified"`
 }
 
-func (realm *Realm) String() string {
+func (realm Realm) String() string {
 	return fmt.Sprintf("{\n Name: %v,\n Enabled: %v,\n fqdn: %v,\n Tags: %v,\n Verified: %v\n}\n", realm.Name, realm.Enabled, realm.FQDN, realm.Tags, realm.Verified)
 }
 
@@ -53,7 +53,7 @@ func (client *Client) GetRealm(name string) (Realm, error) {
 func (client *Client) CreateRealm(realm *Realm) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(realm)
-	body, err := client.Request("POST", "storage/realms", jsonValue)
+	body, err := client.Request("POST", "realms", jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -64,7 +64,7 @@ func (client *Client) DeleteRealm(name string) error {
 	if name == "" {
 		return errors.New("Name cannot be empty")
 	}
-	_, err := client.Request("DELETE", "storage/realm/"+name, nil)
+	_, err := client.Request("DELETE", "realm/"+name, nil)
 	if err != nil {
 		return err
 	}

@@ -39,7 +39,7 @@ type Profile struct {
 	Vlan int `json:"vlan,omitempty"`
 }
 
-func (profile *Profile) String() string {
+func (profile Profile) String() string {
 	json, _ := json.MarshalIndent(profile, "", "  ")
 	return string(json)
 }
@@ -68,7 +68,7 @@ func (client *Client) GetProfile(id string) (Profile, error) {
 	if id == "" {
 		return Profile, errors.New("Id cannot be empty")
 	}
-	body, err := client.Request("GET", "Profile/"+id, nil)
+	body, err := client.Request("GET", "profile/"+id, nil)
 	if err != nil {
 		return Profile, err
 	}
@@ -79,7 +79,7 @@ func (client *Client) GetProfile(id string) (Profile, error) {
 func (client *Client) CreateProfile(Profile *Profile) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(Profile)
-	body, err := client.Request("POST", "storage/Profiles", jsonValue)
+	body, err := client.Request("POST", "profiles", jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -90,7 +90,7 @@ func (client *Client) DeleteProfile(id string) error {
 	if id == "" {
 		return errors.New("Id cannot be empty")
 	}
-	_, err := client.Request("DELETE", "storage/Profile/"+id, nil)
+	_, err := client.Request("DELETE", "profile/"+id, nil)
 	if err != nil {
 		return err
 	}

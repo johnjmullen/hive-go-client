@@ -19,7 +19,7 @@ type StoragePool struct {
 	Tags         []string `json:"tags,omitempty"`
 }
 
-func (sp *StoragePool) String() string {
+func (sp StoragePool) String() string {
 	json, _ := json.MarshalIndent(sp, "", "  ")
 	return string(json)
 }
@@ -40,6 +40,19 @@ func (client *Client) ListStoragePools() ([]StoragePool, error) {
 	}
 	err = json.Unmarshal(body, &pools)
 	return pools, err
+}
+
+func (client *Client) GetStoragePoolByName(name string) (*StoragePool, error) {
+	var pools, err = client.ListStoragePools()
+	if err != nil {
+		return nil, err
+	}
+	for _, pool := range pools {
+		if pool.Name == name {
+			return &pool, nil
+		}
+	}
+	return nil, errors.New("Storage Pool not found")
 }
 
 func (client *Client) GetStoragePool(id string) (StoragePool, error) {

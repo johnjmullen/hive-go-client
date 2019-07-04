@@ -36,11 +36,10 @@ type Cluster struct {
 		Size           int    `json:"size,omitempty"`
 		Target         string `json:"target,omitempty"`
 	} `json:"userVolumes,omitempty"`
-	Vlan   int `json:"vlan,omitempty"`
-	client *Client
+	Vlan int `json:"vlan,omitempty"`
 }
 
-func (cluster *Cluster) String() string {
+func (cluster Cluster) String() string {
 	json, _ := json.MarshalIndent(cluster, "", "  ")
 	return string(json)
 }
@@ -61,9 +60,6 @@ func (client *Client) ListClusters() ([]Cluster, error) {
 	}
 	fmt.Println(string(body))
 	err = json.Unmarshal(body, &clusters)
-	for _, cluster := range clusters {
-		cluster.client = client
-	}
 	return clusters, err
 }
 
@@ -77,17 +73,16 @@ func (client *Client) GetCluster(id string) (Cluster, error) {
 		return cluster, err
 	}
 	err = json.Unmarshal(body, &cluster)
-	cluster.client = client
 	return cluster, err
 }
 
-func (cluster *Cluster) JoinHost(username, password, ipAddress string) error {
+func (client *Client) JoinHost(username, password, ipAddress string) error {
 	jsonData := map[string]string{"remoteUsername": username, "remotePassword": password, "remoteIpAddress": ipAddress}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
 		return err
 	}
-	_, err = cluster.client.Request("POST", fmt.Sprintf("cluster/%s/joinHost", cluster.ID), jsonValue)
+	_, err = client.Request("POST", "cluster/joinHost", jsonValue)
 	//TODO: Need to watch task
 	return err
 }

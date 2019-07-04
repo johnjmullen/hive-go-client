@@ -27,7 +27,7 @@ type Template struct {
 	} `json:"disks"`
 }
 
-func (template *Template) String() string {
+func (template Template) String() string {
 	json, _ := json.MarshalIndent(template, "", "  ")
 	return string(json)
 }

@@ -163,7 +163,7 @@ type Host struct {
 	CRS  bool     `json:"CRS"`
 }
 
-func (host *Host) String() string {
+func (host Host) String() string {
 	json, _ := json.MarshalIndent(host, "", "  ")
 	return string(json)
 }
