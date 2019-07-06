@@ -14,5 +14,6 @@ func main() {
 
 	version, _ := client.HostVersion()
 	fmt.Println(version.Version)
-
+	body, err := client.LoadTemplate("ubuntu-minimal", "disk")
+	fmt.Println(string(body), err)
 }

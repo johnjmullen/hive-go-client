@@ -7,14 +7,14 @@ import (
 )
 
 type Profile struct {
-	AdConfig struct {
+	AdConfig *struct {
 		Domain    string      `json:"domain,omitempty"`
 		Ou        interface{} `json:"ou,omitempty,omitempty"`
 		Password  string      `json:"password,omitempty"`
 		UserGroup string      `json:"userGroup,omitempty"`
 		Username  string      `json:"username,omitempty"`
 	} `json:"adConfig,omitempty"`
-	BrokerOptions struct {
+	BrokerOptions *struct {
 		AllowDesktopComposition bool `json:"allowDesktopComposition,omitempty"`
 		AudioCapture            bool `json:"audioCapture,omitempty"`
 		RedirectCSSP            bool `json:"redirectCSSP,omitempty"`
@@ -30,7 +30,7 @@ type Profile struct {
 	Name         string   `json:"name"`
 	Tags         []string `json:"tags,omitempty"`
 	Timezone     string   `json:"timezone,omitempty"`
-	UserVolumes  struct {
+	UserVolumes  *struct {
 		BackupSchedule int    `json:"backupSchedule,omitempty"`
 		Repository     string `json:"repository,omitempty"`
 		Size           int    `json:"size,omitempty"`
