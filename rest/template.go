@@ -83,3 +83,21 @@ func (client *Client) DeleteTemplate(name string) error {
 	}
 	return err
 }
+
+func (client *Client) LoadTemplate(name, storage string) ([]byte, error) {
+	if name == "" {
+		return nil, errors.New("name cannot be empty")
+	}
+
+	jsonData := map[string]string{"localStorage": storage}
+	jsonValue, _ := json.Marshal(jsonData)
+	return client.Request("POST", "template/"+name+"/loadall", jsonValue)
+}
+
+func (client *Client) UnloadTemplate(name string) error {
+	if name == "" {
+		return errors.New("name cannot be empty")
+	}
+	_, err := client.Request("POST", "template/"+name+"/unloadall", nil)
+	return err
+}

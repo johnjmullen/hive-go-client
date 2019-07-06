@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"bitbucket.org/johnmullen/hiveio-go-client/rest"
+	rest "bitbucket.org/johnmullen/hiveio-go-client/rest"
 )
 
 //TODO: use cobra for cli
