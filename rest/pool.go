@@ -19,7 +19,7 @@ type Pool struct {
 	ID          string   `json:"id"`
 	InjectAgent bool     `json:"injectAgent"`
 	Name        string   `json:"name"`
-	PoolID      string   `json:"poolId"`
+	ProfileID   string   `json:"profilelId"`
 	Seed        string   `json:"seed"`
 	State       string   `json:"state"`
 	StorageID   string   `json:"storageId"`
