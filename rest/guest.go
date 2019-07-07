@@ -6,7 +6,49 @@ import (
 )
 
 type Guest struct {
-	Name string `json:"name"`
+	AgentInstalled bool `json:"agentInstalled"`
+	Cpus           int  `json:"cpus"`
+	Currentmem     int  `json:"currentmem"`
+	Disks          []struct {
+		Backing    string `json:"backing,omitempty"`
+		Dev        string `json:"dev"`
+		DiskDriver string `json:"diskDriver"`
+		Format     string `json:"format,omitempty"`
+		Path       string `json:"path,omitempty"`
+		Size       int64  `json:"size,omitempty"`
+		StorageID  string `json:"storageId,omitempty"`
+		Type       string `json:"type"`
+	} `json:"disks"`
+	GuestState string `json:"guestState"`
+	Hostid     string `json:"hostid"`
+	Hostname   string `json:"hostname"`
+	Interfaces []struct {
+		Emulation  string `json:"emulation"`
+		MacAddress string `json:"macAddress"`
+		Network    string `json:"network"`
+		Vlan       int    `json:"vlan"`
+	} `json:"interfaces"`
+	Memory             int         `json:"memory"`
+	Name               string      `json:"name"`
+	Os                 string      `json:"os"`
+	Persistent         bool        `json:"persistent"`
+	PoolID             string      `json:"poolId"`
+	PreviousGuestState interface{} `json:"previousGuestState"`
+	ProfileID          string      `json:"profileId"`
+	PublishedIP        string      `json:"publishedIp"`
+	Realm              string      `json:"realm"`
+	Stamp              float64     `json:"stamp"`
+	Standalone         bool        `json:"standalone"`
+	Tags               []string    `json:"tags"`
+	TargetState        []string    `json:"targetState"`
+	TemplateName       string      `json:"templateName"`
+	Username           string      `json:"username"`
+	UUID               string      `json:"uuid"`
+	RdpUserInjected    bool        `json:"rdpUserInjected"`
+	HostDetails        struct {
+		Hostname string `json:"hostname"`
+		IP       string `json:"ip"`
+	} `json:"hostDetails"`
 }
 
 func (guest Guest) String() string {
@@ -32,12 +74,12 @@ func (client *Client) ListGuests() ([]Guest, error) {
 	return guests, err
 }
 
-func (client *Client) GetGuest(guestid string) (Guest, error) {
+func (client *Client) GetGuest(name string) (Guest, error) {
 	var guest Guest
-	if guestid == "" {
-		return guest, errors.New("guestid cannot be empty")
+	if name == "" {
+		return guest, errors.New("name cannot be empty")
 	}
-	body, err := client.Request("GET", "guest/"+guestid, nil)
+	body, err := client.Request("GET", "guest/"+name, nil)
 	if err != nil {
 		return guest, err
 	}
@@ -45,23 +87,35 @@ func (client *Client) GetGuest(guestid string) (Guest, error) {
 	return guest, err
 }
 
-func (client *Client) DeleteGuest(guestid string) error {
-	if guestid == "" {
+func (client *Client) ShutdownGuest(name string) error {
+	if name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.Request("DELETE", "guest/"+guestid, nil)
+	_, err := client.Request("POST", "guest/"+name+"/shutdown", nil)
 	if err != nil {
 		return err
 	}
 	return err
 }
 
-func (client *Client) GuestVersion() (Version, error) {
-	var version Version
-	body, err := client.Request("GET", "guest/version", nil)
-	if err != nil {
-		return version, err
+func (client *Client) PowerOffGuest(name string) error {
+	if name == "" {
+		return errors.New("name cannot be empty")
 	}
-	err = json.Unmarshal(body, &version)
-	return version, err
+	_, err := client.Request("POST", "guest/"+name+"/poweroff", nil)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (client *Client) ResetGuest(name string) error {
+	if name == "" {
+		return errors.New("name cannot be empty")
+	}
+	_, err := client.Request("POST", "guest/"+name+"/reset", nil)
+	if err != nil {
+		return err
+	}
+	return err
 }
