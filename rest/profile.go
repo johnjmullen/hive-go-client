@@ -96,3 +96,16 @@ func (client *Client) DeleteProfile(id string) error {
 	}
 	return err
 }
+
+func (client *Client) GetProfileByName(name string) (*Profile, error) {
+	var profiles, err = client.ListProfiles()
+	if err != nil {
+		return nil, err
+	}
+	for _, profile := range profiles {
+		if profile.Name == name {
+			return &profile, nil
+		}
+	}
+	return nil, errors.New("Profile not found")
+}
