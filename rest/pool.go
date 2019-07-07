@@ -7,24 +7,24 @@ import (
 )
 
 type Pool struct {
-	Density   []int `json:"density"`
-	GuestPool struct {
+	Density      []int `json:"density"`
+	GuestProfile struct {
 		CPU          []int  `json:"cpu"`
 		Mem          []int  `json:"mem"`
 		Os           string `json:"os"`
 		Persistent   bool   `json:"persistent"`
 		TemplateName string `json:"templateName"`
 		Vga          string `json:"vga"`
-	} `json:"guestPool"`
-	ID          string   `json:"id"`
+	} `json:"guestProfile"`
+	ID          string   `json:"id,omitempty"`
 	InjectAgent bool     `json:"injectAgent"`
 	Name        string   `json:"name"`
-	ProfileID   string   `json:"profilelId"`
+	ProfileID   string   `json:"profileId"`
 	Seed        string   `json:"seed"`
-	State       string   `json:"state"`
+	State       string   `json:"state,omitempty"`
 	StorageID   string   `json:"storageId"`
 	StorageType string   `json:"storageType"`
-	Tags        []string `json:"tags"`
+	Tags        []string `json:"tags,omitempty"`
 	Type        string   `json:"type"`
 }
 
