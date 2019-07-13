@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"github.com/ghodss/yaml"
 )
 
 type Profile struct {
@@ -50,6 +52,14 @@ func (profile *Profile) ToJson() ([]byte, error) {
 
 func (profile *Profile) FromJson(data []byte) error {
 	return json.Unmarshal(data, profile)
+}
+
+func (profile *Profile) ToYaml() ([]byte, error) {
+	return yaml.Marshal(profile)
+}
+
+func (profile *Profile) FromYaml(data []byte) error {
+	return yaml.Unmarshal(data, profile)
 }
 
 func (profile *Profile) Create(client *Client) (string, error) {

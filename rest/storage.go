@@ -3,6 +3,8 @@ package client
 import (
 	"encoding/json"
 	"errors"
+
+	"github.com/ghodss/yaml"
 )
 
 type StoragePool struct {
@@ -30,6 +32,14 @@ func (sp *StoragePool) ToJson() ([]byte, error) {
 
 func (sp *StoragePool) FromJson(data []byte) error {
 	return json.Unmarshal(data, sp)
+}
+
+func (sp *StoragePool) ToYaml() ([]byte, error) {
+	return yaml.Marshal(sp)
+}
+
+func (sp *StoragePool) FromYaml(data []byte) error {
+	return yaml.Unmarshal(data, sp)
 }
 
 func (client *Client) ListStoragePools() ([]StoragePool, error) {

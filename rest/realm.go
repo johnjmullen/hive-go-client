@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"github.com/ghodss/yaml"
 )
 
 type Realm struct {
@@ -25,6 +27,14 @@ func (realm *Realm) ToJson() ([]byte, error) {
 
 func (realm *Realm) FromJson(data []byte) error {
 	return json.Unmarshal(data, realm)
+}
+
+func (realm *Realm) ToYaml() ([]byte, error) {
+	return yaml.Marshal(realm)
+}
+
+func (realm *Realm) FromYaml(data []byte) error {
+	return yaml.Unmarshal(data, realm)
 }
 
 func (client *Client) ListRealms() ([]Realm, error) {
