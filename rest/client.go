@@ -28,15 +28,6 @@ type Client struct {
 	token         string
 }
 
-func NewClient(host string, port uint, allowInsecure bool) *Client {
-	client := &Client{Host: host, Port: port, AllowInsecure: allowInsecure}
-
-	if client.Port == 0 {
-		client.Port = 8443
-	}
-	return client
-}
-
 func checkResponse(res *http.Response, err error) ([]byte, error) {
 	if err != nil {
 		return nil, err

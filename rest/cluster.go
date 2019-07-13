@@ -82,8 +82,9 @@ func (client *Client) JoinHost(username, password, ipAddress string) error {
 	if err != nil {
 		return err
 	}
+	//Why doesn't this use clusterId?
 	_, err = client.Request("POST", "cluster/joinHost", jsonValue)
-	//TODO: Need to watch task, add clusterId to hive-rest?
+	//TODO: Need to watch task
 	return err
 }
 

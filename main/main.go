@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 
 	rest "bitbucket.org/johnmullen/hiveio-go-client/rest"
@@ -12,19 +10,18 @@ import (
 //TODO: use cobra for cli
 
 func main() {
-	client := rest.NewClient("hive1", 8443)
+	client := &rest.Client{Host: "hive1", Port: 8443, AllowInsecure: true}
 	client.Login("admin", "admin", "local")
 
 	version, _ := client.HostVersion()
 	fmt.Println(version.Version)
 
 	//Create pool
-	confDir := "/home/john1/work/hiveio/conf"
+	/*confDir := "/home/john1/work/hiveio/conf"
 	files, err := ioutil.ReadDir(fmt.Sprintf("%s/pools/", confDir))
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	for _, f := range files {
 		jsonFile, err := os.Open(fmt.Sprintf("%s/pools/%s", confDir, f.Name()))
 		if err != nil {
@@ -41,17 +38,16 @@ func main() {
 			log.Fatal(err)
 		}
 		fmt.Println(msg)
-	}
+	}*/
 
-	//Delete Pools
-	pools, err := client.ListPools()
+	pools, err := client.ListStoragePools()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	for _, pool := range pools {
-		err = pool.Delete(client)
-		fmt.Println(err)
+		files, _ := pool.Browse(client)
+		fmt.Println(files)
 	}
 
 	clusters, err := client.ListClusters()

@@ -41,7 +41,7 @@ func (pool *Pool) FromJson(data []byte) error {
 	return json.Unmarshal(data, pool)
 }
 
-func (client *Client) ListPools() ([]Pool, error) {
+func (client *Client) ListGuestPools() ([]Pool, error) {
 	var pools []Pool
 	body, err := client.Request("GET", "pools", nil)
 	if err != nil {
@@ -66,7 +66,7 @@ func (client *Client) GetPool(id string) (Pool, error) {
 }
 
 func (client *Client) GetPoolByName(name string) (*Pool, error) {
-	var pools, err = client.ListPools()
+	var pools, err = client.ListGuestPools()
 	if err != nil {
 		return nil, err
 	}

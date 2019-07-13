@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/ghodss/yaml"
 )
@@ -90,11 +91,49 @@ func (pool *StoragePool) Create(client *Client) (string, error) {
 
 func (pool *StoragePool) Delete(client *Client) error {
 	if pool.ID == "" {
-		return errors.New("id cannot be empty")
+		return errors.New("Invalid Storage Pool")
 	}
 	_, err := client.Request("DELETE", "storage/pool/"+pool.ID, nil)
 	if err != nil {
 		return err
 	}
 	return err
+}
+
+func (pool *StoragePool) CreateDisk(client *Client, filename, format string, size uint) error {
+	if pool.ID == "" {
+		return errors.New("Invalid Storage Pool")
+	}
+	jsonData := map[string]interface{}{"filename": filename, "size": size, "format": format}
+	jsonValue, err := json.Marshal(jsonData)
+	if err != nil {
+		return err
+	}
+	_, err = client.Request("POST", "storage/pool/"+pool.ID+"/createDisk", jsonValue)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (pool *StoragePool) DeleteFile(client *Client, filename string) error {
+	if pool.ID == "" {
+		return errors.New("Invalid Storage Pool")
+	}
+	_, err := client.Request("DELETE", fmt.Sprintf("storage/pool/%s/%s", pool.ID, filename), nil)
+	return err
+}
+
+func (pool *StoragePool) Browse(client *Client) ([]string, error) {
+	var files []string
+	if pool.ID == "" {
+		return files, errors.New("Invalid Storage Pool")
+	}
+
+	body, err := client.Request("GET", fmt.Sprintf("storage/pool/%s/browse", pool.ID), nil)
+	if err != nil {
+		return files, err
+	}
+	err = json.Unmarshal(body, &files)
+	return files, err
 }
