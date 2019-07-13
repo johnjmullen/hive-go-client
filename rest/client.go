@@ -27,6 +27,10 @@ type Client struct {
 	token      string
 }
 
+func NewClient(host string, port uint) *Client {
+	return &Client{Host: host, Port: port}
+}
+
 func checkResponse(res *http.Response, err error) ([]byte, error) {
 	if err != nil {
 		return nil, err

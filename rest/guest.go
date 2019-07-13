@@ -87,33 +87,33 @@ func (client *Client) GetGuest(name string) (Guest, error) {
 	return guest, err
 }
 
-func (client *Client) ShutdownGuest(name string) error {
-	if name == "" {
+func (guest *Guest) Shutdown(client *Client) error {
+	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.Request("POST", "guest/"+name+"/shutdown", nil)
+	_, err := client.Request("POST", "guest/"+guest.Name+"/shutdown", nil)
 	if err != nil {
 		return err
 	}
 	return err
 }
 
-func (client *Client) PowerOffGuest(name string) error {
-	if name == "" {
+func (guest *Guest) Poweroff(client *Client) error {
+	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.Request("POST", "guest/"+name+"/poweroff", nil)
+	_, err := client.Request("POST", "guest/"+guest.Name+"/poweroff", nil)
 	if err != nil {
 		return err
 	}
 	return err
 }
 
-func (client *Client) ResetGuest(name string) error {
-	if name == "" {
+func (guest *Guest) Reset(client *Client) error {
+	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.Request("POST", "guest/"+name+"/reset", nil)
+	_, err := client.Request("POST", "guest/"+guest.Name+"/reset", nil)
 	if err != nil {
 		return err
 	}

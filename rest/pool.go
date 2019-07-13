@@ -42,48 +42,27 @@ func (pool *Pool) FromJson(data []byte) error {
 }
 
 func (client *Client) ListPools() ([]Pool, error) {
-	var Pools []Pool
+	var pools []Pool
 	body, err := client.Request("GET", "pools", nil)
 	if err != nil {
-		return Pools, err
+		return pools, err
 	}
 	fmt.Println(string(body))
-	err = json.Unmarshal(body, &Pools)
-	return Pools, err
+	err = json.Unmarshal(body, &pools)
+	return pools, err
 }
 
 func (client *Client) GetPool(id string) (Pool, error) {
-	var Pool Pool
+	var pool Pool
 	if id == "" {
-		return Pool, errors.New("Id cannot be empty")
+		return pool, errors.New("Id cannot be empty")
 	}
 	body, err := client.Request("GET", "pool/"+id, nil)
 	if err != nil {
-		return Pool, err
+		return pool, err
 	}
-	err = json.Unmarshal(body, &Pool)
-	return Pool, err
-}
-
-func (client *Client) CreatePool(Pool *Pool) (string, error) {
-	var result string
-	jsonValue, _ := json.Marshal(Pool)
-	body, err := client.Request("POST", "pools", jsonValue)
-	if err == nil {
-		result = string(body)
-	}
-	return result, err
-}
-
-func (client *Client) DeletePool(id string) error {
-	if id == "" {
-		return errors.New("Id cannot be empty")
-	}
-	_, err := client.Request("DELETE", "pool/"+id, nil)
-	if err != nil {
-		return err
-	}
-	return err
+	err = json.Unmarshal(body, &pool)
+	return pool, err
 }
 
 func (client *Client) GetPoolByName(name string) (*Pool, error) {
@@ -97,4 +76,42 @@ func (client *Client) GetPoolByName(name string) (*Pool, error) {
 		}
 	}
 	return nil, errors.New("Pool not found")
+}
+
+func (pool *Pool) Create(client *Client) (string, error) {
+	var result string
+	jsonValue, _ := json.Marshal(pool)
+	body, err := client.Request("POST", "pools", jsonValue)
+	if err == nil {
+		result = string(body)
+	}
+	return result, err
+}
+
+func (pool *Pool) Update(client *Client) (string, error) {
+	var result string
+	jsonValue, _ := json.Marshal(pool)
+	body, err := client.Request("PUT", "pool", jsonValue)
+	if err == nil {
+		result = string(body)
+	}
+	return result, err
+}
+
+func (pool *Pool) Delete(client *Client) error {
+	fmt.Printf("Deleting pool %s, %s\n", pool.Name, pool.ID)
+	if pool.ID == "" || client == nil {
+		return errors.New("Invalid pool")
+	}
+	_, err := client.Request("DELETE", "pool/"+pool.ID, nil)
+	return err
+}
+
+func (pool *Pool) Refresh(client *Client) error {
+	fmt.Printf("Refreshing pool %s, %s\n", pool.Name, pool.ID)
+	if pool.ID == "" || client == nil {
+		return errors.New("Invalid pool")
+	}
+	_, err := client.Request("POST", "pool/"+pool.ID+"/refresh", nil)
+	return err
 }

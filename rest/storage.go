@@ -68,7 +68,7 @@ func (client *Client) GetStoragePool(id string) (StoragePool, error) {
 	return pool, err
 }
 
-func (client *Client) CreateStoragePool(pool *StoragePool) (string, error) {
+func (pool *StoragePool) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(pool)
 	body, err := client.Request("POST", "storage/pools", jsonValue)
@@ -78,11 +78,11 @@ func (client *Client) CreateStoragePool(pool *StoragePool) (string, error) {
 	return result, err
 }
 
-func (client *Client) DeleteStoragePool(id string) error {
-	if id == "" {
+func (pool *StoragePool) Delete(client *Client) error {
+	if pool.ID == "" {
 		return errors.New("id cannot be empty")
 	}
-	_, err := client.Request("DELETE", "storage/pool/"+id, nil)
+	_, err := client.Request("DELETE", "storage/pool/"+pool.ID, nil)
 	if err != nil {
 		return err
 	}

@@ -52,6 +52,37 @@ func (profile *Profile) FromJson(data []byte) error {
 	return json.Unmarshal(data, profile)
 }
 
+func (profile *Profile) Create(client *Client) (string, error) {
+	var result string
+	jsonValue, _ := json.Marshal(profile)
+	body, err := client.Request("POST", "profiles", jsonValue)
+	if err == nil {
+		result = string(body)
+	}
+	return result, err
+}
+
+func (profile *Profile) Update(client *Client) (string, error) {
+	var result string
+	jsonValue, _ := json.Marshal(profile)
+	body, err := client.Request("PUT", "profile/"+profile.ID, jsonValue)
+	if err == nil {
+		result = string(body)
+	}
+	return result, err
+}
+
+func (profile *Profile) Delete(client *Client) error {
+	if profile.ID == "" {
+		return errors.New("Id cannot be empty")
+	}
+	_, err := client.Request("DELETE", "profile/"+profile.ID, nil)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
 func (client *Client) ListProfiles() ([]Profile, error) {
 	var Profiles []Profile
 	body, err := client.Request("GET", "profiles", nil)
@@ -74,27 +105,6 @@ func (client *Client) GetProfile(id string) (Profile, error) {
 	}
 	err = json.Unmarshal(body, &Profile)
 	return Profile, err
-}
-
-func (client *Client) CreateProfile(Profile *Profile) (string, error) {
-	var result string
-	jsonValue, _ := json.Marshal(Profile)
-	body, err := client.Request("POST", "profiles", jsonValue)
-	if err == nil {
-		result = string(body)
-	}
-	return result, err
-}
-
-func (client *Client) DeleteProfile(id string) error {
-	if id == "" {
-		return errors.New("Id cannot be empty")
-	}
-	_, err := client.Request("DELETE", "profile/"+id, nil)
-	if err != nil {
-		return err
-	}
-	return err
 }
 
 func (client *Client) GetProfileByName(name string) (*Profile, error) {

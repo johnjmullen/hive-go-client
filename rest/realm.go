@@ -15,7 +15,8 @@ type Realm struct {
 }
 
 func (realm Realm) String() string {
-	return fmt.Sprintf("{\n Name: %v,\n Enabled: %v,\n fqdn: %v,\n Tags: %v,\n Verified: %v\n}\n", realm.Name, realm.Enabled, realm.FQDN, realm.Tags, realm.Verified)
+	json, _ := json.MarshalIndent(realm, "", "  ")
+	return string(json)
 }
 
 func (realm *Realm) ToJson() ([]byte, error) {
@@ -50,7 +51,7 @@ func (client *Client) GetRealm(name string) (Realm, error) {
 	return realm, err
 }
 
-func (client *Client) CreateRealm(realm *Realm) (string, error) {
+func (realm *Realm) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(realm)
 	body, err := client.Request("POST", "realms", jsonValue)
@@ -60,11 +61,21 @@ func (client *Client) CreateRealm(realm *Realm) (string, error) {
 	return result, err
 }
 
-func (client *Client) DeleteRealm(name string) error {
-	if name == "" {
+func (realm *Realm) Update(client *Client) (string, error) {
+	var result string
+	jsonValue, _ := json.Marshal(realm)
+	body, err := client.Request("PUT", "realm/"+realm.Name, jsonValue)
+	if err == nil {
+		result = string(body)
+	}
+	return result, err
+}
+
+func (realm *Realm) Delete(client *Client) error {
+	if realm.Name == "" {
 		return errors.New("Name cannot be empty")
 	}
-	_, err := client.Request("DELETE", "realm/"+name, nil)
+	_, err := client.Request("DELETE", "realm/"+realm.Name, nil)
 	if err != nil {
 		return err
 	}

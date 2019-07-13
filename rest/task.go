@@ -3,19 +3,33 @@ package client
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+	"time"
 )
 
 type Task struct {
-	Enabled  bool     `json:"enabled"`
-	FQDN     string   `json:"fqdn"`
-	Name     string   `json:"id"`
-	Tags     []string `json:"tags,omitempty"`
-	Verified bool     `json:"verified"`
+	Cancellable     bool      `json:"cancellable"`
+	Description     string    `json:"description"`
+	FinishedTime    time.Time `json:"finishedTime"`
+	ID              string    `json:"id"`
+	LastUpdatedTime time.Time `json:"lastUpdatedTime"`
+	Message         string    `json:"message"`
+	Name            string    `json:"name"`
+	Progress        int       `json:"progress"`
+	QueueTime       int       `json:"queueTime"`
+	Ref             struct {
+		Cluster string `json:"cluster"`
+		Host    string `json:"host"`
+	} `json:"ref"`
+	StartTime time.Time   `json:"startTime"`
+	State     string      `json:"state"`
+	Tags      []string    `json:"tags"`
+	Type      string      `json:"type"`
+	Username  interface{} `json:"username"`
 }
 
 func (task Task) String() string {
-	return fmt.Sprintf("{\n Name: %v,\n Enabled: %v,\n fqdn: %v,\n Tags: %v,\n Verified: %v\n}\n", task.Name, task.Enabled, task.FQDN, task.Tags, task.Verified)
+	json, _ := json.MarshalIndent(task, "", "  ")
+	return string(json)
 }
 
 func (task *Task) ToJson() ([]byte, error) {
@@ -32,7 +46,6 @@ func (client *Client) ListTasks() ([]Task, error) {
 	if err != nil {
 		return tasks, err
 	}
-	fmt.Println(string(body))
 	err = json.Unmarshal(body, &tasks)
 	return tasks, err
 }
@@ -50,10 +63,10 @@ func (client *Client) GetTask(id string) (Task, error) {
 	return task, err
 }
 
-func (client *Client) ForceCompleteTask(id string) error {
-	if id == "" {
+func (task *Task) ForceCompleteTask(client *Client) error {
+	if task.ID == "" {
 		return errors.New("Id cannot be empty")
 	}
-	_, err := client.Request("PUT", "task/"+id+"/forcecomplete", nil)
+	_, err := client.Request("PUT", "task/"+task.ID+"/forcecomplete", nil)
 	return err
 }

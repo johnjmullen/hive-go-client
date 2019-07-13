@@ -83,6 +83,27 @@ func (client *Client) JoinHost(username, password, ipAddress string) error {
 		return err
 	}
 	_, err = client.Request("POST", "cluster/joinHost", jsonValue)
-	//TODO: Need to watch task
+	//TODO: Need to watch task, add clusterId to hive-rest?
+	return err
+}
+
+func (cluster *Cluster) GetLicenseInfo(client *Client) (string, string, error) {
+	body, err := client.Request("GET", "cluster/"+cluster.ID+"/license", nil)
+	if err != nil {
+		return "", "", err
+	}
+	var objMap map[string]string
+	err = json.Unmarshal(body, &objMap)
+
+	return objMap["expiration"], objMap["type"], err
+}
+
+func (cluster *Cluster) SetLicense(client *Client, key string) error {
+	jsonData := map[string]string{"key": key}
+	jsonValue, err := json.Marshal(jsonData)
+	if err != nil {
+		return err
+	}
+	_, err = client.Request("PUT", "cluster/"+cluster.ID+"/license", jsonValue)
 	return err
 }
