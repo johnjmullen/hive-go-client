@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 )
 
 type Pool struct {
@@ -47,7 +46,6 @@ func (client *Client) ListGuestPools() ([]Pool, error) {
 	if err != nil {
 		return pools, err
 	}
-	fmt.Println(string(body))
 	err = json.Unmarshal(body, &pools)
 	return pools, err
 }
@@ -99,7 +97,6 @@ func (pool *Pool) Update(client *Client) (string, error) {
 }
 
 func (pool *Pool) Delete(client *Client) error {
-	fmt.Printf("Deleting pool %s, %s\n", pool.Name, pool.ID)
 	if pool.ID == "" || client == nil {
 		return errors.New("Invalid pool")
 	}
@@ -108,7 +105,6 @@ func (pool *Pool) Delete(client *Client) error {
 }
 
 func (pool *Pool) Refresh(client *Client) error {
-	fmt.Printf("Refreshing pool %s, %s\n", pool.Name, pool.ID)
 	if pool.ID == "" || client == nil {
 		return errors.New("Invalid pool")
 	}

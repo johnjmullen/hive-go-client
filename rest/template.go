@@ -14,7 +14,7 @@ type Template struct {
 	Name          string `json:"name"`
 	Interfaces    []struct {
 		Network   string `json:"network"`
-		Vlan      string `json:"vlan"`
+		Vlan      int    `json:"vlan"`
 		Emulation string `json:"emulation"`
 	} `json:"interfaces"`
 	Drivers bool `json:"drivers"`

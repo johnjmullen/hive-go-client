@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 )
@@ -45,10 +44,9 @@ func checkResponse(res *http.Response, err error) ([]byte, error) {
 
 func (client *Client) Request(method, path string, data []byte) ([]byte, error) {
 	url := fmt.Sprintf("https://%s:%d/api/%s", client.Host, client.Port, path)
-	log.Print(method, " ", url)
 	if client.httpClient == nil {
 		tr := &http.Transport{
-			TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
+			TLSClientConfig:    &tls.Config{InsecureSkipVerify: client.AllowInsecure},
 			DisableCompression: true,
 		}
 		client.httpClient = &http.Client{Transport: tr, Timeout: time.Second * 30}

@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 )
 
 type Cluster struct {
@@ -58,7 +57,6 @@ func (client *Client) ListClusters() ([]Cluster, error) {
 	if err != nil {
 		return clusters, err
 	}
-	fmt.Println(string(body))
 	err = json.Unmarshal(body, &clusters)
 	return clusters, err
 }

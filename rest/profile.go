@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/ghodss/yaml"
 )
@@ -54,10 +53,6 @@ func (profile *Profile) FromJson(data []byte) error {
 	return json.Unmarshal(data, profile)
 }
 
-func (profile *Profile) ToYaml() ([]byte, error) {
-	return yaml.Marshal(profile)
-}
-
 func (profile *Profile) FromYaml(data []byte) error {
 	return yaml.Unmarshal(data, profile)
 }
@@ -99,7 +94,6 @@ func (client *Client) ListProfiles() ([]Profile, error) {
 	if err != nil {
 		return Profiles, err
 	}
-	fmt.Println(string(body))
 	err = json.Unmarshal(body, &Profiles)
 	return Profiles, err
 }

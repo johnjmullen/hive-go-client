@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
-	"github.com/ghodss/yaml"
 )
 
 type StoragePool struct {
@@ -35,14 +33,6 @@ func (sp *StoragePool) FromJson(data []byte) error {
 	return json.Unmarshal(data, sp)
 }
 
-func (sp *StoragePool) ToYaml() ([]byte, error) {
-	return yaml.Marshal(sp)
-}
-
-func (sp *StoragePool) FromYaml(data []byte) error {
-	return yaml.Unmarshal(data, sp)
-}
-
 func (client *Client) ListStoragePools() ([]StoragePool, error) {
 	var pools []StoragePool
 	body, err := client.Request("GET", "storage/pools", nil)
@@ -66,8 +56,8 @@ func (client *Client) GetStoragePoolByName(name string) (*StoragePool, error) {
 	return nil, errors.New("Storage Pool not found")
 }
 
-func (client *Client) GetStoragePool(id string) (StoragePool, error) {
-	var pool StoragePool
+func (client *Client) GetStoragePool(id string) (*StoragePool, error) {
+	var pool *StoragePool
 	if id == "" {
 		return pool, errors.New("id cannot be empty")
 	}

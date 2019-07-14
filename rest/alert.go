@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
-
-	"github.com/ghodss/yaml"
 )
 
 type Alert struct {
@@ -35,14 +33,6 @@ func (alert *Alert) ToJson() ([]byte, error) {
 
 func (alert *Alert) FromJson(data []byte) error {
 	return json.Unmarshal(data, alert)
-}
-
-func (alert *Alert) ToYaml() ([]byte, error) {
-	return yaml.Marshal(alert)
-}
-
-func (alert *Alert) FromYaml(data []byte) error {
-	return yaml.Unmarshal(data, alert)
 }
 
 func (client *Client) ListAlerts() ([]Alert, error) {
