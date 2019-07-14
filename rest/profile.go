@@ -98,17 +98,17 @@ func (client *Client) ListProfiles() ([]Profile, error) {
 	return Profiles, err
 }
 
-func (client *Client) GetProfile(id string) (Profile, error) {
-	var Profile Profile
+func (client *Client) GetProfile(id string) (*Profile, error) {
+	var profile *Profile
 	if id == "" {
-		return Profile, errors.New("Id cannot be empty")
+		return profile, errors.New("Id cannot be empty")
 	}
 	body, err := client.Request("GET", "profile/"+id, nil)
 	if err != nil {
-		return Profile, err
+		return profile, err
 	}
-	err = json.Unmarshal(body, &Profile)
-	return Profile, err
+	err = json.Unmarshal(body, &profile)
+	return profile, err
 }
 
 func (client *Client) GetProfileByName(name string) (*Profile, error) {

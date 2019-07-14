@@ -5,10 +5,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-// listCmd represents the list command
 var poolListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list pools",
@@ -31,5 +29,4 @@ var poolListCmd = &cobra.Command{
 func init() {
 	poolCmd.AddCommand(poolListCmd)
 	poolListCmd.Flags().Bool("details", false, "show details")
-	viper.BindPFlag("details", poolListCmd.Flags().Lookup("details"))
 }

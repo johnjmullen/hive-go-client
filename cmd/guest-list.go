@@ -5,10 +5,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-// listCmd represents the list command
 var guestListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list guests",
@@ -31,5 +29,4 @@ var guestListCmd = &cobra.Command{
 func init() {
 	guestCmd.AddCommand(guestListCmd)
 	guestListCmd.Flags().Bool("details", false, "show details")
-	viper.BindPFlag("details", guestListCmd.Flags().Lookup("details"))
 }

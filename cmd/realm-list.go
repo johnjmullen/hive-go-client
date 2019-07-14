@@ -5,10 +5,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-// listCmd represents the list command
 var realmListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list realms",
@@ -31,5 +29,4 @@ var realmListCmd = &cobra.Command{
 func init() {
 	realmCmd.AddCommand(realmListCmd)
 	realmListCmd.Flags().Bool("details", false, "show details")
-	viper.BindPFlag("details", realmListCmd.Flags().Lookup("details"))
 }

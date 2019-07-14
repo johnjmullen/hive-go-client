@@ -5,10 +5,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-// listCmd represents the list command
 var profileListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list profiles",
@@ -31,5 +29,4 @@ var profileListCmd = &cobra.Command{
 func init() {
 	profileCmd.AddCommand(profileListCmd)
 	profileListCmd.Flags().Bool("details", false, "show details")
-	viper.BindPFlag("details", profileListCmd.Flags().Lookup("details"))
 }

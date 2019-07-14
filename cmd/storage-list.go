@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var storageListPoolsCmd = &cobra.Command{
-	Use:   "list-pools",
+var storageListCmd = &cobra.Command{
+	Use:   "list",
 	Short: "list storage pools",
 	Run: func(cmd *cobra.Command, args []string) {
 		pools, err := restClient.ListStoragePools()
@@ -27,6 +27,6 @@ var storageListPoolsCmd = &cobra.Command{
 }
 
 func init() {
-	storageCmd.AddCommand(storageListPoolsCmd)
-	storageListPoolsCmd.Flags().Bool("details", false, "show details")
+	storageCmd.AddCommand(storageListCmd)
+	storageListCmd.Flags().Bool("details", false, "show details")
 }

@@ -5,10 +5,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-// listCmd represents the list command
 var templateListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list templates",
@@ -31,5 +29,4 @@ var templateListCmd = &cobra.Command{
 func init() {
 	templateCmd.AddCommand(templateListCmd)
 	templateListCmd.Flags().Bool("details", false, "show details")
-	viper.BindPFlag("details", templateListCmd.Flags().Lookup("details"))
 }
