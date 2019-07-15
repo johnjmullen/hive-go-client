@@ -1,7 +1,7 @@
 # hive-go-client
 go client for hive-rest
 
-Since this is a priate repo you need to run
+Since this is a private repo you need to run
 `git config --global url."git@github.com:".insteadOf "https://github.com/"`
 
 install it with: `go get github.com/hive-io/hive-go-client/hioctl`
@@ -37,5 +37,15 @@ Flags:
   -u, --user string       Admin username (default "admin")
 
 Use "hioctl [command] --help" for more information about a command.
+```
+
+You can add a json or yaml config file in ~/.hiveio/ for default settings
+~/.hiveio/config.yaml
+```
+host: hive1
+user: admin
+password: admin
+realm: local
+insecure: true
 ```
 
