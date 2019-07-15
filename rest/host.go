@@ -226,3 +226,23 @@ func (client *Client) HostVersion() (Version, error) {
 	err = json.Unmarshal(body, &version)
 	return version, err
 }
+
+func (client *Client) HostId() (string, error) {
+	body, err := client.Request("GET", "host/hostid", nil)
+	if err != nil {
+		return "", err
+	}
+	var objMap map[string]string
+	err = json.Unmarshal(body, &objMap)
+	return objMap["id"], err
+}
+
+func (client *Client) ClusterId() (string, error) {
+	body, err := client.Request("GET", "host/clusterid", nil)
+	if err != nil {
+		return "", err
+	}
+	var objMap map[string]string
+	err = json.Unmarshal(body, &objMap)
+	return objMap["id"], err
+}

@@ -6,6 +6,7 @@ import (
 
 	rest "bitbucket.org/johnmullen/hiveio-go-client/rest"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var storageGetCmd = &cobra.Command{
@@ -16,9 +17,9 @@ var storageGetCmd = &cobra.Command{
 		var err error
 		switch {
 		case cmd.Flags().Changed("id"):
-			pool, err = restClient.GetStoragePool(poolId)
+			pool, err = restClient.GetStoragePool(viper.GetString("id"))
 		case cmd.Flags().Changed("name"):
-			pool, err = restClient.GetStoragePoolByName(poolName)
+			pool, err = restClient.GetStoragePoolByName(viper.GetString("name"))
 		default:
 			cmd.Usage()
 			os.Exit(1)
@@ -32,10 +33,10 @@ var storageGetCmd = &cobra.Command{
 	},
 }
 
-var poolId, poolName string
-
 func init() {
 	storageCmd.AddCommand(storageGetCmd)
-	storageGetCmd.Flags().StringVarP(&poolId, "id", "i", "", "Storage Pool Id")
-	storageGetCmd.Flags().StringVarP(&poolName, "name", "n", "", "Storage Pool Id")
+	storageGetCmd.Flags().StringP("id", "i", "", "Storage Pool Id")
+	storageGetCmd.Flags().StringP("name", "n", "", "Storage Pool Id")
+	viper.BindPFlag("id", storageGetCmd.Flags().Lookup("id"))
+	viper.BindPFlag("name", storageGetCmd.Flags().Lookup("name"))
 }

@@ -99,3 +99,17 @@ func formatString(obj interface{}) string {
 	}
 	return ""
 }
+
+func unmarshal(data []byte, obj interface{}) error {
+	var err error
+	format := viper.GetString("format")
+	switch format {
+	case "yaml":
+		return yaml.Unmarshal(data, obj)
+	case "json":
+		return json.Unmarshal(data, obj)
+	default:
+		err = (fmt.Errorf("Error: Unsupported format %s", format))
+	}
+	return err
+}
