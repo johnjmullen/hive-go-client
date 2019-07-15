@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	rest "bitbucket.org/johnmullen/hiveio-go-client/rest"
+	rest "github.com/hive-io/hive-go-client/rest"
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

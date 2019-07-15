@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bitbucket.org/johnmullen/hiveio-go-client/cmd"
+	"github.com/hive-io/hive-go-client/cmd"
 )
 
 func main() {
