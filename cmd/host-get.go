@@ -12,7 +12,6 @@ var hostGetCmd = &cobra.Command{
 	Short: "get host details",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(args)
 		host, err := restClient.GetHost(args[0])
 
 		if err != nil {

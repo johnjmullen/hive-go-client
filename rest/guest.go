@@ -98,6 +98,17 @@ func (guest *Guest) Shutdown(client *Client) error {
 	return err
 }
 
+func (guest *Guest) Reboot(client *Client) error {
+	if guest.Name == "" {
+		return errors.New("name cannot be empty")
+	}
+	_, err := client.Request("POST", "guest/"+guest.Name+"/reboot", nil)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
 func (guest *Guest) Poweroff(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
