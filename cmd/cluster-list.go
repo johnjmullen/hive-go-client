@@ -20,7 +20,7 @@ var clusterListCmd = &cobra.Command{
 			fmt.Println(formatString(clusters))
 		} else {
 			for _, cluster := range clusters {
-				fmt.Println(cluster.Name)
+				fmt.Println(cluster.ID)
 			}
 		}
 	},

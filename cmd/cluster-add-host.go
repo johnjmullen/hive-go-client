@@ -9,7 +9,7 @@ import (
 
 var rUser, rPass string
 var addHostCmd = &cobra.Command{
-	Use:   "add [ipAddress]",
+	Use:   "add-host [ipAddress]",
 	Short: "add a host to the cluster",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -22,7 +22,7 @@ var addHostCmd = &cobra.Command{
 }
 
 func init() {
-	hostCmd.AddCommand(addHostCmd)
+	clusterCmd.AddCommand(addHostCmd)
 	addHostCmd.Flags().StringVar(&rUser, "remote-username", "admin", "username for the remote host")
 	addHostCmd.Flags().StringVar(&rPass, "remote-password", "admin", "password for the remote host")
 }

@@ -8,7 +8,7 @@ import (
 )
 
 var setLicenseCmd = &cobra.Command{
-	Use:   "setLicense [license]",
+	Use:   "set-license [license]",
 	Short: "add a license for the cluster",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -23,5 +23,5 @@ var setLicenseCmd = &cobra.Command{
 }
 
 func init() {
-	hostCmd.AddCommand(setLicenseCmd)
+	clusterCmd.AddCommand(setLicenseCmd)
 }
