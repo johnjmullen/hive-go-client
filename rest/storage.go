@@ -84,9 +84,6 @@ func (pool *StoragePool) Delete(client *Client) error {
 		return errors.New("Invalid Storage Pool")
 	}
 	_, err := client.Request("DELETE", "storage/pool/"+pool.ID, nil)
-	if err != nil {
-		return err
-	}
 	return err
 }
 
@@ -110,7 +107,14 @@ func (pool *StoragePool) DeleteFile(client *Client, filename string) error {
 	if pool.ID == "" {
 		return errors.New("Invalid Storage Pool")
 	}
-	_, err := client.Request("DELETE", fmt.Sprintf("storage/pool/%s/%s", pool.ID, filename), nil)
+	body, err := client.Request("DELETE", fmt.Sprintf("storage/pool/%s/%s", pool.ID, filename), nil)
+	var res struct {
+		Deleted bool `json:"deleted"`
+	}
+	err = json.Unmarshal(body, &res)
+	if err == nil && !res.Deleted {
+		err = (fmt.Errorf("Error: Unable to delete %s from %s", filename, pool.Name))
+	}
 	return err
 }
 

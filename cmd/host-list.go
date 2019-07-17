@@ -19,9 +19,12 @@ var hostListCmd = &cobra.Command{
 		if cmd.Flags().Changed("details") {
 			fmt.Println(formatString(hosts))
 		} else {
+			var hostList []map[string]string
 			for _, host := range hosts {
-				fmt.Printf("hostid: %s\t hostname: %s\n", host.Hostid, host.Hostname)
+				var hostInfo = map[string]string{"hostid": host.Hostid, "hostname": host.Hostname}
+				hostList = append(hostList, hostInfo)
 			}
+			fmt.Println(formatString(hostList))
 		}
 	},
 }

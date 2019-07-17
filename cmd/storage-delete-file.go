@@ -9,9 +9,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var storageBrowseCmd = &cobra.Command{
-	Use:   "browse [file]",
-	Short: "list storage pool files",
+var storageDeleteFileCmd = &cobra.Command{
+	Use:   "delete-file [file]",
+	Short: "delete a file from the storage pool",
+	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("id", cmd.Flags().Lookup("id"))
 		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
@@ -33,17 +34,17 @@ var storageBrowseCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		files, err := pool.Browse(restClient)
+		err = pool.DeleteFile(restClient, args[0])
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		fmt.Println(formatString(files))
+
 	},
 }
 
 func init() {
-	storageCmd.AddCommand(storageBrowseCmd)
-	storageBrowseCmd.Flags().StringP("id", "i", "", "Storage Pool Id")
-	storageBrowseCmd.Flags().StringP("name", "n", "", "Storage Pool Name")
+	storageCmd.AddCommand(storageDeleteFileCmd)
+	storageDeleteFileCmd.Flags().StringP("id", "i", "", "Storage Pool Id")
+	storageDeleteFileCmd.Flags().StringP("name", "n", "", "Storage Pool Name")
 }

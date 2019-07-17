@@ -22,8 +22,6 @@ var guestGetCmd = &cobra.Command{
 	},
 }
 
-//var name string
-
 func init() {
 	guestCmd.AddCommand(guestGetCmd)
 }

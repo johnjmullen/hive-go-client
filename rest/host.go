@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 type Host struct {
@@ -245,4 +246,10 @@ func (client *Client) ClusterId() (string, error) {
 	var objMap map[string]string
 	err = json.Unmarshal(body, &objMap)
 	return objMap["id"], err
+}
+
+func (host *Host) RestartServices(client *Client) error {
+	body, err := client.Request("POST", "host/"+host.Hostid+"/services/hive-services/restart", nil)
+	fmt.Println(string(body))
+	return err
 }

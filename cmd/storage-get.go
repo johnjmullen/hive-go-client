@@ -12,6 +12,10 @@ import (
 var storageGetCmd = &cobra.Command{
 	Use:   "get",
 	Short: "get storage pool details",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("id", cmd.Flags().Lookup("id"))
+		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var pool *rest.StoragePool
 		var err error
@@ -37,6 +41,4 @@ func init() {
 	storageCmd.AddCommand(storageGetCmd)
 	storageGetCmd.Flags().StringP("id", "i", "", "Storage Pool Id")
 	storageGetCmd.Flags().StringP("name", "n", "", "Storage Pool Id")
-	viper.BindPFlag("id", storageGetCmd.Flags().Lookup("id"))
-	viper.BindPFlag("name", storageGetCmd.Flags().Lookup("name"))
 }

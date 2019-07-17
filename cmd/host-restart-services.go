@@ -7,17 +7,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var guestRebootCmd = &cobra.Command{
-	Use:   "reboot [Name]",
-	Short: "reboot guest",
+var hostRestartServicesCmd = &cobra.Command{
+	Use:   "restart-services [hostid]",
+	Short: "restart hive servies",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		guest, err := restClient.GetGuest(args[0])
+		host, err := restClient.GetHost(args[0])
+
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		guest.Reboot(restClient)
+		err = host.RestartServices(restClient)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -25,6 +26,8 @@ var guestRebootCmd = &cobra.Command{
 	},
 }
 
+//var name string
+
 func init() {
-	guestCmd.AddCommand(guestRebootCmd)
+	hostCmd.AddCommand(hostRestartServicesCmd)
 }

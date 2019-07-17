@@ -25,8 +25,6 @@ var guestShutdownCmd = &cobra.Command{
 	},
 }
 
-//var name string
-
 func init() {
 	guestCmd.AddCommand(guestShutdownCmd)
 }
