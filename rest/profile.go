@@ -1,4 +1,4 @@
-package client
+package rest
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 type Profile struct {
 	AdConfig *struct {
 		Domain    string      `json:"domain,omitempty"`
-		Ou        interface{} `json:"ou,omitempty,omitempty"`
+		Ou        interface{} `json:"ou,omitempty"`
 		Password  string      `json:"password,omitempty"`
 		UserGroup string      `json:"userGroup,omitempty"`
 		Username  string      `json:"username,omitempty"`

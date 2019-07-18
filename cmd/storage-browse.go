@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	rest "github.com/hive-io/hive-go-client/rest"
+	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

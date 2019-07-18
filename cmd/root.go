@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/ghodss/yaml"
-	rest "github.com/hive-io/hive-go-client/rest"
+	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -78,13 +78,19 @@ func yamlString(obj interface{}) string {
 	return string(yaml)
 }
 
-func jsonString(obj interface{}) string {
-	json, err := json.Marshal(obj)
+func jsonString(obj interface{}, compact bool) string {
+	var data []byte
+	var err error
+	if compact {
+		data, err = json.Marshal(obj)
+	} else {
+		data, err = json.MarshalIndent(obj, "", "  ")
+	}
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	return string(json)
+	return string(data)
 }
 
 func formatString(obj interface{}) string {
@@ -92,7 +98,9 @@ func formatString(obj interface{}) string {
 	case "yaml":
 		return yamlString(obj)
 	case "json":
-		return jsonString(obj)
+		return jsonString(obj, false)
+	case "json-compact":
+		return jsonString(obj, true)
 	default:
 		fmt.Println("Error: Unsupported format")
 		os.Exit(1)

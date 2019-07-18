@@ -1,4 +1,4 @@
-package client
+package rest
 
 import (
 	"encoding/json"
@@ -50,8 +50,8 @@ func (client *Client) ListGuestPools() ([]Pool, error) {
 	return pools, err
 }
 
-func (client *Client) GetPool(id string) (Pool, error) {
-	var pool Pool
+func (client *Client) GetPool(id string) (*Pool, error) {
+	var pool *Pool
 	if id == "" {
 		return pool, errors.New("Id cannot be empty")
 	}

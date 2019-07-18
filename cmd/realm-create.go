@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	rest "github.com/hive-io/hive-go-client/rest"
+	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
 )
 
