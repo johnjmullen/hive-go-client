@@ -32,14 +32,6 @@ func (pool Pool) String() string {
 	return string(json)
 }
 
-func (pool *Pool) ToJson() ([]byte, error) {
-	return json.Marshal(pool)
-}
-
-func (pool *Pool) FromJson(data []byte) error {
-	return json.Unmarshal(data, pool)
-}
-
 func (client *Client) ListGuestPools() ([]Pool, error) {
 	var pools []Pool
 	body, err := client.Request("GET", "pools", nil)

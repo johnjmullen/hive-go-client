@@ -10,11 +10,6 @@ import (
 	"time"
 )
 
-type Type interface {
-	ToJson() ([]byte, error)
-	FromJson([]byte) error
-}
-
 type authToken struct {
 	Token string `json:"token"`
 }

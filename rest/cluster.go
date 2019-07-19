@@ -43,14 +43,6 @@ func (cluster Cluster) String() string {
 	return string(json)
 }
 
-func (cluster *Cluster) ToJson() ([]byte, error) {
-	return json.Marshal(cluster)
-}
-
-func (cluster *Cluster) FromJson(data []byte) error {
-	return json.Unmarshal(data, cluster)
-}
-
 func (client *Client) ListClusters() ([]Cluster, error) {
 	var clusters []Cluster
 	body, err := client.Request("GET", "clusters", nil)

@@ -45,14 +45,6 @@ func (profile Profile) String() string {
 	return string(json)
 }
 
-func (profile *Profile) ToJson() ([]byte, error) {
-	return json.Marshal(profile)
-}
-
-func (profile *Profile) FromJson(data []byte) error {
-	return json.Unmarshal(data, profile)
-}
-
 func (profile *Profile) FromYaml(data []byte) error {
 	return yaml.Unmarshal(data, profile)
 }

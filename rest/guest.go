@@ -56,14 +56,6 @@ func (guest Guest) String() string {
 	return string(json)
 }
 
-func (guest *Guest) ToJson() ([]byte, error) {
-	return json.Marshal(guest)
-}
-
-func (guest *Guest) FromJson(data []byte) error {
-	return json.Unmarshal(data, guest)
-}
-
 func (client *Client) ListGuests() ([]Guest, error) {
 	var guests []Guest
 	body, err := client.Request("GET", "guests", nil)

@@ -25,14 +25,6 @@ func (sp StoragePool) String() string {
 	return string(json)
 }
 
-func (sp *StoragePool) ToJson() ([]byte, error) {
-	return json.Marshal(sp)
-}
-
-func (sp *StoragePool) FromJson(data []byte) error {
-	return json.Unmarshal(data, sp)
-}
-
 func (client *Client) ListStoragePools() ([]StoragePool, error) {
 	var pools []StoragePool
 	body, err := client.Request("GET", "storage/pools", nil)

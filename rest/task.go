@@ -32,14 +32,6 @@ func (task Task) String() string {
 	return string(json)
 }
 
-func (task *Task) ToJson() ([]byte, error) {
-	return json.Marshal(task)
-}
-
-func (task *Task) FromJson(data []byte) error {
-	return json.Unmarshal(data, task)
-}
-
 func (client *Client) ListTasks() ([]Task, error) {
 	var tasks []Task
 	body, err := client.Request("GET", "tasks", nil)

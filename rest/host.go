@@ -169,14 +169,6 @@ func (host Host) String() string {
 	return string(json)
 }
 
-func (host *Host) ToJson() ([]byte, error) {
-	return json.Marshal(host)
-}
-
-func (host *Host) FromJson(data []byte) error {
-	return json.Unmarshal(data, host)
-}
-
 func (client *Client) ListHosts() ([]Host, error) {
 	var hosts []Host
 	body, err := client.Request("GET", "hosts", nil)

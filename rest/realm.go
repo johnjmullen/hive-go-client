@@ -18,14 +18,6 @@ func (realm Realm) String() string {
 	return string(json)
 }
 
-func (realm *Realm) ToJson() ([]byte, error) {
-	return json.Marshal(realm)
-}
-
-func (realm *Realm) FromJson(data []byte) error {
-	return json.Unmarshal(data, realm)
-}
-
 func (client *Client) ListRealms() ([]Realm, error) {
 	var realms []Realm
 	body, err := client.Request("GET", "realms", nil)

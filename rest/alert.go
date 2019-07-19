@@ -27,14 +27,6 @@ func (alert Alert) String() string {
 	return string(json)
 }
 
-func (alert *Alert) ToJson() ([]byte, error) {
-	return json.Marshal(alert)
-}
-
-func (alert *Alert) FromJson(data []byte) error {
-	return json.Unmarshal(data, alert)
-}
-
 func (client *Client) ListAlerts() ([]Alert, error) {
 	var alerts []Alert
 	body, err := client.Request("GET", "alerts", nil)

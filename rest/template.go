@@ -6,9 +6,10 @@ import (
 )
 
 type Template struct {
+	ID            string `json:"id"`
 	Vcpu          int    `json:"vcpu"`
 	Mem           int    `json:"mem"`
-	Os            string `json:"os"`
+	OS            string `json:"os"`
 	Firmware      string `json:"firmware"`
 	DisplayDriver string `json:"displayDriver"`
 	Name          string `json:"name"`
@@ -25,6 +26,9 @@ type Template struct {
 		Emulation string `json:"emulation"`
 		DiskSize  int    `json:"diskSize"`
 	} `json:"disks"`
+	State              string `json:"state"`
+	StateMessage       string `json:"stateMessage"`
+	ManualAgentInstall bool   `json:"manualAgentInstall"`
 }
 
 func (template Template) String() string {
