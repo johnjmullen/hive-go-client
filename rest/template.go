@@ -94,14 +94,15 @@ func (template *Template) Delete(client *Client) error {
 	return err
 }
 
-func (template *Template) Load(client *Client, storage string) ([]byte, error) {
+func (template *Template) Load(client *Client, storage string) error {
 	if template.Name == "" {
-		return nil, errors.New("name cannot be empty")
+		return errors.New("name cannot be empty")
 	}
 
 	jsonData := map[string]string{"localStorage": storage}
 	jsonValue, _ := json.Marshal(jsonData)
-	return client.Request("POST", "template/"+template.Name+"/loadall", jsonValue)
+	_, err := client.Request("POST", "template/"+template.Name+"/loadall", jsonValue)
+	return err
 }
 
 func (template *Template) Unload(client *Client) error {

@@ -130,3 +130,15 @@ func (guest *Guest) Reset(client *Client) error {
 	}
 	return err
 }
+
+//Why is this POST instad of DELETE?
+func (guest *Guest) Delete(client *Client) error {
+	if guest.Name == "" {
+		return errors.New("name cannot be empty")
+	}
+	_, err := client.Request("POST", "guest/"+guest.Name+"/delete", nil)
+	if err != nil {
+		return err
+	}
+	return err
+}
