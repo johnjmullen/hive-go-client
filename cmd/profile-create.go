@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"os"
+	"log"
 
 	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
@@ -14,7 +14,6 @@ var profileCreateCmd = &cobra.Command{
 	Short: "Add a new profile",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			fmt.Print("using flags")
 			cmd.MarkFlagRequired("name")
 		}
 		if cmd.Flags().Changed("enable-ad") {
@@ -30,7 +29,6 @@ var profileCreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		v := viper.New()
 		if len(args) == 1 {
-			fmt.Print("loading config")
 			v.SetConfigFile(args[0])
 			v.ReadInConfig()
 		}
@@ -65,15 +63,13 @@ var profileCreateCmd = &cobra.Command{
 		var profile rest.Profile
 		err := v.Unmarshal(&profile)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			log.Fatal(err)
 		}
 		fmt.Println(formatString(profile))
 		msg, err := profile.Create(restClient)
 		fmt.Println(msg)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			log.Fatal(err)
 		}
 	},
 }

@@ -2,41 +2,47 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
+	"log"
 
 	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var realmCreateCmd = &cobra.Command{
 	Use:   "create [file]",
 	Short: "Add a new realm",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if len(args) != 1 {
+			cmd.MarkFlagRequired("name")
+			cmd.MarkFlagRequired("fqdn")
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
-		file, err := os.Open(args[0])
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		v := viper.New()
+		if len(args) == 1 {
+			v.SetConfigFile(args[0])
+			v.ReadInConfig()
 		}
-		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
+		v.BindPFlag("fqdn", cmd.Flags().Lookup("fqdn"))
+		v.BindPFlag("name", cmd.Flags().Lookup("name"))
 		var realm rest.Realm
-		err = unmarshal(data, &realm)
+		err := v.Unmarshal(&realm)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			log.Fatal(err)
 		}
-
+		realm.Verified = true
 		msg, err := realm.Create(restClient)
 		fmt.Println(msg)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			log.Fatal(err)
 		}
 	},
 }
 
 func init() {
 	realmCmd.AddCommand(realmCreateCmd)
+	realmCreateCmd.Flags().StringP("name", "n", "", "Netbios Name")
+	realmCreateCmd.Flags().String("fqdn", "", "FQDN")
 }
