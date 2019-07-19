@@ -1,15 +1,13 @@
 # hive-go-client
-go client for hive-rest
 
-hive-go-client/rest is a go wrapper arounf the hiveio api
+hive-go-client/rest is a go wrapper around the hiveio api
 
 hive-go-client/hioctl is a command line interface for the api
 
+install it with: `go get github.com/hive-io/hive-go-client/hioctl`
 
 Since this is a private repo you need to run
 `git config --global url."git@github.com:".insteadOf "https://github.com/"`
-
-install it with: `go get github.com/hive-io/hive-go-client/hioctl`
 
 ```
  ~/go/bin/hioctl
@@ -34,7 +32,7 @@ Available Commands:
 
 Use "hioctl [command] --help" for more information about a command.
 ```
-[hioctl Documentation](doc/hioctl.md)
+[hioctl Documentation](docs/hioctl.md)
 
 You can add a json or yaml config file in ~/.hiveio/ for default settings
 ~/.hiveio/config.yaml

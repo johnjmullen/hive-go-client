@@ -12,7 +12,6 @@ var docCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Short: "Generates documentation",
 	Run: func(cmd *cobra.Command, args []string) {
-		//RootCmd.GenBashCompletion(os.Stdout)
 		err := doc.GenMarkdownTree(RootCmd, args[0])
 		if err != nil {
 			log.Fatal(err)
