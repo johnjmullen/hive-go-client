@@ -1,7 +1,8 @@
 package cmd
 
 import (
-	"log"
+	"fmt"
+	"os"
 
 	"github.com/spf13/viper"
 
@@ -18,11 +19,13 @@ var templateLoadCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		template, err := restClient.GetTemplate(args[0])
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
+			os.Exit(1)
 		}
 		err = template.Load(restClient, viper.GetString("storage"))
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
+			os.Exit(1)
 		}
 	},
 }

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	"os"
 
 	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
@@ -30,13 +30,15 @@ var realmCreateCmd = &cobra.Command{
 		var realm rest.Realm
 		err := v.Unmarshal(&realm)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
+			os.Exit(1)
 		}
 		realm.Verified = true
 		msg, err := realm.Create(restClient)
 		fmt.Println(msg)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
+			os.Exit(1)
 		}
 	},
 }

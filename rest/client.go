@@ -37,7 +37,7 @@ func checkResponse(res *http.Response, err error) ([]byte, error) {
 	}
 	defer res.Body.Close()
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		err = (fmt.Errorf("Error %d: %s", res.StatusCode, body))
+		err = (fmt.Errorf("{\"error\": %d, \"message\": %s}", res.StatusCode, body))
 	}
 	return body, err
 }

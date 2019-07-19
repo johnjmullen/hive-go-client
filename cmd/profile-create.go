@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	"os"
 
 	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
@@ -63,13 +63,15 @@ var profileCreateCmd = &cobra.Command{
 		var profile rest.Profile
 		err := v.Unmarshal(&profile)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
+			os.Exit(1)
 		}
 		fmt.Println(formatString(profile))
 		msg, err := profile.Create(restClient)
 		fmt.Println(msg)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
+			os.Exit(1)
 		}
 	},
 }

@@ -200,14 +200,30 @@ func (client *Client) GetHost(hostid string) (Host, error) {
 	return host, err
 }
 
-func (client *Client) DeleteHost(hostid string) error {
-	if hostid == "" {
-		return errors.New("name cannot be empty")
+func (host *Host) Update(client *Client) (string, error) {
+	var result string
+	jsonValue, _ := json.Marshal(host)
+	body, err := client.Request("PUT", "host/"+host.Hostid, jsonValue)
+	if err == nil {
+		result = string(body)
 	}
-	_, err := client.Request("DELETE", "host/"+hostid, nil)
+	return result, err
+}
+
+func (host *Host) Delete(client *Client) error {
+	if host.Hostid == "" {
+		return errors.New("Id cannot be empty")
+	}
+	_, err := client.Request("DELETE", "host/"+host.Hostid, nil)
 	if err != nil {
 		return err
 	}
+	return err
+}
+
+func (host *Host) RestartServices(client *Client) error {
+	body, err := client.Request("POST", "host/"+host.Hostid+"/services/hive-services/restart", nil)
+	fmt.Println(string(body))
 	return err
 }
 
@@ -246,10 +262,4 @@ func (client *Client) ClusterId() (string, error) {
 	var objMap map[string]string
 	err = json.Unmarshal(body, &objMap)
 	return objMap["id"], err
-}
-
-func (host *Host) RestartServices(client *Client) error {
-	body, err := client.Request("POST", "host/"+host.Hostid+"/services/hive-services/restart", nil)
-	fmt.Println(string(body))
-	return err
 }
