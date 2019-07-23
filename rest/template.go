@@ -5,30 +5,34 @@ import (
 	"errors"
 )
 
+type TemplateInterface struct {
+	Network   string `json:"network"`
+	Vlan      int    `json:"vlan"`
+	Emulation string `json:"emulation"`
+}
+
+type TemplateDisk struct {
+	Type      string `json:"type"`
+	StorageID string `json:"storageId"`
+	Filename  string `json:"filename"`
+	Emulation string `json:"emulation"`
+	DiskSize  int    `json:"diskSize"`
+}
+
 type Template struct {
-	ID            string `json:"id"`
-	Vcpu          int    `json:"vcpu"`
-	Mem           int    `json:"mem"`
-	OS            string `json:"os"`
-	Firmware      string `json:"firmware"`
-	DisplayDriver string `json:"displayDriver"`
-	Name          string `json:"name"`
-	Interfaces    []struct {
-		Network   string `json:"network"`
-		Vlan      int    `json:"vlan"`
-		Emulation string `json:"emulation"`
-	} `json:"interfaces"`
-	Drivers bool `json:"drivers"`
-	Disks   []struct {
-		Type      string `json:"type"`
-		StorageID string `json:"storageId"`
-		Filename  string `json:"filename"`
-		Emulation string `json:"emulation"`
-		DiskSize  int    `json:"diskSize"`
-	} `json:"disks"`
-	State              string `json:"state"`
-	StateMessage       string `json:"stateMessage"`
-	ManualAgentInstall bool   `json:"manualAgentInstall"`
+	ID                 string              `json:"id,omitempty"`
+	Vcpu               int                 `json:"vcpu"`
+	Mem                int                 `json:"mem"`
+	OS                 string              `json:"os"`
+	Firmware           string              `json:"firmware"`
+	DisplayDriver      string              `json:"displayDriver"`
+	Name               string              `json:"name"`
+	Interfaces         []TemplateInterface `json:"interfaces"`
+	Drivers            bool                `json:"drivers"`
+	Disks              []TemplateDisk      `json:"disks"`
+	State              string              `json:"state,omitempty"`
+	StateMessage       string              `json:"stateMessage,omitempty"`
+	ManualAgentInstall bool                `json:"manualAgentInstall"`
 }
 
 func (template Template) String() string {

@@ -7,37 +7,43 @@ import (
 	"github.com/ghodss/yaml"
 )
 
+type ProfileADConfig struct {
+	Domain    string      `json:"domain,omitempty"`
+	Ou        interface{} `json:"ou,omitempty"`
+	Password  string      `json:"password,omitempty"`
+	UserGroup string      `json:"userGroup,omitempty"`
+	Username  string      `json:"username,omitempty"`
+}
+
+type ProfileBrokerOptions struct {
+	AllowDesktopComposition bool `json:"allowDesktopComposition,omitempty"`
+	AudioCapture            bool `json:"audioCapture,omitempty"`
+	RedirectCSSP            bool `json:"redirectCSSP,omitempty"`
+	RedirectClipboard       bool `json:"redirectClipboard,omitempty"`
+	RedirectDisk            bool `json:"redirectDisk,omitempty"`
+	RedirectPNP             bool `json:"redirectPNP,omitempty"`
+	RedirectPrinter         bool `json:"redirectPrinter,omitempty"`
+	RedirectUSB             bool `json:"redirectUSB,omitempty"`
+	SmartResize             bool `json:"smartResize,omitempty"`
+}
+
+type ProfileUserVolumes struct {
+	BackupSchedule int    `json:"backupSchedule,omitempty"`
+	Repository     string `json:"repository,omitempty"`
+	Size           int    `json:"size,omitempty"`
+	Target         string `json:"target,omitempty"`
+}
+
 type Profile struct {
-	AdConfig *struct {
-		Domain    string      `json:"domain,omitempty"`
-		Ou        interface{} `json:"ou,omitempty"`
-		Password  string      `json:"password,omitempty"`
-		UserGroup string      `json:"userGroup,omitempty"`
-		Username  string      `json:"username,omitempty"`
-	} `json:"adConfig,omitempty"`
-	BrokerOptions *struct {
-		AllowDesktopComposition bool `json:"allowDesktopComposition,omitempty"`
-		AudioCapture            bool `json:"audioCapture,omitempty"`
-		RedirectCSSP            bool `json:"redirectCSSP,omitempty"`
-		RedirectClipboard       bool `json:"redirectClipboard,omitempty"`
-		RedirectDisk            bool `json:"redirectDisk,omitempty"`
-		RedirectPNP             bool `json:"redirectPNP,omitempty"`
-		RedirectPrinter         bool `json:"redirectPrinter,omitempty"`
-		RedirectUSB             bool `json:"redirectUSB,omitempty"`
-		SmartResize             bool `json:"smartResize,omitempty"`
-	} `json:"brokerOptions,omitempty"`
-	BypassBroker bool     `json:"bypassBroker,omitempty"`
-	ID           string   `json:"id,omitempty"`
-	Name         string   `json:"name"`
-	Tags         []string `json:"tags,omitempty"`
-	Timezone     string   `json:"timezone,omitempty"`
-	UserVolumes  *struct {
-		BackupSchedule int    `json:"backupSchedule,omitempty"`
-		Repository     string `json:"repository,omitempty"`
-		Size           int    `json:"size,omitempty"`
-		Target         string `json:"target,omitempty"`
-	} `json:"userVolumes,omitempty"`
-	Vlan int `json:"vlan,omitempty"`
+	AdConfig      *ProfileADConfig      `json:"adConfig,omitempty"`
+	BrokerOptions *ProfileBrokerOptions `json:"brokerOptions,omitempty"`
+	BypassBroker  bool                  `json:"bypassBroker,omitempty"`
+	ID            string                `json:"id,omitempty"`
+	Name          string                `json:"name"`
+	Tags          []string              `json:"tags,omitempty"`
+	Timezone      string                `json:"timezone,omitempty"`
+	UserVolumes   *ProfileUserVolumes   `json:"userVolumes,omitempty"`
+	Vlan          int                   `json:"vlan,omitempty"`
 }
 
 func (profile Profile) String() string {

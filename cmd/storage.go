@@ -8,8 +8,7 @@ import (
 
 var storageCmd = &cobra.Command{
 	Use:   "storage",
-	Short: "Storage",
-	Long:  `storage operations`,
+	Short: `storage operations`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 		os.Exit(0)
