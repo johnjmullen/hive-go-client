@@ -5,26 +5,63 @@ import (
 	"errors"
 )
 
+type PoolDisk struct {
+	BootOrder   float64     `json:"bootOrder,omitempty"`
+	DiskDriver  interface{} `json:"diskDriver,omitempty"`
+	Filename    string      `json:"filename,omitempty"`
+	StoragePool string      `json:"storagePool,omitempty"`
+	Type        interface{} `json:"type,omitempty"`
+}
+
+type PoolGuestProfile struct {
+	AgentInstalled bool              `json:"agentInstalled,omitempty"`
+	CPU            []int             `json:"cpu,omitempty"`
+	Debug          bool              `json:"debug,omitempty"`
+	Disks          []*PoolDisk       `json:"disks"`
+	Firmware       string            `json:"firmware,omitempty"`
+	Gpu            bool              `json:"gpu,omitempty"`
+	HostDevices    []*PoolHostDevice `json:"hostDevices,omitempty"`
+	Interfaces     []*PoolInterface  `json:"interfaces,omitempty"`
+	Mem            []float64         `json:"mem,omitempty"`
+	OS             string            `json:"os,omitempty"`
+	Persistent     bool              `json:"persistent,omitempty"`
+	Protocol       string            `json:"protocol,omitempty"`
+	TemplateName   string            `json:"templateName,omitempty"`
+	Vga            interface{}       `json:"vga,omitempty"`
+}
+
+type PoolHostDevice struct {
+	Bus    float64 `json:"bus,omitempty"`
+	Domain float64 `json:"domain,omitempty"`
+	Func   float64 `json:"func,omitempty"`
+	Slot   float64 `json:"slot,omitempty"`
+	Type   string  `json:"type,omitempty"`
+	UUID   string  `json:"uuid,omitempty"`
+}
+
+type PoolInterface struct {
+	BootOrder float64     `json:"bootOrder,omitempty"`
+	Emulation interface{} `json:"emulation,omitempty"`
+	Network   string      `json:"network,omitempty"`
+	Vlan      interface{} `json:"vlan,omitempty"`
+}
+
 type Pool struct {
-	Density      []int `json:"density"`
-	GuestProfile struct {
-		CPU          []int  `json:"cpu"`
-		Mem          []int  `json:"mem"`
-		Os           string `json:"os"`
-		Persistent   bool   `json:"persistent"`
-		TemplateName string `json:"templateName"`
-		Vga          string `json:"vga"`
-	} `json:"guestProfile"`
-	ID          string   `json:"id,omitempty"`
-	InjectAgent bool     `json:"injectAgent"`
-	Name        string   `json:"name"`
-	ProfileID   string   `json:"profileId"`
-	Seed        string   `json:"seed"`
-	State       string   `json:"state,omitempty"`
-	StorageID   string   `json:"storageId"`
-	StorageType string   `json:"storageType"`
-	Tags        []string `json:"tags,omitempty"`
-	Type        string   `json:"type"`
+	ID                        string            `json:"id,omitempty"`
+	Density                   []float64         `json:"density"`
+	GuestProfile              *PoolGuestProfile `json:"guestProfile,omitempty"`
+	InjectAgent               bool              `json:"injectAgent,omitempty"`
+	Name                      string            `json:"name"`
+	PerformanceThreshold      float64           `json:"performanceThreshold,omitempty"`
+	ProfileID                 interface{}       `json:"profileId,omitempty"`
+	Seed                      string            `json:"seed,omitempty"`
+	State                     interface{}       `json:"state,omitempty"`
+	StorageID                 string            `json:"storageId,omitempty"`
+	StorageType               interface{}       `json:"storageType,omitempty"`
+	Tags                      []string          `json:"tags,omitempty"`
+	TargetState               []interface{}     `json:"targetState,omitempty"`
+	Type                      interface{}       `json:"type"`
+	UserSessionLoginThreshold float64           `json:"userSessionLoginThreshold,omitempty"`
 }
 
 func (pool Pool) String() string {
