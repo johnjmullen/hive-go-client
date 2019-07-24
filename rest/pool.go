@@ -6,7 +6,7 @@ import (
 )
 
 type PoolDisk struct {
-	BootOrder   float64     `json:"bootOrder,omitempty"`
+	BootOrder   int         `json:"bootOrder,omitempty"`
 	DiskDriver  interface{} `json:"diskDriver,omitempty"`
 	Filename    string      `json:"filename,omitempty"`
 	StoragePool string      `json:"storagePool,omitempty"`
@@ -22,7 +22,7 @@ type PoolGuestProfile struct {
 	Gpu            bool              `json:"gpu,omitempty"`
 	HostDevices    []*PoolHostDevice `json:"hostDevices,omitempty"`
 	Interfaces     []*PoolInterface  `json:"interfaces,omitempty"`
-	Mem            []float64         `json:"mem,omitempty"`
+	Mem            []int             `json:"mem,omitempty"`
 	OS             string            `json:"os,omitempty"`
 	Persistent     bool              `json:"persistent,omitempty"`
 	Protocol       string            `json:"protocol,omitempty"`
@@ -31,16 +31,16 @@ type PoolGuestProfile struct {
 }
 
 type PoolHostDevice struct {
-	Bus    float64 `json:"bus,omitempty"`
-	Domain float64 `json:"domain,omitempty"`
-	Func   float64 `json:"func,omitempty"`
-	Slot   float64 `json:"slot,omitempty"`
-	Type   string  `json:"type,omitempty"`
-	UUID   string  `json:"uuid,omitempty"`
+	Bus    int    `json:"bus,omitempty"`
+	Domain int    `json:"domain,omitempty"`
+	Func   int    `json:"func,omitempty"`
+	Slot   int    `json:"slot,omitempty"`
+	Type   string `json:"type,omitempty"`
+	UUID   string `json:"uuid,omitempty"`
 }
 
 type PoolInterface struct {
-	BootOrder float64     `json:"bootOrder,omitempty"`
+	BootOrder int         `json:"bootOrder,omitempty"`
 	Emulation interface{} `json:"emulation,omitempty"`
 	Network   string      `json:"network,omitempty"`
 	Vlan      interface{} `json:"vlan,omitempty"`
@@ -48,20 +48,20 @@ type PoolInterface struct {
 
 type Pool struct {
 	ID                        string            `json:"id,omitempty"`
-	Density                   []float64         `json:"density"`
+	Density                   []int             `json:"density"`
 	GuestProfile              *PoolGuestProfile `json:"guestProfile,omitempty"`
 	InjectAgent               bool              `json:"injectAgent,omitempty"`
 	Name                      string            `json:"name"`
-	PerformanceThreshold      float64           `json:"performanceThreshold,omitempty"`
-	ProfileID                 interface{}       `json:"profileId,omitempty"`
+	PerformanceThreshold      int               `json:"performanceThreshold,omitempty"`
+	ProfileID                 string            `json:"profileId,omitempty"`
 	Seed                      string            `json:"seed,omitempty"`
-	State                     interface{}       `json:"state,omitempty"`
+	State                     string            `json:"state,omitempty"`
 	StorageID                 string            `json:"storageId,omitempty"`
-	StorageType               interface{}       `json:"storageType,omitempty"`
+	StorageType               string            `json:"storageType,omitempty"`
 	Tags                      []string          `json:"tags,omitempty"`
-	TargetState               []interface{}     `json:"targetState,omitempty"`
-	Type                      interface{}       `json:"type"`
-	UserSessionLoginThreshold float64           `json:"userSessionLoginThreshold,omitempty"`
+	TargetState               []string          `json:"targetState,omitempty"`
+	Type                      string            `json:"type"`
+	UserSessionLoginThreshold int               `json:"userSessionLoginThreshold,omitempty"`
 }
 
 func (pool Pool) String() string {

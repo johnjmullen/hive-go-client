@@ -12,27 +12,29 @@ type TemplateInterface struct {
 }
 
 type TemplateDisk struct {
-	Type      string `json:"type"`
-	StorageID string `json:"storageId"`
-	Filename  string `json:"filename"`
-	Emulation string `json:"emulation"`
-	DiskSize  int    `json:"diskSize"`
+	DiskDriver string `json:"diskDriver"`
+	Filename   string `json:"filename"`
+	Format     string `json:"format,omitempty"`
+	Path       string `json:"path,omitempty"` //TODO: Is this actually used?
+	Size       int    `json:"size"`
+	StorageID  string `json:"storageId"`
+	Type       string `json:"type"`
 }
 
 type Template struct {
-	ID                 string              `json:"id,omitempty"`
-	Vcpu               int                 `json:"vcpu"`
-	Mem                int                 `json:"mem"`
-	OS                 string              `json:"os"`
-	Firmware           string              `json:"firmware"`
-	DisplayDriver      string              `json:"displayDriver"`
-	Name               string              `json:"name"`
-	Interfaces         []TemplateInterface `json:"interfaces"`
-	Drivers            bool                `json:"drivers"`
-	Disks              []TemplateDisk      `json:"disks"`
-	State              string              `json:"state,omitempty"`
-	StateMessage       string              `json:"stateMessage,omitempty"`
-	ManualAgentInstall bool                `json:"manualAgentInstall"`
+	ID                 string               `json:"id,omitempty"`
+	Name               string               `json:"name"`
+	Vcpu               int                  `json:"vcpu"`
+	Mem                int                  `json:"mem"`
+	OS                 string               `json:"os"`
+	Firmware           string               `json:"firmware,omitempty"`
+	DisplayDriver      string               `json:"displayDriver,omitempty"`
+	Interfaces         []*TemplateInterface `json:"interfaces,omitempty"`
+	Drivers            bool                 `json:"drivers"`
+	Disks              []*TemplateDisk      `json:"disks,omitempty"`
+	State              string               `json:"state,omitempty"`
+	StateMessage       string               `json:"stateMessage,omitempty"`
+	ManualAgentInstall bool                 `json:"manualAgentInstall"`
 }
 
 func (template Template) String() string {
