@@ -7,7 +7,6 @@ import (
 
 type PoolDisk struct {
 	BootOrder   int         `json:"bootOrder,omitempty"`
-	BootOrder   float64 `json:"bootOrder,omitempty"` //This is in the schema but doesn't appear to be used
 	DiskDriver  string  `json:"diskDriver,omitempty"`
 	Filename    string  `json:"filename,omitempty"`
 	StoragePool string  `json:"storagePool,omitempty"`
