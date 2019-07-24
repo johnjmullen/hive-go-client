@@ -20,11 +20,11 @@ type Task struct {
 		Cluster string `json:"cluster"`
 		Host    string `json:"host"`
 	} `json:"ref"`
-	StartTime time.Time   `json:"startTime"`
-	State     string      `json:"state"`
-	Tags      []string    `json:"tags"`
-	Type      string      `json:"type"`
-	Username  interface{} `json:"username"`
+	StartTime time.Time `json:"startTime"`
+	State     string    `json:"state"`
+	Tags      []string  `json:"tags"`
+	Type      string    `json:"type"`
+	Username  string    `json:"username"`
 }
 
 func (task Task) String() string {

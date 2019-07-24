@@ -7,17 +7,18 @@ import (
 
 type PoolDisk struct {
 	BootOrder   int         `json:"bootOrder,omitempty"`
-	DiskDriver  interface{} `json:"diskDriver,omitempty"`
-	Filename    string      `json:"filename,omitempty"`
-	StoragePool string      `json:"storagePool,omitempty"`
-	Type        interface{} `json:"type,omitempty"`
+	BootOrder   float64 `json:"bootOrder,omitempty"` //This is in the schema but doesn't appear to be used
+	DiskDriver  string  `json:"diskDriver,omitempty"`
+	Filename    string  `json:"filename,omitempty"`
+	StoragePool string  `json:"storagePool,omitempty"`
+	Type        string  `json:"type,omitempty"`
 }
 
 type PoolGuestProfile struct {
 	AgentInstalled bool              `json:"agentInstalled,omitempty"`
 	CPU            []int             `json:"cpu,omitempty"`
 	Debug          bool              `json:"debug,omitempty"`
-	Disks          []*PoolDisk       `json:"disks"`
+	Disks          []*PoolDisk       `json:"disks,omitempty"`
 	Firmware       string            `json:"firmware,omitempty"`
 	Gpu            bool              `json:"gpu,omitempty"`
 	HostDevices    []*PoolHostDevice `json:"hostDevices,omitempty"`
@@ -27,7 +28,7 @@ type PoolGuestProfile struct {
 	Persistent     bool              `json:"persistent,omitempty"`
 	Protocol       string            `json:"protocol,omitempty"`
 	TemplateName   string            `json:"templateName,omitempty"`
-	Vga            interface{}       `json:"vga,omitempty"`
+	Vga            string            `json:"vga,omitempty"`
 }
 
 type PoolHostDevice struct {
@@ -40,10 +41,11 @@ type PoolHostDevice struct {
 }
 
 type PoolInterface struct {
-	BootOrder int         `json:"bootOrder,omitempty"`
-	Emulation interface{} `json:"emulation,omitempty"`
-	Network   string      `json:"network,omitempty"`
-	Vlan      interface{} `json:"vlan,omitempty"`
+	BootOrder  int    `json:"bootOrder,omitempty"`
+	Emulation  string `json:"emulation,omitempty"`
+	Network    string `json:"network,omitempty"`
+	Vlan       string `json:"vlan,omitempty"`
+	MacAddress string `json:"macAddress,omitempty"`
 }
 
 type Pool struct {

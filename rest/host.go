@@ -18,11 +18,11 @@ type Host struct {
 			Software    string `json:"software"`
 			PendingSwap bool   `json:"pendingSwap"`
 		} `json:"firmware"`
-		Hostname        string      `json:"hostname"`
-		Loglevel        string      `json:"loglevel"`
-		MaxCloneDensity int         `json:"maxCloneDensity"`
-		Ntp             interface{} `json:"ntp"`
-		Timezone        string      `json:"timezone"`
+		Hostname        string `json:"hostname"`
+		Loglevel        string `json:"loglevel"`
+		MaxCloneDensity int    `json:"maxCloneDensity"`
+		Ntp             string `json:"ntp"`
+		Timezone        string `json:"timezone"`
 	} `json:"appliance"`
 	Capabilities struct {
 		StorageTypes []string `json:"storageTypes"`
@@ -61,8 +61,8 @@ type Host struct {
 		CPUFeatures         struct {
 			Arch     string `json:"arch"`
 			Features []struct {
-				Name   string      `json:"name"`
-				Policy interface{} `json:"policy"`
+				Name   string `json:"name"`
+				Policy string `json:"policy"`
 			} `json:"features"`
 			ModelName string `json:"modelName"`
 		} `json:"cpuFeatures"`
@@ -70,7 +70,7 @@ type Host struct {
 			Size int    `json:"size"`
 			Type string `json:"type"`
 		} `json:"memory"`
-		VideoCards []interface{} `json:"videoCards"`
+		VideoCards []string `json:"videoCards"`
 	} `json:"hardware"`
 	Hostid     string `json:"hostid"`
 	Hostname   string `json:"hostname"`
@@ -96,29 +96,29 @@ type Host struct {
 	State   string `json:"state"`
 	Storage struct {
 		Blockdevices []struct {
-			MajMin     string      `json:"maj:min"`
-			Mountpoint interface{} `json:"mountpoint"`
-			Name       string      `json:"name"`
-			Rm         string      `json:"rm"`
-			Ro         string      `json:"ro"`
-			Size       string      `json:"size"`
-			Type       string      `json:"type"`
+			MajMin     string `json:"maj:min"`
+			Mountpoint string `json:"mountpoint"`
+			Name       string `json:"name"`
+			Rm         string `json:"rm"`
+			Ro         string `json:"ro"`
+			Size       string `json:"size"`
+			Type       string `json:"type"`
 			Children   []struct {
-				MajMin     string      `json:"maj:min"`
-				Mountpoint interface{} `json:"mountpoint"`
-				Name       string      `json:"name"`
-				Rm         string      `json:"rm"`
-				Ro         string      `json:"ro"`
-				Size       string      `json:"size"`
-				Type       string      `json:"type"`
+				MajMin     string `json:"maj:min"`
+				Mountpoint string `json:"mountpoint"`
+				Name       string `json:"name"`
+				Rm         string `json:"rm"`
+				Ro         string `json:"ro"`
+				Size       string `json:"size"`
+				Type       string `json:"type"`
 			} `json:"children,omitempty"`
 		} `json:"blockdevices"`
 		Disk struct {
 			Zpool struct {
-				CacheDevices []interface{} `json:"cacheDevices"`
-				Compression  string        `json:"compression"`
-				Dedup        string        `json:"dedup"`
-				Devices      []string      `json:"devices"`
+				CacheDevices []string `json:"cacheDevices"`
+				Compression  string   `json:"compression"`
+				Dedup        string   `json:"dedup"`
+				Devices      []string `json:"devices"`
 				Filesystems  struct {
 					Hive struct {
 						Filesystems struct {

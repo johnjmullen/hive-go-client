@@ -3,39 +3,32 @@ package rest
 import (
 	"encoding/json"
 	"errors"
+	"time"
 )
 
 type Cluster struct {
-	AdConfig struct {
-		Domain    string      `json:"domain,omitempty"`
-		Ou        interface{} `json:"ou,omitempty,omitempty"`
-		Password  string      `json:"password,omitempty"`
-		UserGroup string      `json:"userGroup,omitempty"`
-		Username  string      `json:"username,omitempty"`
-	} `json:"adConfig,omitempty"`
-	BrokerOptions struct {
-		AllowDesktopComposition bool `json:"allowDesktopComposition,omitempty"`
-		AudioCapture            bool `json:"audioCapture,omitempty"`
-		RedirectCSSP            bool `json:"redirectCSSP,omitempty"`
-		RedirectClipboard       bool `json:"redirectClipboard,omitempty"`
-		RedirectDisk            bool `json:"redirectDisk,omitempty"`
-		RedirectPNP             bool `json:"redirectPNP,omitempty"`
-		RedirectPrinter         bool `json:"redirectPrinter,omitempty"`
-		RedirectUSB             bool `json:"redirectUSB,omitempty"`
-		SmartResize             bool `json:"smartResize,omitempty"`
-	} `json:"brokerOptions,omitempty"`
-	BypassBroker bool     `json:"bypassBroker,omitempty"`
-	ID           string   `json:"id,omitempty"`
-	Name         string   `json:"name"`
-	Tags         []string `json:"tags,omitempty"`
-	Timezone     string   `json:"timezone,omitempty"`
-	UserVolumes  struct {
-		BackupSchedule int    `json:"backupSchedule,omitempty"`
-		Repository     string `json:"repository,omitempty"`
-		Size           int    `json:"size,omitempty"`
-		Target         string `json:"target,omitempty"`
-	} `json:"userVolumes,omitempty"`
-	Vlan int `json:"vlan,omitempty"`
+	AdminPassword string `json:"adminPassword"`
+	Gateway       struct {
+		Enabled bool `json:"enabled"`
+	} `json:"gateway"`
+	HiveSense struct {
+		AwsAccessKeyID     string `json:"awsAccessKeyId"`
+		AwsSecretAccessKey string `json:"awsSecretAccessKey"`
+		CustomerName       string `json:"customerName"`
+		Enabled            bool   `json:"enabled"`
+		UploadFrequency    int    `json:"uploadFrequency"`
+	} `json:"hiveSense"`
+	ID      string `json:"id"`
+	License struct {
+		Expiration        time.Time `json:"expiration"`
+		Type              string    `json:"type"`
+		LicenseExpiration time.Time `json:"license.expiration"`
+	} `json:"license"`
+	Name          string `json:"name"`
+	SharedStorage struct {
+		State string `json:"state"`
+	} `json:"sharedStorage"`
+	Tags []string `json:"tags"`
 }
 
 func (cluster Cluster) String() string {
