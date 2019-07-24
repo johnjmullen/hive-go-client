@@ -8,11 +8,11 @@ import (
 )
 
 type ProfileADConfig struct {
-	Domain    string      `json:"domain,omitempty"`
-	Ou        interface{} `json:"ou,omitempty"`
-	Password  string      `json:"password,omitempty"`
-	UserGroup string      `json:"userGroup,omitempty"`
-	Username  string      `json:"username,omitempty"`
+	Domain    string `json:"domain,omitempty"`
+	Ou        string `json:"ou,omitempty"`
+	Password  string `json:"password,omitempty"`
+	UserGroup string `json:"userGroup,omitempty"`
+	Username  string `json:"username,omitempty"`
 }
 
 type ProfileBrokerOptions struct {
