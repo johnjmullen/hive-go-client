@@ -15,7 +15,7 @@ type Guest struct {
 		DiskDriver string `json:"diskDriver"`
 		Format     string `json:"format,omitempty"`
 		Path       string `json:"path,omitempty"`
-		Size       int64  `json:"size,omitempty"`
+		Size       int    `json:"size,omitempty"`
 		StorageID  string `json:"storageId,omitempty"`
 		Type       string `json:"type"`
 	} `json:"disks"`
@@ -28,23 +28,23 @@ type Guest struct {
 		Network    string `json:"network"`
 		Vlan       int    `json:"vlan"`
 	} `json:"interfaces"`
-	Memory             int         `json:"memory"`
-	Name               string      `json:"name"`
-	Os                 string      `json:"os"`
-	Persistent         bool        `json:"persistent"`
-	PoolID             string      `json:"poolId"`
-	PreviousGuestState interface{} `json:"previousGuestState"`
-	ProfileID          string      `json:"profileId"`
-	PublishedIP        string      `json:"publishedIp"`
-	Realm              string      `json:"realm"`
-	Stamp              float64     `json:"stamp"`
-	Standalone         bool        `json:"standalone"`
-	Tags               []string    `json:"tags"`
-	TargetState        []string    `json:"targetState"`
-	TemplateName       string      `json:"templateName"`
-	Username           string      `json:"username"`
-	UUID               string      `json:"uuid"`
-	RdpUserInjected    bool        `json:"rdpUserInjected"`
+	Memory             int      `json:"memory"`
+	Name               string   `json:"name"`
+	Os                 string   `json:"os"`
+	Persistent         bool     `json:"persistent"`
+	PoolID             string   `json:"poolId"`
+	PreviousGuestState string   `json:"previousGuestState"`
+	ProfileID          string   `json:"profileId"`
+	PublishedIP        string   `json:"publishedIp"`
+	Realm              string   `json:"realm"`
+	Stamp              float64  `json:"stamp"`
+	Standalone         bool     `json:"standalone"`
+	Tags               []string `json:"tags"`
+	TargetState        []string `json:"targetState"`
+	TemplateName       string   `json:"templateName"`
+	Username           string   `json:"username"`
+	UUID               string   `json:"uuid"`
+	RdpUserInjected    bool     `json:"rdpUserInjected"`
 	HostDetails        struct {
 		Hostname string `json:"hostname"`
 		IP       string `json:"ip"`

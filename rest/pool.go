@@ -6,25 +6,25 @@ import (
 )
 
 type PoolDisk struct {
-	BootOrder   int         `json:"bootOrder,omitempty"`
-	DiskDriver  string  `json:"diskDriver,omitempty"`
-	Filename    string  `json:"filename,omitempty"`
-	StoragePool string  `json:"storagePool,omitempty"`
-	Type        string  `json:"type,omitempty"`
+	BootOrder  int    `json:"bootOrder,omitempty"`
+	DiskDriver string `json:"diskDriver,omitempty"`
+	Filename   string `json:"filename,omitempty"`
+	StorageID  string `json:"storageId,omitempty"`
+	Type       string `json:"type,omitempty"`
 }
 
 type PoolGuestProfile struct {
-	AgentInstalled bool              `json:"agentInstalled,omitempty"`
+	AgentInstalled bool              `json:"agentInstalled"`
 	CPU            []int             `json:"cpu,omitempty"`
 	Debug          bool              `json:"debug,omitempty"`
 	Disks          []*PoolDisk       `json:"disks,omitempty"`
 	Firmware       string            `json:"firmware,omitempty"`
-	Gpu            bool              `json:"gpu,omitempty"`
+	Gpu            bool              `json:"gpu"`
 	HostDevices    []*PoolHostDevice `json:"hostDevices,omitempty"`
 	Interfaces     []*PoolInterface  `json:"interfaces,omitempty"`
 	Mem            []int             `json:"mem,omitempty"`
 	OS             string            `json:"os,omitempty"`
-	Persistent     bool              `json:"persistent,omitempty"`
+	Persistent     bool              `json:"persistent"`
 	Protocol       string            `json:"protocol,omitempty"`
 	TemplateName   string            `json:"templateName,omitempty"`
 	Vga            string            `json:"vga,omitempty"`
@@ -43,7 +43,7 @@ type PoolInterface struct {
 	BootOrder  int    `json:"bootOrder,omitempty"`
 	Emulation  string `json:"emulation,omitempty"`
 	Network    string `json:"network,omitempty"`
-	Vlan       string `json:"vlan,omitempty"`
+	Vlan       int    `json:"vlan,omitempty"`
 	MacAddress string `json:"macAddress,omitempty"`
 }
 
@@ -51,7 +51,7 @@ type Pool struct {
 	ID                        string            `json:"id,omitempty"`
 	Density                   []int             `json:"density"`
 	GuestProfile              *PoolGuestProfile `json:"guestProfile,omitempty"`
-	InjectAgent               bool              `json:"injectAgent,omitempty"`
+	InjectAgent               bool              `json:"injectAgent"`
 	Name                      string            `json:"name"`
 	PerformanceThreshold      int               `json:"performanceThreshold,omitempty"`
 	ProfileID                 string            `json:"profileId,omitempty"`

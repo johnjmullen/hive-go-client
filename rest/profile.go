@@ -3,8 +3,6 @@ package rest
 import (
 	"encoding/json"
 	"errors"
-
-	"github.com/ghodss/yaml"
 )
 
 type ProfileADConfig struct {
@@ -37,7 +35,7 @@ type ProfileUserVolumes struct {
 type Profile struct {
 	AdConfig      *ProfileADConfig      `json:"adConfig,omitempty"`
 	BrokerOptions *ProfileBrokerOptions `json:"brokerOptions,omitempty"`
-	BypassBroker  bool                  `json:"bypassBroker,omitempty"`
+	BypassBroker  bool                  `json:"bypassBroker"`
 	ID            string                `json:"id,omitempty"`
 	Name          string                `json:"name"`
 	Tags          []string              `json:"tags,omitempty"`
@@ -49,10 +47,6 @@ type Profile struct {
 func (profile Profile) String() string {
 	json, _ := json.MarshalIndent(profile, "", "  ")
 	return string(json)
-}
-
-func (profile *Profile) FromYaml(data []byte) error {
-	return yaml.Unmarshal(data, profile)
 }
 
 func (profile *Profile) Create(client *Client) (string, error) {
