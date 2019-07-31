@@ -32,9 +32,13 @@ func (task Task) String() string {
 	return string(json)
 }
 
-func (client *Client) ListTasks() ([]Task, error) {
+func (client *Client) ListTasks(filter string) ([]Task, error) {
 	var tasks []Task
-	body, err := client.Request("GET", "tasks", nil)
+	path := "tasks"
+	if filter != "" {
+		path += "?" + filter
+	}
+	body, err := client.Request("GET", path, nil)
 	if err != nil {
 		return tasks, err
 	}

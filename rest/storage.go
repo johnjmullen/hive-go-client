@@ -25,9 +25,13 @@ func (sp StoragePool) String() string {
 	return string(json)
 }
 
-func (client *Client) ListStoragePools() ([]StoragePool, error) {
+func (client *Client) ListStoragePools(filter string) ([]StoragePool, error) {
 	var pools []StoragePool
-	body, err := client.Request("GET", "storage/pools", nil)
+	path := "storage/pools"
+	if filter != "" {
+		path += "?" + filter
+	}
+	body, err := client.Request("GET", path, nil)
 	if err != nil {
 		return pools, err
 	}
@@ -36,7 +40,7 @@ func (client *Client) ListStoragePools() ([]StoragePool, error) {
 }
 
 func (client *Client) GetStoragePoolByName(name string) (*StoragePool, error) {
-	var pools, err = client.ListStoragePools()
+	var pools, err = client.ListStoragePools("name=" + name)
 	if err != nil {
 		return nil, err
 	}

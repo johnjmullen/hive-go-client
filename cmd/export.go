@@ -22,37 +22,37 @@ var exportCmd = &cobra.Command{
 			Pools        []rest.Pool
 		}
 
-		data.Realms, err = restClient.ListRealms()
+		data.Realms, err = restClient.ListRealms("")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		data.Profiles, err = restClient.ListProfiles()
+		data.Profiles, err = restClient.ListProfiles("")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		data.StoragePools, err = restClient.ListStoragePools()
+		data.StoragePools, err = restClient.ListStoragePools("")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		data.Templates, err = restClient.ListTemplates()
+		data.Templates, err = restClient.ListTemplates("")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		data.Pools, err = restClient.ListGuestPools()
+		data.Pools, err = restClient.ListGuestPools("")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		data.Hosts, err = restClient.ListHosts()
+		data.Hosts, err = restClient.ListHosts("")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

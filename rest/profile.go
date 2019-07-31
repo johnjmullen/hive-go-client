@@ -80,9 +80,13 @@ func (profile *Profile) Delete(client *Client) error {
 	return err
 }
 
-func (client *Client) ListProfiles() ([]Profile, error) {
+func (client *Client) ListProfiles(filter string) ([]Profile, error) {
 	var Profiles []Profile
-	body, err := client.Request("GET", "profiles", nil)
+	path := "profiles"
+	if filter != "" {
+		path += "?" + filter
+	}
+	body, err := client.Request("GET", path, nil)
 	if err != nil {
 		return Profiles, err
 	}
@@ -104,7 +108,7 @@ func (client *Client) GetProfile(id string) (*Profile, error) {
 }
 
 func (client *Client) GetProfileByName(name string) (*Profile, error) {
-	var profiles, err = client.ListProfiles()
+	var profiles, err = client.ListProfiles("name=" + name)
 	if err != nil {
 		return nil, err
 	}

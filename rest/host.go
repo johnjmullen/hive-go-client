@@ -169,9 +169,13 @@ func (host Host) String() string {
 	return string(json)
 }
 
-func (client *Client) ListHosts() ([]Host, error) {
+func (client *Client) ListHosts(filter string) ([]Host, error) {
 	var hosts []Host
-	body, err := client.Request("GET", "hosts", nil)
+	path := "hosts"
+	if filter != "" {
+		path += "?" + filter
+	}
+	body, err := client.Request("GET", path, nil)
 	if err != nil {
 		return hosts, err
 	}

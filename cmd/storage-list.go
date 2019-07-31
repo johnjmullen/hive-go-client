@@ -5,13 +5,17 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var storageListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list storage pools",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("filter", cmd.Flags().Lookup("filter"))
+	},
 	Run: func(cmd *cobra.Command, args []string) {
-		pools, err := restClient.ListStoragePools()
+		pools, err := restClient.ListStoragePools(viper.GetString("filter"))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -29,4 +33,5 @@ var storageListCmd = &cobra.Command{
 func init() {
 	storageCmd.AddCommand(storageListCmd)
 	storageListCmd.Flags().Bool("details", false, "show details")
+	storageListCmd.Flags().String("filter", "", "filter query string")
 }

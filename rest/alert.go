@@ -27,9 +27,13 @@ func (alert Alert) String() string {
 	return string(json)
 }
 
-func (client *Client) ListAlerts() ([]Alert, error) {
+func (client *Client) ListAlerts(filter string) ([]Alert, error) {
 	var alerts []Alert
-	body, err := client.Request("GET", "alerts", nil)
+	path := "alerts"
+	if filter != "" {
+		path += "?" + filter
+	}
+	body, err := client.Request("GET", path, nil)
 	if err != nil {
 		return alerts, err
 	}

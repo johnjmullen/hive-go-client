@@ -18,9 +18,13 @@ func (realm Realm) String() string {
 	return string(json)
 }
 
-func (client *Client) ListRealms() ([]Realm, error) {
+func (client *Client) ListRealms(filter string) ([]Realm, error) {
 	var realms []Realm
-	body, err := client.Request("GET", "realms", nil)
+	path := "realms"
+	if filter != "" {
+		path += "?" + filter
+	}
+	body, err := client.Request("GET", path, nil)
 	if err != nil {
 		return realms, err
 	}

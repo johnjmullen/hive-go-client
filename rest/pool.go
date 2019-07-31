@@ -70,9 +70,13 @@ func (pool Pool) String() string {
 	return string(json)
 }
 
-func (client *Client) ListGuestPools() ([]Pool, error) {
+func (client *Client) ListGuestPools(filter string) ([]Pool, error) {
 	var pools []Pool
-	body, err := client.Request("GET", "pools", nil)
+	path := "pools"
+	if filter != "" {
+		path += "?" + filter
+	}
+	body, err := client.Request("GET", path, nil)
 	if err != nil {
 		return pools, err
 	}
@@ -94,7 +98,7 @@ func (client *Client) GetPool(id string) (*Pool, error) {
 }
 
 func (client *Client) GetPoolByName(name string) (*Pool, error) {
-	var pools, err = client.ListGuestPools()
+	var pools, err = client.ListGuestPools("name=" + name)
 	if err != nil {
 		return nil, err
 	}

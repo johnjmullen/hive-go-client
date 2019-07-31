@@ -36,9 +36,13 @@ func (cluster Cluster) String() string {
 	return string(json)
 }
 
-func (client *Client) ListClusters() ([]Cluster, error) {
+func (client *Client) ListClusters(filter string) ([]Cluster, error) {
 	var clusters []Cluster
-	body, err := client.Request("GET", "clusters", nil)
+	path := "clusters"
+	if filter != "" {
+		path += "?" + filter
+	}
+	body, err := client.Request("GET", path, nil)
 	if err != nil {
 		return clusters, err
 	}

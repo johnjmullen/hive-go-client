@@ -5,13 +5,17 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var templateListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list templates",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("filter", cmd.Flags().Lookup("filter"))
+	},
 	Run: func(cmd *cobra.Command, args []string) {
-		templates, err := restClient.ListTemplates()
+		templates, err := restClient.ListTemplates(viper.GetString("filter"))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -29,4 +33,5 @@ var templateListCmd = &cobra.Command{
 func init() {
 	templateCmd.AddCommand(templateListCmd)
 	templateListCmd.Flags().Bool("details", false, "show details")
+	templateListCmd.Flags().String("filter", "", "filter query string")
 }

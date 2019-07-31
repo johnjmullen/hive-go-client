@@ -5,13 +5,17 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var hostListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list hosts",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("filter", cmd.Flags().Lookup("filter"))
+	},
 	Run: func(cmd *cobra.Command, args []string) {
-		hosts, err := restClient.ListHosts()
+		hosts, err := restClient.ListHosts(viper.GetString("filter"))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -32,4 +36,5 @@ var hostListCmd = &cobra.Command{
 func init() {
 	hostCmd.AddCommand(hostListCmd)
 	hostListCmd.Flags().Bool("details", false, "show details")
+	hostListCmd.Flags().String("filter", "", "filter query string")
 }

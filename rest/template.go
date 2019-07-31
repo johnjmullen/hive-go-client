@@ -50,9 +50,13 @@ func (template *Template) FromJson(data []byte) error {
 	return json.Unmarshal(data, template)
 }
 
-func (client *Client) ListTemplates() ([]Template, error) {
+func (client *Client) ListTemplates(filter string) ([]Template, error) {
+	path := "templates"
+	if filter != "" {
+		path += "?" + filter
+	}
 	var templates []Template
-	body, err := client.Request("GET", "templates", nil)
+	body, err := client.Request("GET", path, nil)
 	if err != nil {
 		return templates, err
 	}
