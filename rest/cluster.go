@@ -6,16 +6,52 @@ import (
 	"time"
 )
 
+//Broker information from the cluster table
+type Broker struct {
+	AutoConnectUserDesktop    bool   `json:"autoConnectUserDesktop,omitempty"`
+	BackgroundColor           string `json:"backgroundColor,omitempty"`
+	BgImage                   string `json:"bgImage,omitempty"`
+	BgImageFilename           string `json:"bgImageFilename,omitempty"`
+	ButtonTextColor           string `json:"buttonTextColor,omitempty"`
+	Disclaimer                string `json:"disclaimer,omitempty"`
+	Enabled                   bool   `json:"enabled"`
+	Favicon                   string `json:"favicon,omitempty"`
+	FaviconFilename           string `json:"faviconFilename,omitempty"`
+	HideRealms                bool   `json:"hideRealms,omitempty"`
+	HideRelease               bool   `json:"hideRelease,omitempty"`
+	Logo                      string `json:"logo,omitempty"`
+	LogoFilename              string `json:"logoFilename,omitempty"`
+	MainColor                 string `json:"mainColor,omitempty"`
+	PassthroughAuthentication bool   `json:"passthroughAuthentication,omitempty"`
+	TextColor                 string `json:"textColor,omitempty"`
+	Title                     string `json:"title,omitempty"`
+	TwoFormAuth               struct {
+	} `json:"twoFormAuth"`
+}
+
+//Gateway settings from the cluster table
+type Gateway struct {
+	Enabled bool `json:"enabled"`
+	PortMap struct {
+		F91577A2F6F8 struct {
+			EndPort   int `json:"endPort"`
+			StartPort int `json:"startPort"`
+		} `json:"f91577a2f6f8"`
+	} `json:"portMap"`
+	URI string `json:"uri"`
+}
+
+//Cluster record from hive-rest
 type Cluster struct {
-	AdminPassword string `json:"adminPassword"`
-	Gateway       struct {
-		Enabled bool `json:"enabled"`
-	} `json:"gateway"`
-	HiveSense struct {
+	AdminPassword string   `json:"adminPassword"`
+	Broker        *Broker  `json:"broker"`
+	Gateway       *Gateway `json:"gateway"`
+	HiveSense     struct {
 		AwsAccessKeyID     string `json:"awsAccessKeyId"`
 		AwsSecretAccessKey string `json:"awsSecretAccessKey"`
 		CustomerName       string `json:"customerName"`
 		Enabled            bool   `json:"enabled"`
+		LogStatus          string `json:"logStatus"`
 		UploadFrequency    int    `json:"uploadFrequency"`
 	} `json:"hiveSense"`
 	ID      string `json:"id"`
@@ -26,7 +62,15 @@ type Cluster struct {
 	} `json:"license"`
 	Name          string `json:"name"`
 	SharedStorage struct {
-		State string `json:"state"`
+		Enabled bool `json:"enabled"`
+		Hosts   []struct {
+			Hostid string `json:"hostid"`
+			State  string `json:"state"`
+		} `json:"hosts"`
+		ID                 string `json:"id"`
+		MinSetSize         int    `json:"minSetSize"`
+		State              string `json:"state"`
+		StorageUtilization int    `json:"storageUtilization"`
 	} `json:"sharedStorage"`
 	Tags []string `json:"tags"`
 }

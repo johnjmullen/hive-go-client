@@ -28,9 +28,9 @@ type Host struct {
 		StorageTypes []string `json:"storageTypes"`
 	} `json:"capabilities"`
 	Certificate struct {
-		Expiration int64  `json:"expiration"`
-		Issuer     string `json:"issuer"`
-		Status     string `json:"status"`
+		Expiration interface{} `json:"expiration"`
+		Issuer     string      `json:"issuer"`
+		Status     string      `json:"status"`
 	} `json:"certificate"`
 	Hardware struct {
 		BIOS struct {
@@ -70,7 +70,18 @@ type Host struct {
 			Size int    `json:"size"`
 			Type string `json:"type"`
 		} `json:"memory"`
-		VideoCards []string `json:"videoCards"`
+		VideoCards []struct {
+			Bus         int    `json:"bus"`
+			DeviceClass int    `json:"deviceClass"`
+			DeviceID    int    `json:"deviceId"`
+			Domain      int    `json:"domain"`
+			Func        int    `json:"func"`
+			IommuGroup  int    `json:"iommu_group"`
+			Mode        string `json:"mode"`
+			Path        string `json:"path"`
+			Slot        int    `json:"slot"`
+			VendorID    int    `json:"vendorId"`
+		} `json:"videoCards"`
 	} `json:"hardware"`
 	Hostid     string `json:"hostid"`
 	Hostname   string `json:"hostname"`
