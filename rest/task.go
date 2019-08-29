@@ -46,10 +46,10 @@ func (client *Client) ListTasks(filter string) ([]Task, error) {
 	return tasks, err
 }
 
-func (client *Client) GetTask(id string) (Task, error) {
-	var task Task
+func (client *Client) GetTask(id string) (*Task, error) {
+	var task *Task
 	if id == "" {
-		return task, errors.New("Name cannot be empty")
+		return task, errors.New("Id cannot be empty")
 	}
 	body, err := client.Request("GET", "task/"+id, nil)
 	if err != nil {
@@ -59,7 +59,20 @@ func (client *Client) GetTask(id string) (Task, error) {
 	return task, err
 }
 
-func (task *Task) ForceCompleteTask(client *Client) error {
+func (client *Client) GetTaskByName(name string) (*Task, error) {
+	var tasks, err = client.ListTasks("name=" + name)
+	if err != nil {
+		return nil, err
+	}
+	for _, task := range tasks {
+		if task.Name == name {
+			return &task, nil
+		}
+	}
+	return nil, errors.New("Task not found")
+}
+
+func (task *Task) ForceComplete(client *Client) error {
 	if task.ID == "" {
 		return errors.New("Id cannot be empty")
 	}
