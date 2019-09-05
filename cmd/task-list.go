@@ -32,7 +32,7 @@ var taskListCmd = &cobra.Command{
 }
 
 func init() {
-	taskCmd.AddCommand(alertListCmd)
+	taskCmd.AddCommand(taskListCmd)
 	taskListCmd.Flags().Bool("details", false, "show details")
 	taskListCmd.Flags().String("filter", "", "filter query string")
 }
