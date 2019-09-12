@@ -1,21 +1,24 @@
-## hioctl storage browse
+## hioctl storage convert-disk
 
-list storage pool files
+convert or copy a disk
 
 ### Synopsis
 
-list storage pool files
+convert or copy a disk
 
 ```
-hioctl storage browse [file] [flags]
+hioctl storage convert-disk [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help          help for browse
-  -i, --id string     Storage Pool Id
-  -n, --name string   Storage Pool Name
+      --dest-filename string   Destination filename
+      --dest-format string     Destination file format (default "qcow2")
+      --dest-storage string    Destination storage pool name
+  -h, --help                   help for convert-disk
+      --src-filename string    Source filename
+      --src-storage string     Source storage pool name
 ```
 
 ### Options inherited from parent commands
