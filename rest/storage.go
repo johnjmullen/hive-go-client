@@ -99,6 +99,28 @@ func (pool *StoragePool) CreateDisk(client *Client, filename, format string, siz
 	return err
 }
 
+func (pool *StoragePool) ConvertDisk(client *Client, srcFilename, dstStorageId, dstFilename, dstFormat string) error {
+	if pool.ID == "" {
+		return errors.New("Invalid Storage Pool")
+	}
+	jsonData := map[string]interface{}{
+		"srcStorage":  pool.ID,
+		"srcFilename": srcFilename,
+		"format":      "auto",
+		"dstStorage":  dstStorageId,
+		"dstFilename": dstFilename,
+		"output":      dstFormat}
+	jsonValue, err := json.Marshal(jsonData)
+	if err != nil {
+		return err
+	}
+	_, err = client.Request("POST", "template/convert", jsonValue) //TODO: move to storage in rest api for 8.0
+	if err != nil {
+		return err
+	}
+	return err
+}
+
 func (pool *StoragePool) DeleteFile(client *Client, filename string) error {
 	if pool.ID == "" {
 		return errors.New("Invalid Storage Pool")
