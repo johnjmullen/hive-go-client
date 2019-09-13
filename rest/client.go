@@ -38,7 +38,11 @@ func checkResponse(res *http.Response, err error) ([]byte, error) {
 }
 
 func (client *Client) Request(method, path string, data []byte) ([]byte, error) {
-	url := fmt.Sprintf("https://%s:%d/api/%s", client.Host, client.Port, path)
+	protocol := "https"
+	if client.Port == 3000 {
+		protocol = "http"
+	}
+	url := fmt.Sprintf("%s://%s:%d/api/%s", protocol, client.Host, client.Port, path)
 	if client.httpClient == nil {
 		tr := &http.Transport{
 			TLSClientConfig:    &tls.Config{InsecureSkipVerify: client.AllowInsecure},
@@ -59,6 +63,9 @@ func (client *Client) Request(method, path string, data []byte) ([]byte, error) 
 }
 
 func (client *Client) Login(username, password, realm string) error {
+	if client.Host == "localhost" || client.Host == "::1" || client.Host == "127.0.0.1" {
+		return nil
+	}
 	jsonData := map[string]string{"username": username, "password": password, "realm": realm}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
