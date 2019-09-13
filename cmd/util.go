@@ -13,6 +13,7 @@ var utilCmd = &cobra.Command{
 		cmd.Usage()
 		os.Exit(0)
 	},
+	Hidden: true,
 }
 
 func init() {

@@ -123,7 +123,7 @@ func (pool *Pool) Create(client *Client) (string, error) {
 func (pool *Pool) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(pool)
-	body, err := client.Request("PUT", "pool", jsonValue)
+	body, err := client.Request("PUT", "pool/"+pool.ID, jsonValue)
 	if err == nil {
 		result = string(body)
 	}

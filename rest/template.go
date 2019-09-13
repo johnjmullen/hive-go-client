@@ -22,12 +22,12 @@ type TemplateDisk struct {
 }
 
 type Template struct {
-	ID                 string               `json:"id,omitempty"`
 	Name               string               `json:"name"`
 	Vcpu               int                  `json:"vcpu"`
 	Mem                int                  `json:"mem"`
 	OS                 string               `json:"os"`
 	Firmware           string               `json:"firmware,omitempty"`
+	Gpu                bool                 `json:"gpu,omitempty"`
 	DisplayDriver      string               `json:"displayDriver,omitempty"`
 	Interfaces         []*TemplateInterface `json:"interfaces,omitempty"`
 	Drivers            bool                 `json:"drivers"`

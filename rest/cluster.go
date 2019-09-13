@@ -8,25 +8,24 @@ import (
 
 //Broker information from the cluster table
 type Broker struct {
-	AutoConnectUserDesktop    bool   `json:"autoConnectUserDesktop,omitempty"`
-	BackgroundColor           string `json:"backgroundColor,omitempty"`
-	BgImage                   string `json:"bgImage,omitempty"`
-	BgImageFilename           string `json:"bgImageFilename,omitempty"`
-	ButtonTextColor           string `json:"buttonTextColor,omitempty"`
-	Disclaimer                string `json:"disclaimer,omitempty"`
-	Enabled                   bool   `json:"enabled"`
-	Favicon                   string `json:"favicon,omitempty"`
-	FaviconFilename           string `json:"faviconFilename,omitempty"`
-	HideRealms                bool   `json:"hideRealms,omitempty"`
-	HideRelease               bool   `json:"hideRelease,omitempty"`
-	Logo                      string `json:"logo,omitempty"`
-	LogoFilename              string `json:"logoFilename,omitempty"`
-	MainColor                 string `json:"mainColor,omitempty"`
-	PassthroughAuthentication bool   `json:"passthroughAuthentication,omitempty"`
-	TextColor                 string `json:"textColor,omitempty"`
-	Title                     string `json:"title,omitempty"`
-	TwoFormAuth               struct {
-	} `json:"twoFormAuth"`
+	AutoConnectUserDesktop    bool        `json:"autoConnectUserDesktop,omitempty"`
+	BackgroundColor           string      `json:"backgroundColor,omitempty"`
+	BgImage                   string      `json:"bgImage,omitempty"`
+	BgImageFilename           string      `json:"bgImageFilename,omitempty"`
+	ButtonTextColor           string      `json:"buttonTextColor,omitempty"`
+	Disclaimer                string      `json:"disclaimer,omitempty"`
+	Enabled                   bool        `json:"enabled"`
+	Favicon                   string      `json:"favicon,omitempty"`
+	FaviconFilename           string      `json:"faviconFilename,omitempty"`
+	HideRealms                bool        `json:"hideRealms,omitempty"`
+	HideRelease               bool        `json:"hideRelease,omitempty"`
+	Logo                      string      `json:"logo,omitempty"`
+	LogoFilename              string      `json:"logoFilename,omitempty"`
+	MainColor                 string      `json:"mainColor,omitempty"`
+	PassthroughAuthentication bool        `json:"passthroughAuthentication,omitempty"`
+	TextColor                 string      `json:"textColor,omitempty"`
+	Title                     string      `json:"title,omitempty"`
+	TwoFormAuth               interface{} `json:"twoFormAuth"`
 }
 
 //Gateway settings from the cluster table
