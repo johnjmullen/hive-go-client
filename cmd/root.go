@@ -31,7 +31,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "", "", "config file")
 	RootCmd.PersistentFlags().BoolP("insecure", "k", false, "ignore certificate errors")
-	RootCmd.PersistentFlags().String("host", "", "Server to connect to")
+	RootCmd.PersistentFlags().String("host", "", "Hostname or ip address")
 	RootCmd.PersistentFlags().Uint("port", 8443, "port")
 	RootCmd.PersistentFlags().StringP("user", "u", "admin", "Admin username")
 	RootCmd.PersistentFlags().StringP("password", "p", "", "Admin user password")
@@ -51,16 +51,23 @@ func initConfig() {
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
-		viper.SetConfigName("config")
+		viper.SetConfigName("hioctl")
 		viper.AddConfigPath("/etc/hiveio/")
 		viper.AddConfigPath("$HOME/.hiveio")
 	}
 	viper.SetEnvPrefix("hio")
 	viper.AutomaticEnv()
 	viper.ReadInConfig()
+
 }
 
 func connectRest(cmd *cobra.Command, args []string) {
+	cmd.MarkPersistentFlagRequired("host")
+	if viper.GetString("host") == "" {
+		fmt.Println("Error: Host was not provided.")
+		cmd.Usage()
+		os.Exit(1)
+	}
 	restClient = &rest.Client{Host: viper.GetString("host"), Port: viper.GetUint("port"), AllowInsecure: viper.GetBool("insecure")}
 	err := restClient.Login(viper.GetString("user"), viper.GetString("password"), viper.GetString("realm"))
 	if err != nil {
