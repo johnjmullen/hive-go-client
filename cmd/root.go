@@ -52,6 +52,7 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	} else {
 		viper.SetConfigName("hioctl")
+		viper.AddConfigPath("/etc/hive/")
 		viper.AddConfigPath("/etc/hiveio/")
 		viper.AddConfigPath("$HOME/.hiveio")
 	}
