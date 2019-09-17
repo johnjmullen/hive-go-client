@@ -1,0 +1,6 @@
+hive-go-client (0.1~git20190917.ccae01c-1) UNRELEASED; urgency=medium
+
+  [ John Mullen ]
+  * Initial release
+
+ -- John Mullen <johnjmullen25@gmail.com>  Tue, 17 Sep 2019 14:27:12 -0400

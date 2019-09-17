@@ -1,0 +1,5 @@
+#!/usr/bin/make -f
+
+export GOCACHE=$(shell mktemp -d /tmp/gocache-XXXX)
+%:
+	dh $@ --buildsystem=golang --with=golang

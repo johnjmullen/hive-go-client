@@ -1,0 +1,24 @@
+Source: hive-go-client
+Section: devel
+Priority: optional
+Maintainer: John Mullen <johnjmullen25@gmail.com>
+Build-Depends: debhelper (>= 10),
+               dh-golang,
+               golang-any,
+               golang-github-ghodss-yaml-dev,
+               golang-github-google-go-cmp-dev,
+               golang-github-spf13-cobra-dev,
+               golang-github-spf13-viper-dev
+Standards-Version: 4.1.1
+Homepage: https://github.com/hive-io/hive-go-client
+Vcs-Browser: https://anonscm.debian.org/cgit/pkg-go/packages/hive-go-client.git
+Vcs-Git: https://anonscm.debian.org/git/pkg-go/packages/hive-go-client.git
+XS-Go-Import-Path: github.com/hive-io/hive-go-client
+Testsuite: autopkgtest-pkg-go
+
+Package: hioctl
+Architecture: any
+Built-Using: ${misc:Built-Using}
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: Command line interface for the HiveIO rest api rest api
