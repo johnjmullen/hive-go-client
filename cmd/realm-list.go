@@ -23,9 +23,11 @@ var realmListCmd = &cobra.Command{
 		if cmd.Flags().Changed("details") {
 			fmt.Println(formatString(realms))
 		} else {
+			var list []string
 			for _, realm := range realms {
-				fmt.Println(realm.Name)
+				list = append(list, realm.Name)
 			}
+			fmt.Println(formatString(list))
 		}
 	},
 }

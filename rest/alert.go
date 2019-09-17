@@ -3,7 +3,6 @@ package rest
 import (
 	"encoding/json"
 	"errors"
-	"time"
 )
 
 type Alert struct {
@@ -17,9 +16,9 @@ type Alert struct {
 		Cluster string `json:"cluster"`
 		Host    string `json:"host"`
 	} `json:"ref"`
-	Tags      []string  `json:"tags"`
-	Timestamp time.Time `json:"timestamp"`
-	Type      string    `json:"type"`
+	Tags      []string `json:"tags"`
+	Timestamp int      `json:"timestamp"`
+	Type      string   `json:"type"`
 }
 
 func (alert Alert) String() string {

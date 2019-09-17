@@ -24,9 +24,12 @@ var alertListCmd = &cobra.Command{
 		if cmd.Flags().Changed("details") {
 			fmt.Println(formatString(alerts))
 		} else {
+			var list []map[string]string
 			for _, alert := range alerts {
-				fmt.Println(alert.ID, alert.Message)
+				var info = map[string]string{"id": alert.ID, "message": alert.Message}
+				list = append(list, info)
 			}
+			fmt.Println(formatString(list))
 		}
 	},
 }
