@@ -270,3 +270,19 @@ func (client *Client) ClusterId() (string, error) {
 	err = json.Unmarshal(body, &objMap)
 	return objMap["id"], err
 }
+
+func (host *Host) SetState(client *Client, state string) error {
+	body, err := client.Request("POST", "host/"+host.Hostid+"/state?state="+state, nil)
+	fmt.Println(string(body))
+	return err
+}
+
+func (host *Host) GetState(client *Client) (string, error) {
+	body, err := client.Request("GET", "host/"+host.Hostid+"/state", nil)
+	if err != nil {
+		return "", err
+	}
+	var state string
+	err = json.Unmarshal(body, &state)
+	return state, err
+}
