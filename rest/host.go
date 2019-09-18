@@ -271,10 +271,8 @@ func (client *Client) ClusterId() (string, error) {
 	return objMap["id"], err
 }
 
-func (host *Host) SetState(client *Client, state string) error {
-	body, err := client.Request("POST", "host/"+host.Hostid+"/state?state="+state, nil)
-	fmt.Println(string(body))
-	return err
+func (host *Host) SetState(client *Client, state string) (*Task, error) {
+	return client.getTaskFromResponse(client.Request("POST", "host/"+host.Hostid+"/state?state="+state, nil))
 }
 
 func (host *Host) GetState(client *Client) (string, error) {

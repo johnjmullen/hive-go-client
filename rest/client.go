@@ -22,6 +22,19 @@ type Client struct {
 	token         string
 }
 
+func (client *Client) getTaskFromResponse(body []byte, err error) (*Task, error) {
+	if err != nil {
+		return nil, err
+	}
+	var objMap map[string]string
+	err = json.Unmarshal(body, &objMap)
+	taskId, ok := objMap["taskId"]
+	if err != nil || !ok {
+		return nil, fmt.Errorf("Error parsing data.  taskId not found")
+	}
+	return client.GetTask(taskId)
+}
+
 func checkResponse(res *http.Response, err error) ([]byte, error) {
 	if err != nil {
 		return nil, err
