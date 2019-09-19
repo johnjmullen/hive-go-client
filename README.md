@@ -35,7 +35,7 @@ Use "hioctl [command] --help" for more information about a command.
 [hioctl Documentation](docs/hioctl.md)
 
 You can add a json or yaml config file in ~/.hiveio/ for default settings
-~/.hiveio/config.yaml
+~/.hiveio/hioctl.yaml
 ```
 host: hive1
 user: admin
