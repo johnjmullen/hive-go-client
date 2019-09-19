@@ -32,13 +32,13 @@ hioctl guest [flags]
 ### SEE ALSO
 
 * [hioctl](hioctl.md)	 - hiveio cli
+* [hioctl guest assign](hioctl_guest_assign.md)	 - assign guest to a user
 * [hioctl guest delete](hioctl_guest_delete.md)	 - delete guest pool
 * [hioctl guest diff](hioctl_guest_diff.md)	 - compare 2 guests
 * [hioctl guest get](hioctl_guest_get.md)	 - get guest details
 * [hioctl guest list](hioctl_guest_list.md)	 - list guests
 * [hioctl guest poweroff](hioctl_guest_poweroff.md)	 - force power off guest
 * [hioctl guest reboot](hioctl_guest_reboot.md)	 - reboot guest
-* [hioctl guest release](hioctl_guest_release.md)	 - release guest assignment
 * [hioctl guest release](hioctl_guest_release.md)	 - release guest assignment
 * [hioctl guest reset](hioctl_guest_reset.md)	 - force reset guest
 * [hioctl guest shutdown](hioctl_guest_shutdown.md)	 - shutdown guest

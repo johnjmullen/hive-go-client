@@ -33,7 +33,7 @@ var guestAssignCmd = &cobra.Command{
 }
 
 func init() {
-	guestCmd.AddCommand(guestReleaseCmd)
+	guestCmd.AddCommand(guestAssignCmd)
 	hostListCmd.Flags().String("guest-user", "", "user to assign to this guest")
 	hostListCmd.Flags().String("guest-realm", "", "user's realm")
 
