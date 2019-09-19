@@ -106,16 +106,14 @@ func (client *Client) GetCluster(id string) (Cluster, error) {
 	return cluster, err
 }
 
-func (client *Client) JoinHost(username, password, ipAddress string) error {
+func (client *Client) JoinHost(username, password, ipAddress string) (*Task, error) {
 	jsonData := map[string]string{"remoteUsername": username, "remotePassword": password, "remoteIpAddress": ipAddress}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	//Why doesn't this use clusterId?
-	_, err = client.Request("POST", "cluster/joinHost", jsonValue)
-	//TODO: Need to watch task
-	return err
+	return client.getTaskFromResponse(client.Request("POST", "cluster/joinHost", jsonValue))
 }
 
 func (cluster *Cluster) GetLicenseInfo(client *Client) (string, string, error) {

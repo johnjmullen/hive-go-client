@@ -13,7 +13,7 @@ var addHostCmd = &cobra.Command{
 	Short: "add a host to the cluster",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		err := restClient.JoinHost(rUser, rPass, args[0])
+		_, err := restClient.JoinHost(rUser, rPass, args[0])
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

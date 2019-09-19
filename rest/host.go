@@ -207,9 +207,10 @@ func (client *Client) GetHost(hostid string) (Host, error) {
 	return host, err
 }
 
-func (host *Host) Update(client *Client) (string, error) {
+func (host *Host) UpdateAppliance(client *Client) (string, error) {
 	var result string
-	jsonValue, _ := json.Marshal(host)
+	data := map[string]interface{}{"appliance": host.Appliance}
+	jsonValue, _ := json.Marshal(data)
 	body, err := client.Request("PUT", "host/"+host.Hostid, jsonValue)
 	if err == nil {
 		result = string(body)

@@ -23,7 +23,7 @@ var hostLogLevelCmd = &cobra.Command{
 		}
 		if viper.GetString("set") != "" {
 			host.Appliance.Loglevel = viper.GetString("set")
-			_, err := host.Update(restClient)
+			_, err := host.UpdateAppliance(restClient)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
