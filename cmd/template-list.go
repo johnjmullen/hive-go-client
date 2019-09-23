@@ -23,7 +23,7 @@ var templateListCmd = &cobra.Command{
 		if cmd.Flags().Changed("details") {
 			fmt.Println(formatString(templates))
 		} else {
-			var list []string
+			list := []string{}
 			for _, template := range templates {
 				list = append(list, template.Name)
 			}

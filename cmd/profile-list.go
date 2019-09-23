@@ -23,7 +23,7 @@ var profileListCmd = &cobra.Command{
 		if cmd.Flags().Changed("details") {
 			fmt.Println(formatString(profiles))
 		} else {
-			var list []map[string]string
+			list := []map[string]string{}
 			for _, profile := range profiles {
 				var info = map[string]string{"id": profile.ID, "name": profile.Name}
 				list = append(list, info)

@@ -24,7 +24,7 @@ var taskListCmd = &cobra.Command{
 		if cmd.Flags().Changed("details") {
 			fmt.Println(formatString(tasks))
 		} else {
-			var list []map[string]string
+			list := []map[string]string{}
 			for _, task := range tasks {
 				var info = map[string]string{"id": task.ID, "name": task.Name}
 				list = append(list, info)

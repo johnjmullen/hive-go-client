@@ -33,7 +33,7 @@ var storageConvertDiskCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		err = srcPool.ConvertDisk(restClient, viper.GetString("src-filename"), destPool.ID, viper.GetString("dest-filename"), viper.GetString("dest-format"))
+		_, err = srcPool.ConvertDisk(restClient, viper.GetString("src-filename"), destPool.ID, viper.GetString("dest-filename"), viper.GetString("dest-format"))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

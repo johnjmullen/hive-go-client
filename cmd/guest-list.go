@@ -23,7 +23,7 @@ var guestListCmd = &cobra.Command{
 		if cmd.Flags().Changed("details") {
 			fmt.Println(formatString(guests))
 		} else {
-			var guestList []string
+			guestList := []string{}
 			for _, guest := range guests {
 				guestList = append(guestList, guest.Name)
 			}

@@ -23,7 +23,7 @@ var clusterListCmd = &cobra.Command{
 		if cmd.Flags().Changed("details") {
 			fmt.Println(formatString(clusters))
 		} else {
-			var list []string
+			list := []string{}
 			for _, cluster := range clusters {
 				list = append(list, cluster.ID)
 			}

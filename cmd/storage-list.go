@@ -23,7 +23,7 @@ var storageListCmd = &cobra.Command{
 		if cmd.Flags().Changed("details") {
 			fmt.Println(formatString(pools))
 		} else {
-			var list []map[string]string
+			list := []map[string]string{}
 			for _, pool := range pools {
 				var info = map[string]string{"id": pool.ID, "name": pool.Name}
 				list = append(list, info)
