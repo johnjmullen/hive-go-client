@@ -83,20 +83,16 @@ func (pool *StoragePool) Delete(client *Client) error {
 	return err
 }
 
-func (pool *StoragePool) CreateDisk(client *Client, filename, format string, size uint) error {
+func (pool *StoragePool) CreateDisk(client *Client, filename, format string, size uint) (*Task, error) {
 	if pool.ID == "" {
-		return errors.New("Invalid Storage Pool")
+		return nil, errors.New("Invalid Storage Pool")
 	}
 	jsonData := map[string]interface{}{"filename": filename, "size": size, "format": format}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	_, err = client.Request("POST", "storage/pool/"+pool.ID+"/createDisk", jsonValue)
-	if err != nil {
-		return err
-	}
-	return err
+	return client.getTaskFromResponse(client.Request("POST", "storage/pool/"+pool.ID+"/createDisk", jsonValue))
 }
 
 func (pool *StoragePool) ConvertDisk(client *Client, srcFilename, dstStorageId, dstFilename, dstFormat string) (*Task, error) {

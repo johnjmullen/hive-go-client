@@ -10,7 +10,7 @@ import (
 )
 
 var storageBrowseCmd = &cobra.Command{
-	Use:   "browse [file]",
+	Use:   "browse",
 	Short: "list storage pool files",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("id", cmd.Flags().Lookup("id"))
