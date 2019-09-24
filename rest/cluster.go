@@ -85,7 +85,7 @@ func (client *Client) ListClusters(filter string) ([]Cluster, error) {
 	if filter != "" {
 		path += "?" + filter
 	}
-	body, err := client.Request("GET", path, nil)
+	body, err := client.request("GET", path, nil)
 	if err != nil {
 		return clusters, err
 	}
@@ -98,7 +98,7 @@ func (client *Client) GetCluster(id string) (Cluster, error) {
 	if id == "" {
 		return cluster, errors.New("Id cannot be empty")
 	}
-	body, err := client.Request("GET", "cluster/"+id, nil)
+	body, err := client.request("GET", "cluster/"+id, nil)
 	if err != nil {
 		return cluster, err
 	}
@@ -113,11 +113,11 @@ func (client *Client) JoinHost(username, password, ipAddress string) (*Task, err
 		return nil, err
 	}
 	//Why doesn't this use clusterId?
-	return client.getTaskFromResponse(client.Request("POST", "cluster/joinHost", jsonValue))
+	return client.getTaskFromResponse(client.request("POST", "cluster/joinHost", jsonValue))
 }
 
 func (cluster *Cluster) GetLicenseInfo(client *Client) (string, string, error) {
-	body, err := client.Request("GET", "cluster/"+cluster.ID+"/license", nil)
+	body, err := client.request("GET", "cluster/"+cluster.ID+"/license", nil)
 	if err != nil {
 		return "", "", err
 	}
@@ -133,6 +133,6 @@ func (cluster *Cluster) SetLicense(client *Client, key string) error {
 	if err != nil {
 		return err
 	}
-	_, err = client.Request("PUT", "cluster/"+cluster.ID+"/license", jsonValue)
+	_, err = client.request("PUT", "cluster/"+cluster.ID+"/license", jsonValue)
 	return err
 }

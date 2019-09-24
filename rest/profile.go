@@ -52,7 +52,7 @@ func (profile Profile) String() string {
 func (profile *Profile) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(profile)
-	body, err := client.Request("POST", "profiles", jsonValue)
+	body, err := client.request("POST", "profiles", jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -62,7 +62,7 @@ func (profile *Profile) Create(client *Client) (string, error) {
 func (profile *Profile) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(profile)
-	body, err := client.Request("PUT", "profile/"+profile.ID, jsonValue)
+	body, err := client.request("PUT", "profile/"+profile.ID, jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -73,7 +73,7 @@ func (profile *Profile) Delete(client *Client) error {
 	if profile.ID == "" {
 		return errors.New("Id cannot be empty")
 	}
-	_, err := client.Request("DELETE", "profile/"+profile.ID, nil)
+	_, err := client.request("DELETE", "profile/"+profile.ID, nil)
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (client *Client) ListProfiles(filter string) ([]Profile, error) {
 	if filter != "" {
 		path += "?" + filter
 	}
-	body, err := client.Request("GET", path, nil)
+	body, err := client.request("GET", path, nil)
 	if err != nil {
 		return Profiles, err
 	}
@@ -99,7 +99,7 @@ func (client *Client) GetProfile(id string) (*Profile, error) {
 	if id == "" {
 		return profile, errors.New("Id cannot be empty")
 	}
-	body, err := client.Request("GET", "profile/"+id, nil)
+	body, err := client.request("GET", "profile/"+id, nil)
 	if err != nil {
 		return profile, err
 	}

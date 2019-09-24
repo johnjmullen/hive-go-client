@@ -24,7 +24,7 @@ func (client *Client) ListRealms(filter string) ([]Realm, error) {
 	if filter != "" {
 		path += "?" + filter
 	}
-	body, err := client.Request("GET", path, nil)
+	body, err := client.request("GET", path, nil)
 	if err != nil {
 		return realms, err
 	}
@@ -37,7 +37,7 @@ func (client *Client) GetRealm(name string) (Realm, error) {
 	if name == "" {
 		return realm, errors.New("Name cannot be empty")
 	}
-	body, err := client.Request("GET", "realm/"+name, nil)
+	body, err := client.request("GET", "realm/"+name, nil)
 	if err != nil {
 		return realm, err
 	}
@@ -48,7 +48,7 @@ func (client *Client) GetRealm(name string) (Realm, error) {
 func (realm *Realm) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(realm)
-	body, err := client.Request("POST", "realms", jsonValue)
+	body, err := client.request("POST", "realms", jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -58,7 +58,7 @@ func (realm *Realm) Create(client *Client) (string, error) {
 func (realm *Realm) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(realm)
-	body, err := client.Request("PUT", "realm/"+realm.Name, jsonValue)
+	body, err := client.request("PUT", "realm/"+realm.Name, jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -69,7 +69,7 @@ func (realm *Realm) Delete(client *Client) error {
 	if realm.Name == "" {
 		return errors.New("Name cannot be empty")
 	}
-	_, err := client.Request("DELETE", "realm/"+realm.Name, nil)
+	_, err := client.request("DELETE", "realm/"+realm.Name, nil)
 	if err != nil {
 		return err
 	}

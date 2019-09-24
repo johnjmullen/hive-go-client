@@ -32,7 +32,7 @@ func (client *Client) ListAlerts(filter string) ([]Alert, error) {
 	if filter != "" {
 		path += "?" + filter
 	}
-	body, err := client.Request("GET", path, nil)
+	body, err := client.request("GET", path, nil)
 	if err != nil {
 		return alerts, err
 	}
@@ -45,7 +45,7 @@ func (client *Client) GetAlert(id string) (Alert, error) {
 	if id == "" {
 		return alert, errors.New("Name cannot be empty")
 	}
-	body, err := client.Request("GET", "alert/"+id, nil)
+	body, err := client.request("GET", "alert/"+id, nil)
 	if err != nil {
 		return alert, err
 	}
@@ -57,6 +57,6 @@ func (alert *Alert) Acknowledge(client *Client) error {
 	if alert.ID == "" {
 		return errors.New("Id cannot be empty")
 	}
-	_, err := client.Request("POST", "alert/"+alert.ID+"/acknowledge", nil)
+	_, err := client.request("POST", "alert/"+alert.ID+"/acknowledge", nil)
 	return err
 }

@@ -31,7 +31,7 @@ func (client *Client) ListStoragePools(filter string) ([]StoragePool, error) {
 	if filter != "" {
 		path += "?" + filter
 	}
-	body, err := client.Request("GET", path, nil)
+	body, err := client.request("GET", path, nil)
 	if err != nil {
 		return pools, err
 	}
@@ -57,7 +57,7 @@ func (client *Client) GetStoragePool(id string) (*StoragePool, error) {
 	if id == "" {
 		return pool, errors.New("id cannot be empty")
 	}
-	body, err := client.Request("GET", "storage/pool/"+id, nil)
+	body, err := client.request("GET", "storage/pool/"+id, nil)
 	if err != nil {
 		return pool, err
 	}
@@ -68,7 +68,7 @@ func (client *Client) GetStoragePool(id string) (*StoragePool, error) {
 func (pool *StoragePool) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(pool)
-	body, err := client.Request("POST", "storage/pools", jsonValue)
+	body, err := client.request("POST", "storage/pools", jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -79,7 +79,7 @@ func (pool *StoragePool) Delete(client *Client) error {
 	if pool.ID == "" {
 		return errors.New("Invalid Storage Pool")
 	}
-	_, err := client.Request("DELETE", "storage/pool/"+pool.ID, nil)
+	_, err := client.request("DELETE", "storage/pool/"+pool.ID, nil)
 	return err
 }
 
@@ -92,7 +92,7 @@ func (pool *StoragePool) CreateDisk(client *Client, filename, format string, siz
 	if err != nil {
 		return nil, err
 	}
-	return client.getTaskFromResponse(client.Request("POST", "storage/pool/"+pool.ID+"/createDisk", jsonValue))
+	return client.getTaskFromResponse(client.request("POST", "storage/pool/"+pool.ID+"/createDisk", jsonValue))
 }
 
 func (pool *StoragePool) ConvertDisk(client *Client, srcFilename, dstStorageId, dstFilename, dstFormat string) (*Task, error) {
@@ -110,14 +110,14 @@ func (pool *StoragePool) ConvertDisk(client *Client, srcFilename, dstStorageId, 
 	if err != nil {
 		return nil, err
 	}
-	return client.getTaskFromResponse(client.Request("POST", "template/convert", jsonValue))
+	return client.getTaskFromResponse(client.request("POST", "template/convert", jsonValue))
 }
 
 func (pool *StoragePool) DeleteFile(client *Client, filename string) error {
 	if pool.ID == "" {
 		return errors.New("Invalid Storage Pool")
 	}
-	body, err := client.Request("DELETE", fmt.Sprintf("storage/pool/%s/%s", pool.ID, filename), nil)
+	body, err := client.request("DELETE", fmt.Sprintf("storage/pool/%s/%s", pool.ID, filename), nil)
 	var res struct {
 		Deleted bool `json:"deleted"`
 	}
@@ -134,7 +134,7 @@ func (pool *StoragePool) Browse(client *Client) ([]string, error) {
 		return files, errors.New("Invalid Storage Pool")
 	}
 
-	body, err := client.Request("GET", fmt.Sprintf("storage/pool/%s/browse", pool.ID), nil)
+	body, err := client.request("GET", fmt.Sprintf("storage/pool/%s/browse", pool.ID), nil)
 	if err != nil {
 		return files, err
 	}

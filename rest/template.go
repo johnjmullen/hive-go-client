@@ -56,7 +56,7 @@ func (client *Client) ListTemplates(filter string) ([]Template, error) {
 		path += "?" + filter
 	}
 	var templates []Template
-	body, err := client.Request("GET", path, nil)
+	body, err := client.request("GET", path, nil)
 	if err != nil {
 		return templates, err
 	}
@@ -69,7 +69,7 @@ func (client *Client) GetTemplate(name string) (Template, error) {
 	if name == "" {
 		return template, errors.New("name cannot be empty")
 	}
-	body, err := client.Request("GET", "template/"+name, nil)
+	body, err := client.request("GET", "template/"+name, nil)
 	if err != nil {
 		return template, err
 	}
@@ -80,7 +80,7 @@ func (client *Client) GetTemplate(name string) (Template, error) {
 func (template *Template) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(template)
-	body, err := client.Request("POST", "templates", jsonValue)
+	body, err := client.request("POST", "templates", jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -90,7 +90,7 @@ func (template *Template) Create(client *Client) (string, error) {
 func (template *Template) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(template)
-	body, err := client.Request("PUT", "template/"+template.Name, jsonValue)
+	body, err := client.request("PUT", "template/"+template.Name, jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -101,7 +101,7 @@ func (template *Template) Delete(client *Client) error {
 	if template.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.Request("DELETE", "template/"+template.Name, nil)
+	_, err := client.request("DELETE", "template/"+template.Name, nil)
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func (template *Template) Load(client *Client, storage string) error {
 
 	jsonData := map[string]string{"localStorage": storage}
 	jsonValue, _ := json.Marshal(jsonData)
-	_, err := client.Request("POST", "template/"+template.Name+"/loadall", jsonValue)
+	_, err := client.request("POST", "template/"+template.Name+"/loadall", jsonValue)
 	return err
 }
 
@@ -123,7 +123,7 @@ func (template *Template) Unload(client *Client) error {
 	if template.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.Request("POST", "template/"+template.Name+"/unloadall", nil)
+	_, err := client.request("POST", "template/"+template.Name+"/unloadall", nil)
 	return err
 }
 
@@ -131,7 +131,7 @@ func (template *Template) Analyze(client *Client) error {
 	if template.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.Request("POST", "template/"+template.Name+"/analyze", nil)
+	_, err := client.request("POST", "template/"+template.Name+"/analyze", nil)
 	return err
 }
 
@@ -139,7 +139,7 @@ func (template *Template) Author(client *Client) error {
 	if template.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.Request("PUT", "template/"+template.Name+"/author", nil)
+	_, err := client.request("PUT", "template/"+template.Name+"/author", nil)
 	return err
 }
 
@@ -149,6 +149,6 @@ func (template *Template) Author(client *Client) error {
 	}
 	jsonData := map[string]string{"dstName": dstName, "dstStorage": dstStorage, "dstFilename": dstFilename, "srcStorage":template. }
 	jsonValue, _ := json.Marshal(jsonData)
-	_, err := client.Request("POST", "template/"+template.Name+"/author", jsonValue)
+	_, err := client.request("POST", "template/"+template.Name+"/author", jsonValue)
 	return err
 }*/

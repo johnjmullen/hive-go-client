@@ -23,7 +23,7 @@ func (client *Client) BrokerLogin(username, password, realm string) ([]BrokerPoo
 	if err != nil {
 		return nil, err
 	}
-	body, err := client.Request("POST", "authBrokerUser", jsonValue)
+	body, err := client.request("POST", "authBrokerUser", jsonValue)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (client *Client) BrokerLogin(username, password, realm string) ([]BrokerPoo
 }
 
 func (client *Client) BrokerAssignments() ([]interface{}, error) {
-	body, err := client.Request("GET", "broker/assignments", nil)
+	body, err := client.request("GET", "broker/assignments", nil)
 	var assignments []interface{}
 	if err != nil {
 		return assignments, err
@@ -47,7 +47,7 @@ func (client *Client) BrokerAssignments() ([]interface{}, error) {
 }
 
 func (client *Client) BrokerAssign(poolId string) (interface{}, error) {
-	body, err := client.Request("POST", "broker/assign/"+poolId, nil)
+	body, err := client.request("POST", "broker/assign/"+poolId, nil)
 	var result interface{}
 	if err != nil {
 		return result, err
@@ -62,7 +62,7 @@ func (client *Client) BrokerConnectRDP(guest string, remote bool) ([]byte, error
 	if err != nil {
 		return nil, err
 	}
-	body, err := client.Request("POST", "broker/"+guest+"/connect", jsonValue)
+	body, err := client.request("POST", "broker/"+guest+"/connect", jsonValue)
 	return body, err
 }
 
@@ -73,7 +73,7 @@ func (client *Client) AssignGuest(poolId, username, realm, guest string) (interf
 	if err != nil {
 		return result, err
 	}
-	body, err := client.Request("POST", "broker/assign/"+poolId, jsonValue)
+	body, err := client.request("POST", "broker/assign/"+poolId, jsonValue)
 	if err != nil {
 		return result, err
 	}
@@ -87,7 +87,7 @@ func (client *Client) ReleaseGuest(poolId, username, guest string) error {
 	if err != nil {
 		return err
 	}
-	body, err := client.Request("POST", "broker/release", jsonValue)
+	body, err := client.request("POST", "broker/release", jsonValue)
 	var result interface{}
 	if err != nil {
 		return err

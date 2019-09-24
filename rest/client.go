@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -50,12 +51,17 @@ func checkResponse(res *http.Response, err error) ([]byte, error) {
 	return body, err
 }
 
-func (client *Client) Request(method, path string, data []byte) ([]byte, error) {
+func (client *Client) request(method, path string, data []byte) ([]byte, error) {
 	protocol := "https"
 	if client.Port == 3000 {
 		protocol = "http"
 	}
-	url := fmt.Sprintf("%s://%s:%d/api/%s", protocol, client.Host, client.Port, path)
+	//TODO: separate queryString from path in function arguments
+	urlString := fmt.Sprintf("%s://%s:%d/api/%s", protocol, client.Host, client.Port, path)
+	u, err := url.Parse(urlString)
+	if err != nil {
+		return nil, err
+	}
 	if client.httpClient == nil {
 		tr := &http.Transport{
 			TLSClientConfig:    &tls.Config{InsecureSkipVerify: client.AllowInsecure},
@@ -64,7 +70,7 @@ func (client *Client) Request(method, path string, data []byte) ([]byte, error) 
 		client.httpClient = &http.Client{Transport: tr, Timeout: time.Second * 30}
 	}
 
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
+	req, err := http.NewRequest(method, u.String(), bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +90,7 @@ func (client *Client) Login(username, password, realm string) error {
 	if err != nil {
 		return err
 	}
-	body, err := client.Request("POST", "auth", jsonValue)
+	body, err := client.request("POST", "auth", jsonValue)
 	if err != nil {
 		return err
 	}

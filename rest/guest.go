@@ -116,7 +116,7 @@ func (client *Client) ListGuests(filter string) ([]Guest, error) {
 	if filter != "" {
 		path += "?" + filter
 	}
-	body, err := client.Request("GET", path, nil)
+	body, err := client.request("GET", path, nil)
 	if err != nil {
 		return guests, err
 	}
@@ -129,7 +129,7 @@ func (client *Client) GetGuest(name string) (*Guest, error) {
 	if name == "" {
 		return nil, errors.New("name cannot be empty")
 	}
-	body, err := client.Request("GET", "guest/"+name, nil)
+	body, err := client.request("GET", "guest/"+name, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func (guest *Guest) Shutdown(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.Request("POST", "guest/"+guest.Name+"/shutdown", nil)
+	_, err := client.request("POST", "guest/"+guest.Name+"/shutdown", nil)
 	if err != nil {
 		return err
 	}
@@ -152,7 +152,7 @@ func (guest *Guest) Reboot(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.Request("POST", "guest/"+guest.Name+"/reboot", nil)
+	_, err := client.request("POST", "guest/"+guest.Name+"/reboot", nil)
 	if err != nil {
 		return err
 	}
@@ -163,7 +163,7 @@ func (guest *Guest) Poweroff(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.Request("POST", "guest/"+guest.Name+"/poweroff", nil)
+	_, err := client.request("POST", "guest/"+guest.Name+"/poweroff", nil)
 	if err != nil {
 		return err
 	}
@@ -174,7 +174,7 @@ func (guest *Guest) Reset(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.Request("POST", "guest/"+guest.Name+"/reset", nil)
+	_, err := client.request("POST", "guest/"+guest.Name+"/reset", nil)
 	if err != nil {
 		return err
 	}
@@ -186,7 +186,7 @@ func (guest *Guest) Delete(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.Request("POST", "guest/"+guest.Name+"/delete", nil)
+	_, err := client.request("POST", "guest/"+guest.Name+"/delete", nil)
 	if err != nil {
 		return err
 	}

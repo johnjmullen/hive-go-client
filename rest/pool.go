@@ -76,7 +76,7 @@ func (client *Client) ListGuestPools(filter string) ([]Pool, error) {
 	if filter != "" {
 		path += "?" + filter
 	}
-	body, err := client.Request("GET", path, nil)
+	body, err := client.request("GET", path, nil)
 	if err != nil {
 		return pools, err
 	}
@@ -89,7 +89,7 @@ func (client *Client) GetPool(id string) (*Pool, error) {
 	if id == "" {
 		return pool, errors.New("Id cannot be empty")
 	}
-	body, err := client.Request("GET", "pool/"+id, nil)
+	body, err := client.request("GET", "pool/"+id, nil)
 	if err != nil {
 		return pool, err
 	}
@@ -113,7 +113,7 @@ func (client *Client) GetPoolByName(name string) (*Pool, error) {
 func (pool *Pool) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(pool)
-	body, err := client.Request("POST", "pools", jsonValue)
+	body, err := client.request("POST", "pools", jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -123,7 +123,7 @@ func (pool *Pool) Create(client *Client) (string, error) {
 func (pool *Pool) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(pool)
-	body, err := client.Request("PUT", "pool/"+pool.ID, jsonValue)
+	body, err := client.request("PUT", "pool/"+pool.ID, jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -134,7 +134,7 @@ func (pool *Pool) Delete(client *Client) error {
 	if pool.ID == "" || client == nil {
 		return errors.New("Invalid pool")
 	}
-	_, err := client.Request("DELETE", "pool/"+pool.ID, nil)
+	_, err := client.request("DELETE", "pool/"+pool.ID, nil)
 	return err
 }
 
@@ -142,6 +142,6 @@ func (pool *Pool) Refresh(client *Client) error {
 	if pool.ID == "" || client == nil {
 		return errors.New("Invalid pool")
 	}
-	_, err := client.Request("POST", "pool/"+pool.ID+"/refresh", nil)
+	_, err := client.request("POST", "pool/"+pool.ID+"/refresh", nil)
 	return err
 }

@@ -186,7 +186,7 @@ func (client *Client) ListHosts(filter string) ([]Host, error) {
 	if filter != "" {
 		path += "?" + filter
 	}
-	body, err := client.Request("GET", path, nil)
+	body, err := client.request("GET", path, nil)
 	if err != nil {
 		return hosts, err
 	}
@@ -199,7 +199,7 @@ func (client *Client) GetHost(hostid string) (Host, error) {
 	if hostid == "" {
 		return host, errors.New("hostid cannot be empty")
 	}
-	body, err := client.Request("GET", "host/"+hostid, nil)
+	body, err := client.request("GET", "host/"+hostid, nil)
 	if err != nil {
 		return host, err
 	}
@@ -211,7 +211,7 @@ func (host *Host) UpdateAppliance(client *Client) (string, error) {
 	var result string
 	data := map[string]interface{}{"appliance": host.Appliance}
 	jsonValue, _ := json.Marshal(data)
-	body, err := client.Request("PUT", "host/"+host.Hostid, jsonValue)
+	body, err := client.request("PUT", "host/"+host.Hostid, jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -222,7 +222,7 @@ func (host *Host) Delete(client *Client) error {
 	if host.Hostid == "" {
 		return errors.New("Id cannot be empty")
 	}
-	_, err := client.Request("DELETE", "host/"+host.Hostid, nil)
+	_, err := client.request("DELETE", "host/"+host.Hostid, nil)
 	if err != nil {
 		return err
 	}
@@ -230,7 +230,7 @@ func (host *Host) Delete(client *Client) error {
 }
 
 func (host *Host) RestartServices(client *Client) error {
-	body, err := client.Request("POST", "host/"+host.Hostid+"/services/hive-services/restart", nil)
+	body, err := client.request("POST", "host/"+host.Hostid+"/services/hive-services/restart", nil)
 	fmt.Println(string(body))
 	return err
 }
@@ -244,7 +244,7 @@ type Version struct {
 
 func (client *Client) HostVersion() (Version, error) {
 	var version Version
-	body, err := client.Request("GET", "host/version", nil)
+	body, err := client.request("GET", "host/version", nil)
 	if err != nil {
 		return version, err
 	}
@@ -253,7 +253,7 @@ func (client *Client) HostVersion() (Version, error) {
 }
 
 func (client *Client) HostId() (string, error) {
-	body, err := client.Request("GET", "host/hostid", nil)
+	body, err := client.request("GET", "host/hostid", nil)
 	if err != nil {
 		return "", err
 	}
@@ -263,7 +263,7 @@ func (client *Client) HostId() (string, error) {
 }
 
 func (client *Client) ClusterId() (string, error) {
-	body, err := client.Request("GET", "host/clusterid", nil)
+	body, err := client.request("GET", "host/clusterid", nil)
 	if err != nil {
 		return "", err
 	}
@@ -273,11 +273,11 @@ func (client *Client) ClusterId() (string, error) {
 }
 
 func (host *Host) SetState(client *Client, state string) (*Task, error) {
-	return client.getTaskFromResponse(client.Request("POST", "host/"+host.Hostid+"/state?state="+state, nil))
+	return client.getTaskFromResponse(client.request("POST", "host/"+host.Hostid+"/state?state="+state, nil))
 }
 
 func (host *Host) GetState(client *Client) (string, error) {
-	body, err := client.Request("GET", "host/"+host.Hostid+"/state", nil)
+	body, err := client.request("GET", "host/"+host.Hostid+"/state", nil)
 	if err != nil {
 		return "", err
 	}

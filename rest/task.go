@@ -38,7 +38,7 @@ func (client *Client) ListTasks(filter string) ([]Task, error) {
 	if filter != "" {
 		path += "?" + filter
 	}
-	body, err := client.Request("GET", path, nil)
+	body, err := client.request("GET", path, nil)
 	if err != nil {
 		return tasks, err
 	}
@@ -51,7 +51,7 @@ func (client *Client) GetTask(id string) (*Task, error) {
 	if id == "" {
 		return task, errors.New("Id cannot be empty")
 	}
-	body, err := client.Request("GET", "task/"+id, nil)
+	body, err := client.request("GET", "task/"+id, nil)
 	if err != nil {
 		return task, err
 	}
@@ -76,6 +76,6 @@ func (task *Task) ForceComplete(client *Client) error {
 	if task.ID == "" {
 		return errors.New("Id cannot be empty")
 	}
-	_, err := client.Request("PUT", "task/"+task.ID+"/forcecomplete", nil)
+	_, err := client.request("PUT", "task/"+task.ID+"/forcecomplete", nil)
 	return err
 }
