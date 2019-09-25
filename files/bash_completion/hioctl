@@ -1,0 +1,3234 @@
+# bash completion for hioctl                               -*- shell-script -*-
+
+__hioctl_debug()
+{
+    if [[ -n ${BASH_COMP_DEBUG_FILE} ]]; then
+        echo "$*" >> "${BASH_COMP_DEBUG_FILE}"
+    fi
+}
+
+# Homebrew on Macs have version 1.3 of bash-completion which doesn't include
+# _init_completion. This is a very minimal version of that function.
+__hioctl_init_completion()
+{
+    COMPREPLY=()
+    _get_comp_words_by_ref "$@" cur prev words cword
+}
+
+__hioctl_index_of_word()
+{
+    local w word=$1
+    shift
+    index=0
+    for w in "$@"; do
+        [[ $w = "$word" ]] && return
+        index=$((index+1))
+    done
+    index=-1
+}
+
+__hioctl_contains_word()
+{
+    local w word=$1; shift
+    for w in "$@"; do
+        [[ $w = "$word" ]] && return
+    done
+    return 1
+}
+
+__hioctl_handle_reply()
+{
+    __hioctl_debug "${FUNCNAME[0]}"
+    case $cur in
+        -*)
+            if [[ $(type -t compopt) = "builtin" ]]; then
+                compopt -o nospace
+            fi
+            local allflags
+            if [ ${#must_have_one_flag[@]} -ne 0 ]; then
+                allflags=("${must_have_one_flag[@]}")
+            else
+                allflags=("${flags[*]} ${two_word_flags[*]}")
+            fi
+            COMPREPLY=( $(compgen -W "${allflags[*]}" -- "$cur") )
+            if [[ $(type -t compopt) = "builtin" ]]; then
+                [[ "${COMPREPLY[0]}" == *= ]] || compopt +o nospace
+            fi
+
+            # complete after --flag=abc
+            if [[ $cur == *=* ]]; then
+                if [[ $(type -t compopt) = "builtin" ]]; then
+                    compopt +o nospace
+                fi
+
+                local index flag
+                flag="${cur%=*}"
+                __hioctl_index_of_word "${flag}" "${flags_with_completion[@]}"
+                COMPREPLY=()
+                if [[ ${index} -ge 0 ]]; then
+                    PREFIX=""
+                    cur="${cur#*=}"
+                    ${flags_completion[${index}]}
+                    if [ -n "${ZSH_VERSION}" ]; then
+                        # zsh completion needs --flag= prefix
+                        eval "COMPREPLY=( \"\${COMPREPLY[@]/#/${flag}=}\" )"
+                    fi
+                fi
+            fi
+            return 0;
+            ;;
+    esac
+
+    # check if we are handling a flag with special work handling
+    local index
+    __hioctl_index_of_word "${prev}" "${flags_with_completion[@]}"
+    if [[ ${index} -ge 0 ]]; then
+        ${flags_completion[${index}]}
+        return
+    fi
+
+    # we are parsing a flag and don't have a special handler, no completion
+    if [[ ${cur} != "${words[cword]}" ]]; then
+        return
+    fi
+
+    local completions
+    completions=("${commands[@]}")
+    if [[ ${#must_have_one_noun[@]} -ne 0 ]]; then
+        completions=("${must_have_one_noun[@]}")
+    fi
+    if [[ ${#must_have_one_flag[@]} -ne 0 ]]; then
+        completions+=("${must_have_one_flag[@]}")
+    fi
+    COMPREPLY=( $(compgen -W "${completions[*]}" -- "$cur") )
+
+    if [[ ${#COMPREPLY[@]} -eq 0 && ${#noun_aliases[@]} -gt 0 && ${#must_have_one_noun[@]} -ne 0 ]]; then
+        COMPREPLY=( $(compgen -W "${noun_aliases[*]}" -- "$cur") )
+    fi
+
+    if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
+		if declare -F __hioctl_custom_func >/dev/null; then
+			# try command name qualified custom func
+			__hioctl_custom_func
+		else
+			# otherwise fall back to unqualified for compatibility
+			declare -F __custom_func >/dev/null && __custom_func
+		fi
+    fi
+
+    # available in bash-completion >= 2, not always present on macOS
+    if declare -F __ltrim_colon_completions >/dev/null; then
+        __ltrim_colon_completions "$cur"
+    fi
+
+    # If there is only 1 completion and it is a flag with an = it will be completed
+    # but we don't want a space after the =
+    if [[ "${#COMPREPLY[@]}" -eq "1" ]] && [[ $(type -t compopt) = "builtin" ]] && [[ "${COMPREPLY[0]}" == --*= ]]; then
+       compopt -o nospace
+    fi
+}
+
+# The arguments should be in the form "ext1|ext2|extn"
+__hioctl_handle_filename_extension_flag()
+{
+    local ext="$1"
+    _filedir "@(${ext})"
+}
+
+__hioctl_handle_subdirs_in_dir_flag()
+{
+    local dir="$1"
+    pushd "${dir}" >/dev/null 2>&1 && _filedir -d && popd >/dev/null 2>&1
+}
+
+__hioctl_handle_flag()
+{
+    __hioctl_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+
+    # if a command required a flag, and we found it, unset must_have_one_flag()
+    local flagname=${words[c]}
+    local flagvalue
+    # if the word contained an =
+    if [[ ${words[c]} == *"="* ]]; then
+        flagvalue=${flagname#*=} # take in as flagvalue after the =
+        flagname=${flagname%=*} # strip everything after the =
+        flagname="${flagname}=" # but put the = back
+    fi
+    __hioctl_debug "${FUNCNAME[0]}: looking for ${flagname}"
+    if __hioctl_contains_word "${flagname}" "${must_have_one_flag[@]}"; then
+        must_have_one_flag=()
+    fi
+
+    # if you set a flag which only applies to this command, don't show subcommands
+    if __hioctl_contains_word "${flagname}" "${local_nonpersistent_flags[@]}"; then
+      commands=()
+    fi
+
+    # keep flag value with flagname as flaghash
+    # flaghash variable is an associative array which is only supported in bash > 3.
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        if [ -n "${flagvalue}" ] ; then
+            flaghash[${flagname}]=${flagvalue}
+        elif [ -n "${words[ $((c+1)) ]}" ] ; then
+            flaghash[${flagname}]=${words[ $((c+1)) ]}
+        else
+            flaghash[${flagname}]="true" # pad "true" for bool flag
+        fi
+    fi
+
+    # skip the argument to a two word flag
+    if [[ ${words[c]} != *"="* ]] && __hioctl_contains_word "${words[c]}" "${two_word_flags[@]}"; then
+			  __hioctl_debug "${FUNCNAME[0]}: found a flag ${words[c]}, skip the next argument"
+        c=$((c+1))
+        # if we are looking for a flags value, don't show commands
+        if [[ $c -eq $cword ]]; then
+            commands=()
+        fi
+    fi
+
+    c=$((c+1))
+
+}
+
+__hioctl_handle_noun()
+{
+    __hioctl_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+
+    if __hioctl_contains_word "${words[c]}" "${must_have_one_noun[@]}"; then
+        must_have_one_noun=()
+    elif __hioctl_contains_word "${words[c]}" "${noun_aliases[@]}"; then
+        must_have_one_noun=()
+    fi
+
+    nouns+=("${words[c]}")
+    c=$((c+1))
+}
+
+__hioctl_handle_command()
+{
+    __hioctl_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+
+    local next_command
+    if [[ -n ${last_command} ]]; then
+        next_command="_${last_command}_${words[c]//:/__}"
+    else
+        if [[ $c -eq 0 ]]; then
+            next_command="_hioctl_root_command"
+        else
+            next_command="_${words[c]//:/__}"
+        fi
+    fi
+    c=$((c+1))
+    __hioctl_debug "${FUNCNAME[0]}: looking for ${next_command}"
+    declare -F "$next_command" >/dev/null && $next_command
+}
+
+__hioctl_handle_word()
+{
+    if [[ $c -ge $cword ]]; then
+        __hioctl_handle_reply
+        return
+    fi
+    __hioctl_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    if [[ "${words[c]}" == -* ]]; then
+        __hioctl_handle_flag
+    elif __hioctl_contains_word "${words[c]}" "${commands[@]}"; then
+        __hioctl_handle_command
+    elif [[ $c -eq 0 ]]; then
+        __hioctl_handle_command
+    elif __hioctl_contains_word "${words[c]}" "${command_aliases[@]}"; then
+        # aliashash variable is an associative array which is only supported in bash > 3.
+        if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+            words[c]=${aliashash[${words[c]}]}
+            __hioctl_handle_command
+        else
+            __hioctl_handle_noun
+        fi
+    else
+        __hioctl_handle_noun
+    fi
+    __hioctl_handle_word
+}
+
+_hioctl_alert_list()
+{
+    last_command="hioctl_alert_list"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--details")
+    local_nonpersistent_flags+=("--details")
+    flags+=("--filter=")
+    two_word_flags+=("--filter")
+    local_nonpersistent_flags+=("--filter=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_alert()
+{
+    last_command="hioctl_alert"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("list")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_cluster_add-host()
+{
+    last_command="hioctl_cluster_add-host"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--remote-password=")
+    two_word_flags+=("--remote-password")
+    local_nonpersistent_flags+=("--remote-password=")
+    flags+=("--remote-username=")
+    two_word_flags+=("--remote-username")
+    local_nonpersistent_flags+=("--remote-username=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_cluster_get()
+{
+    last_command="hioctl_cluster_get"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_cluster_list()
+{
+    last_command="hioctl_cluster_list"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--details")
+    local_nonpersistent_flags+=("--details")
+    flags+=("--filter=")
+    two_word_flags+=("--filter")
+    local_nonpersistent_flags+=("--filter=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_cluster_set-license()
+{
+    last_command="hioctl_cluster_set-license"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_cluster()
+{
+    last_command="hioctl_cluster"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("add-host")
+    commands+=("get")
+    commands+=("list")
+    commands+=("set-license")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_export()
+{
+    last_command="hioctl_export"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_guest_assign()
+{
+    last_command="hioctl_guest_assign"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_guest_delete()
+{
+    last_command="hioctl_guest_delete"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_guest_diff()
+{
+    last_command="hioctl_guest_diff"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_guest_get()
+{
+    last_command="hioctl_guest_get"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_guest_list()
+{
+    last_command="hioctl_guest_list"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--details")
+    local_nonpersistent_flags+=("--details")
+    flags+=("--filter=")
+    two_word_flags+=("--filter")
+    local_nonpersistent_flags+=("--filter=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_guest_poweroff()
+{
+    last_command="hioctl_guest_poweroff"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_guest_reboot()
+{
+    last_command="hioctl_guest_reboot"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_guest_release()
+{
+    last_command="hioctl_guest_release"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_guest_reset()
+{
+    last_command="hioctl_guest_reset"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_guest_shutdown()
+{
+    last_command="hioctl_guest_shutdown"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_guest()
+{
+    last_command="hioctl_guest"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("assign")
+    commands+=("delete")
+    commands+=("diff")
+    commands+=("get")
+    commands+=("list")
+    commands+=("poweroff")
+    commands+=("reboot")
+    commands+=("release")
+    commands+=("reset")
+    commands+=("shutdown")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_host_get()
+{
+    last_command="hioctl_host_get"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_host_info()
+{
+    last_command="hioctl_host_info"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_host_list()
+{
+    last_command="hioctl_host_list"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--details")
+    local_nonpersistent_flags+=("--details")
+    flags+=("--filter=")
+    two_word_flags+=("--filter")
+    local_nonpersistent_flags+=("--filter=")
+    flags+=("--guest-realm=")
+    two_word_flags+=("--guest-realm")
+    local_nonpersistent_flags+=("--guest-realm=")
+    flags+=("--guest-user=")
+    two_word_flags+=("--guest-user")
+    local_nonpersistent_flags+=("--guest-user=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_host_log-level()
+{
+    last_command="hioctl_host_log-level"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--set=")
+    two_word_flags+=("--set")
+    two_word_flags+=("-s")
+    local_nonpersistent_flags+=("--set=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_host_restart-services()
+{
+    last_command="hioctl_host_restart-services"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_host_state()
+{
+    last_command="hioctl_host_state"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--set=")
+    two_word_flags+=("--set")
+    two_word_flags+=("-s")
+    local_nonpersistent_flags+=("--set=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_host()
+{
+    last_command="hioctl_host"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("get")
+    commands+=("info")
+    commands+=("list")
+    commands+=("log-level")
+    commands+=("restart-services")
+    commands+=("state")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_pool_create()
+{
+    last_command="hioctl_pool_create"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_pool_delete()
+{
+    last_command="hioctl_pool_delete"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_pool_diff()
+{
+    last_command="hioctl_pool_diff"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_pool_get()
+{
+    last_command="hioctl_pool_get"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_pool_list()
+{
+    last_command="hioctl_pool_list"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--details")
+    local_nonpersistent_flags+=("--details")
+    flags+=("--filter=")
+    two_word_flags+=("--filter")
+    local_nonpersistent_flags+=("--filter=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_pool()
+{
+    last_command="hioctl_pool"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("create")
+    commands+=("delete")
+    commands+=("diff")
+    commands+=("get")
+    commands+=("list")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_profile_create()
+{
+    last_command="hioctl_profile_create"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--ad-domain=")
+    two_word_flags+=("--ad-domain")
+    local_nonpersistent_flags+=("--ad-domain=")
+    flags+=("--ad-password=")
+    two_word_flags+=("--ad-password")
+    local_nonpersistent_flags+=("--ad-password=")
+    flags+=("--ad-user-group=")
+    two_word_flags+=("--ad-user-group")
+    local_nonpersistent_flags+=("--ad-user-group=")
+    flags+=("--ad-username=")
+    two_word_flags+=("--ad-username")
+    local_nonpersistent_flags+=("--ad-username=")
+    flags+=("--broker-allow-desktop-composition")
+    local_nonpersistent_flags+=("--broker-allow-desktop-composition")
+    flags+=("--broker-audio-capture")
+    local_nonpersistent_flags+=("--broker-audio-capture")
+    flags+=("--broker-hide-certificate-warnings")
+    local_nonpersistent_flags+=("--broker-hide-certificate-warnings")
+    flags+=("--broker-redirect-clipboard")
+    local_nonpersistent_flags+=("--broker-redirect-clipboard")
+    flags+=("--broker-redirect-cssp")
+    local_nonpersistent_flags+=("--broker-redirect-cssp")
+    flags+=("--broker-redirect-pnp")
+    local_nonpersistent_flags+=("--broker-redirect-pnp")
+    flags+=("--broker-redirect-printer")
+    local_nonpersistent_flags+=("--broker-redirect-printer")
+    flags+=("--broker-redirect-smartcard")
+    local_nonpersistent_flags+=("--broker-redirect-smartcard")
+    flags+=("--broker-redirect-usb")
+    local_nonpersistent_flags+=("--broker-redirect-usb")
+    flags+=("--broker-smart-resize")
+    local_nonpersistent_flags+=("--broker-smart-resize")
+    flags+=("--enable-ad")
+    local_nonpersistent_flags+=("--enable-ad")
+    flags+=("--enable-broker-options")
+    local_nonpersistent_flags+=("--enable-broker-options")
+    flags+=("--enable-uv")
+    local_nonpersistent_flags+=("--enable-uv")
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--timezone=")
+    two_word_flags+=("--timezone")
+    local_nonpersistent_flags+=("--timezone=")
+    flags+=("--uv-backup-schedule=")
+    two_word_flags+=("--uv-backup-schedule")
+    local_nonpersistent_flags+=("--uv-backup-schedule=")
+    flags+=("--uv-repository=")
+    two_word_flags+=("--uv-repository")
+    local_nonpersistent_flags+=("--uv-repository=")
+    flags+=("--uv-size=")
+    two_word_flags+=("--uv-size")
+    local_nonpersistent_flags+=("--uv-size=")
+    flags+=("--uv-target=")
+    two_word_flags+=("--uv-target")
+    local_nonpersistent_flags+=("--uv-target=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_profile_delete()
+{
+    last_command="hioctl_profile_delete"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_profile_get()
+{
+    last_command="hioctl_profile_get"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_profile_list()
+{
+    last_command="hioctl_profile_list"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--details")
+    local_nonpersistent_flags+=("--details")
+    flags+=("--filter=")
+    two_word_flags+=("--filter")
+    local_nonpersistent_flags+=("--filter=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_profile()
+{
+    last_command="hioctl_profile"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("create")
+    commands+=("delete")
+    commands+=("get")
+    commands+=("list")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_realm_create()
+{
+    last_command="hioctl_realm_create"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--fqdn=")
+    two_word_flags+=("--fqdn")
+    local_nonpersistent_flags+=("--fqdn=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_realm_delete()
+{
+    last_command="hioctl_realm_delete"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_realm_get()
+{
+    last_command="hioctl_realm_get"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_realm_list()
+{
+    last_command="hioctl_realm_list"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--details")
+    local_nonpersistent_flags+=("--details")
+    flags+=("--filter=")
+    two_word_flags+=("--filter")
+    local_nonpersistent_flags+=("--filter=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_realm()
+{
+    last_command="hioctl_realm"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("create")
+    commands+=("delete")
+    commands+=("get")
+    commands+=("list")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_storage_browse()
+{
+    last_command="hioctl_storage_browse"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_storage_convert-disk()
+{
+    last_command="hioctl_storage_convert-disk"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--dest-filename=")
+    two_word_flags+=("--dest-filename")
+    local_nonpersistent_flags+=("--dest-filename=")
+    flags+=("--dest-format=")
+    two_word_flags+=("--dest-format")
+    local_nonpersistent_flags+=("--dest-format=")
+    flags+=("--dest-storage=")
+    two_word_flags+=("--dest-storage")
+    local_nonpersistent_flags+=("--dest-storage=")
+    flags+=("--src-filename=")
+    two_word_flags+=("--src-filename")
+    local_nonpersistent_flags+=("--src-filename=")
+    flags+=("--src-storage=")
+    two_word_flags+=("--src-storage")
+    local_nonpersistent_flags+=("--src-storage=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_storage_create()
+{
+    last_command="hioctl_storage_create"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_storage_create-disk()
+{
+    last_command="hioctl_storage_create-disk"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--disk-format=")
+    two_word_flags+=("--disk-format")
+    local_nonpersistent_flags+=("--disk-format=")
+    flags+=("--disk-size=")
+    two_word_flags+=("--disk-size")
+    local_nonpersistent_flags+=("--disk-size=")
+    flags+=("--filename=")
+    two_word_flags+=("--filename")
+    local_nonpersistent_flags+=("--filename=")
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_storage_delete()
+{
+    last_command="hioctl_storage_delete"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_storage_delete-file()
+{
+    last_command="hioctl_storage_delete-file"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_storage_get()
+{
+    last_command="hioctl_storage_get"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_storage_get-id()
+{
+    last_command="hioctl_storage_get-id"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_storage_list()
+{
+    last_command="hioctl_storage_list"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--details")
+    local_nonpersistent_flags+=("--details")
+    flags+=("--filter=")
+    two_word_flags+=("--filter")
+    local_nonpersistent_flags+=("--filter=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_storage()
+{
+    last_command="hioctl_storage"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("browse")
+    commands+=("convert-disk")
+    commands+=("create")
+    commands+=("create-disk")
+    commands+=("delete")
+    commands+=("delete-file")
+    commands+=("get")
+    commands+=("get-id")
+    commands+=("list")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_task_force-complete()
+{
+    last_command="hioctl_task_force-complete"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_task_get()
+{
+    last_command="hioctl_task_get"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_task_list()
+{
+    last_command="hioctl_task_list"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--details")
+    local_nonpersistent_flags+=("--details")
+    flags+=("--filter=")
+    two_word_flags+=("--filter")
+    local_nonpersistent_flags+=("--filter=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_task()
+{
+    last_command="hioctl_task"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("force-complete")
+    commands+=("get")
+    commands+=("list")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_template_analyze()
+{
+    last_command="hioctl_template_analyze"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_template_author()
+{
+    last_command="hioctl_template_author"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_template_create()
+{
+    last_command="hioctl_template_create"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_template_delete()
+{
+    last_command="hioctl_template_delete"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--id=")
+    two_word_flags+=("--id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--id=")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_template_diff()
+{
+    last_command="hioctl_template_diff"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_template_get()
+{
+    last_command="hioctl_template_get"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_template_list()
+{
+    last_command="hioctl_template_list"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--details")
+    local_nonpersistent_flags+=("--details")
+    flags+=("--filter=")
+    two_word_flags+=("--filter")
+    local_nonpersistent_flags+=("--filter=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_template_load()
+{
+    last_command="hioctl_template_load"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--storage=")
+    two_word_flags+=("--storage")
+    two_word_flags+=("-s")
+    local_nonpersistent_flags+=("--storage=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_template_unload()
+{
+    last_command="hioctl_template_unload"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_template()
+{
+    last_command="hioctl_template"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("analyze")
+    commands+=("author")
+    commands+=("create")
+    commands+=("delete")
+    commands+=("diff")
+    commands+=("get")
+    commands+=("list")
+    commands+=("load")
+    commands+=("unload")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_root_command()
+{
+    last_command="hioctl"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("alert")
+    commands+=("cluster")
+    commands+=("export")
+    commands+=("guest")
+    commands+=("host")
+    commands+=("pool")
+    commands+=("profile")
+    commands+=("realm")
+    commands+=("storage")
+    commands+=("task")
+    commands+=("template")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+__start_hioctl()
+{
+    local cur prev words cword
+    declare -A flaghash 2>/dev/null || :
+    declare -A aliashash 2>/dev/null || :
+    if declare -F _init_completion >/dev/null 2>&1; then
+        _init_completion -s || return
+    else
+        __hioctl_init_completion -n "=" || return
+    fi
+
+    local c=0
+    local flags=()
+    local two_word_flags=()
+    local local_nonpersistent_flags=()
+    local flags_with_completion=()
+    local flags_completion=()
+    local commands=("hioctl")
+    local must_have_one_flag=()
+    local must_have_one_noun=()
+    local last_command
+    local nouns=()
+
+    __hioctl_handle_word
+}
+
+if [[ $(type -t compopt) = "builtin" ]]; then
+    complete -o default -F __start_hioctl hioctl
+else
+    complete -o default -o nospace -F __start_hioctl hioctl
+fi
+
+# ex: ts=4 sw=4 et filetype=sh
