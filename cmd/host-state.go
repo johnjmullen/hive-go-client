@@ -23,6 +23,9 @@ var hostStateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		if viper.GetString("set") != "" {
+			if viper.GetBool("wait") && viper.GetBool("progress-bar") {
+				fmt.Printf("Setting state on %s to %s\n", host.Hostname, viper.GetString("set"))
+			}
 			handleTask(host.SetState(restClient, viper.GetString("set")))
 		} else {
 			state, err := host.GetState(restClient)

@@ -37,6 +37,9 @@ var storageCreateDiskCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
+		if viper.GetBool("wait") && viper.GetBool("progress-bar") {
+			fmt.Println("Converting Disk " + viper.GetString("filename"))
+		}
 		handleTask(pool.CreateDisk(restClient, viper.GetString("filename"), viper.GetString("disk-format"), uint(viper.GetInt("disk-size"))))
 	},
 }

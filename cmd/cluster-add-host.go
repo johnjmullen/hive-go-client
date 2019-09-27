@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var rUser, rPass string
@@ -13,6 +16,9 @@ var addHostCmd = &cobra.Command{
 		bindTaskFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		if viper.GetBool("wait") && viper.GetBool("progress-bar") {
+			fmt.Printf("Adding %s to cluster\n", args[0])
+		}
 		handleTask(restClient.JoinHost(rUser, rPass, args[0]))
 	},
 }
