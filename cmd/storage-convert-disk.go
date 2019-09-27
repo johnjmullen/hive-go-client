@@ -21,6 +21,7 @@ var storageConvertDiskCmd = &cobra.Command{
 		viper.BindPFlag("dest-storage", cmd.Flags().Lookup("dest-storage"))
 		viper.BindPFlag("dest-filename", cmd.Flags().Lookup("dest-filename"))
 		viper.BindPFlag("dest-format", cmd.Flags().Lookup("dest-format"))
+		bindTaskFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		srcPool, err := restClient.GetStoragePoolByName(viper.GetString("src-storage"))
@@ -33,12 +34,10 @@ var storageConvertDiskCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		_, err = srcPool.ConvertDisk(restClient, viper.GetString("src-filename"), destPool.ID, viper.GetString("dest-filename"), viper.GetString("dest-format"))
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		if viper.GetBool("wait") && viper.GetBool("progress-bar") {
+			fmt.Println("Converting Disk")
 		}
-
+		handleTask(srcPool.ConvertDisk(restClient, viper.GetString("src-filename"), destPool.ID, viper.GetString("dest-filename"), viper.GetString("dest-format")))
 	},
 }
 
@@ -49,4 +48,5 @@ func init() {
 	storageConvertDiskCmd.Flags().String("dest-storage", "", "Destination storage pool name")
 	storageConvertDiskCmd.Flags().String("dest-filename", "", "Destination filename")
 	storageConvertDiskCmd.Flags().String("dest-format", "qcow2", "Destination file format")
+	addTaskFlags(storageConvertDiskCmd)
 }

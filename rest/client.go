@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -124,7 +123,6 @@ func (feed *ChangeFeed) monitorChangeFeed() {
 	for {
 		_, message, err := feed.conn.ReadMessage()
 		if err != nil {
-			log.Println("read:", err)
 			return
 		}
 		if len(message) < 3 || string(message[:2]) != "42" {
@@ -134,7 +132,6 @@ func (feed *ChangeFeed) monitorChangeFeed() {
 
 		var jsonMsg []json.RawMessage
 		err = json.Unmarshal(message[2:], &jsonMsg)
-		//fmt.Println(string(jsonMsg[2]))
 		if len(jsonMsg) < 3 {
 			continue
 			//send error?

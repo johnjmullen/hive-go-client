@@ -19,6 +19,7 @@ var storageCreateDiskCmd = &cobra.Command{
 		viper.BindPFlag("filename", cmd.Flags().Lookup("filename"))
 		viper.BindPFlag("disk-format", cmd.Flags().Lookup("disk-format"))
 		viper.BindPFlag("disk-size", cmd.Flags().Lookup("disk-size"))
+		bindTaskFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var pool *rest.StoragePool
@@ -36,12 +37,7 @@ var storageCreateDiskCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		task, err := pool.CreateDisk(restClient, viper.GetString("filename"), viper.GetString("disk-format"), uint(viper.GetInt("disk-size")))
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		fmt.Println(formatString(task))
+		handleTask(pool.CreateDisk(restClient, viper.GetString("filename"), viper.GetString("disk-format"), uint(viper.GetInt("disk-size"))))
 	},
 }
 
@@ -52,4 +48,5 @@ func init() {
 	storageCreateDiskCmd.Flags().String("filename", "", "filename for the disk")
 	storageCreateDiskCmd.Flags().String("disk-format", "qcow2", "disk format ()")
 	storageCreateDiskCmd.Flags().Int("disk-size", 25, "size of the disk in GB")
+	addTaskFlags(storageCreateDiskCmd)
 }

@@ -15,6 +15,8 @@ var taskWaitCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("id", cmd.Flags().Lookup("id"))
 		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
+		viper.BindPFlag("progress", cmd.Flags().Lookup("progress"))
+		viper.BindPFlag("progress-bar", cmd.Flags().Lookup("progress-bar"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var task *rest.Task
@@ -33,9 +35,12 @@ var taskWaitCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		task, err = task.WaitForTask(restClient, true)
-		if err != nil {
-			fmt.Println(err)
+		newTask := task.WaitForTask(restClient, viper.GetBool("progress"))
+		if newTask.State == "completed" {
+			fmt.Println(formatString("Task Complete"))
+		}
+		if newTask.State == "failed" {
+			fmt.Println(formatString("Task Failed: " + task.Message))
 			os.Exit(1)
 		}
 	},
@@ -45,4 +50,6 @@ func init() {
 	taskCmd.AddCommand(taskWaitCmd)
 	taskWaitCmd.Flags().StringP("id", "i", "", "task id")
 	taskWaitCmd.Flags().StringP("name", "n", "", "task name")
+	taskWaitCmd.Flags().Bool("progress", false, "print progress")
+	taskWaitCmd.Flags().Bool("progress-bar", false, "print progress-bar")
 }

@@ -14,6 +14,7 @@ var hostStateCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("set", cmd.Flags().Lookup("set"))
+		bindTaskFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		host, err := restClient.GetHost(args[0])
@@ -22,11 +23,7 @@ var hostStateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		if viper.GetString("set") != "" {
-			_, err := host.SetState(restClient, viper.GetString("set"))
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
+			handleTask(host.SetState(restClient, viper.GetString("set")))
 		} else {
 			state, err := host.GetState(restClient)
 			if err != nil {
@@ -42,4 +39,5 @@ var hostStateCmd = &cobra.Command{
 func init() {
 	hostCmd.AddCommand(hostStateCmd)
 	hostStateCmd.Flags().StringP("set", "s", "", "set host state (available/maintenance)")
+	addTaskFlags(hostStateCmd)
 }
