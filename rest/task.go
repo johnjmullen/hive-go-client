@@ -3,6 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -78,4 +79,44 @@ func (task *Task) ForceComplete(client *Client) error {
 	}
 	_, err := client.request("PUT", "task/"+task.ID+"/forcecomplete", nil)
 	return err
+}
+
+func (task *Task) WaitForTask(client *Client, printProgress bool) (*Task, error) {
+	var progress int
+	if task.State == "completed" || task.State == "failed" {
+		return task, nil
+	}
+	feed, err := client.GetChangeFeed("task", map[string]string{"id": task.ID})
+	var newVal Task
+	if err != nil {
+		return nil, err
+	}
+	for {
+		select {
+		case msg := <-feed.Data:
+			if msg.Error != nil {
+				fmt.Println(msg.Error)
+				feed.Close()
+				continue
+			}
+			err = json.Unmarshal(msg.NewValue, &newVal)
+			if err != nil {
+				feed.Close()
+				return nil, err
+			}
+			if printProgress && newVal.Progress != progress {
+				progress = newVal.Progress
+				fmt.Println(newVal.Progress)
+			}
+			if newVal.State == "completed" {
+				feed.Close()
+				return &newVal, nil
+			} else if newVal.State == "failed" {
+				feed.Close()
+				return &newVal, fmt.Errorf("Task Failed: %s", newVal.Message)
+			}
+		case <-feed.Done:
+			return nil, fmt.Errorf("ChangeFeed was closed")
+		}
+	}
 }

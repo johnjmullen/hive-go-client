@@ -6,9 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type authToken struct {
@@ -101,4 +104,100 @@ func (client *Client) Login(username, password, realm string) error {
 		client.token = auth.Token
 	}
 	return err
+}
+
+type ChangeFeed struct {
+	Data chan ChangeFeedMessage
+	Done chan struct{}
+	conn *websocket.Conn
+}
+
+type ChangeFeedMessage struct {
+	OldValue json.RawMessage `json:"old_val"`
+	NewValue json.RawMessage `json:"new_val"`
+	Error    error
+}
+
+func (feed *ChangeFeed) monitorChangeFeed() {
+	defer close(feed.Done)
+	defer feed.conn.Close()
+	for {
+		_, message, err := feed.conn.ReadMessage()
+		if err != nil {
+			log.Println("read:", err)
+			return
+		}
+		if len(message) < 3 || string(message[:2]) != "42" {
+			continue
+		}
+		var msg ChangeFeedMessage
+
+		var jsonMsg []json.RawMessage
+		err = json.Unmarshal(message[2:], &jsonMsg)
+		//fmt.Println(string(jsonMsg[2]))
+		if len(jsonMsg) < 3 {
+			continue
+			//send error?
+		}
+		err = json.Unmarshal(jsonMsg[2], &msg)
+		if err != nil {
+			msg.Error = err
+		}
+		feed.Data <- msg
+	}
+}
+
+func (feed *ChangeFeed) changeFeedKeepAlive(timeout time.Duration) {
+	ticker := time.NewTicker(timeout)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			feed.conn.WriteMessage(websocket.TextMessage, []byte("2"))
+		case <-feed.Done:
+			return
+		}
+	}
+}
+
+func (feed *ChangeFeed) Close() error {
+	return feed.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+}
+
+func (client *Client) GetChangeFeed(table string, filter map[string]string) (*ChangeFeed, error) {
+	protocol := "wss"
+	var token string
+	if client.Port == 3000 {
+		protocol = "ws"
+	} else {
+		token = "token=" + client.token + "&"
+	}
+	u := url.URL{Scheme: protocol, Host: fmt.Sprintf("%s:%d", client.Host, client.Port), Path: "/socket.io/", RawQuery: token + "transport=websocket"}
+	dialer := websocket.Dialer{
+		TLSClientConfig:  &tls.Config{InsecureSkipVerify: true},
+		HandshakeTimeout: 20 * time.Second,
+	}
+	c, _, err := dialer.Dial(u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	options := map[string]interface{}{"table": table, "includeInitial": false, "filter": filter}
+	jsonData := []interface{}{"query:change:register", options}
+	jsonValue, err := json.Marshal(jsonData)
+	if err != nil {
+		return nil, err
+	}
+	err = c.WriteMessage(websocket.TextMessage, append([]byte("42"), jsonValue...))
+	if err != nil {
+		return nil, err
+	}
+
+	done := make(chan struct{})
+	incomingData := make(chan ChangeFeedMessage)
+	feed := ChangeFeed{Data: incomingData, Done: done, conn: c}
+
+	go feed.changeFeedKeepAlive(25 * time.Second)
+	go feed.monitorChangeFeed()
+
+	return &feed, nil
 }
