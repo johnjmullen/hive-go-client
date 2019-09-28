@@ -91,8 +91,18 @@ func (task *Task) WatchTask(client *Client, taskData chan Task, done chan struct
 	if err != nil {
 		return
 	}
+	timer := time.NewTimer(time.Second)
 	for {
 		select {
+		case <-timer.C:
+			//work around race condition
+			t, err := client.GetTask(task.ID)
+			if t.State == "completed" || t.State == "failed" {
+				taskData <- *t
+				feed.Close()
+				continue
+			}
+			fmt.Println(err)
 		case msg := <-feed.Data:
 			if msg.Error != nil {
 				fmt.Println(msg.Error)
@@ -101,13 +111,13 @@ func (task *Task) WatchTask(client *Client, taskData chan Task, done chan struct
 			}
 			err = json.Unmarshal(msg.NewValue, &newVal)
 			if err != nil {
+				fmt.Println("Error with json unmarshal", err)
 				feed.Close()
 				return
 			}
 			taskData <- newVal
 			if newVal.State == "completed" || newVal.State == "failed" {
 				feed.Close()
-				return
 			}
 		case <-feed.Done:
 			return
@@ -117,16 +127,13 @@ func (task *Task) WatchTask(client *Client, taskData chan Task, done chan struct
 
 func (task *Task) WaitForTask(client *Client, printProgress bool) *Task {
 	var progress int
+	var newVal Task
 	done := make(chan struct{})
 	taskData := make(chan Task)
 	go task.WatchTask(client, taskData, done)
-	newVal, _ := client.GetTask(task.ID)
-	if newVal.State == "completed" || newVal.State == "failed" {
-		close(done)
-	}
 	for {
 		select {
-		case *newVal = <-taskData:
+		case newVal = <-taskData:
 			if printProgress && newVal.Progress != progress {
 				progress = newVal.Progress
 				fmt.Println(newVal.Progress)
@@ -135,7 +142,7 @@ func (task *Task) WaitForTask(client *Client, printProgress bool) *Task {
 			if printProgress && newVal.Progress != progress {
 				fmt.Println(newVal.Progress)
 			}
-			return newVal
+			return &newVal
 		}
 	}
 }

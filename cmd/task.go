@@ -75,17 +75,11 @@ func taskProgressBar(task *rest.Task) {
 	bar.AppendCompleted()
 	done := make(chan struct{})
 	taskData := make(chan rest.Task)
+	var newVal rest.Task
 	go task.WatchTask(restClient, taskData, done)
-	newVal, _ := restClient.GetTask(task.ID)
-	if newVal.State == "completed" || newVal.State == "failed" {
-		bar.Set(100)
-		uiprogress.Stop()
-		time.Sleep(time.Millisecond * 100)
-		return
-	}
 	for {
 		select {
-		case *newVal = <-taskData:
+		case newVal = <-taskData:
 			bar.Set(newVal.Progress)
 		case <-done:
 			if newVal.State == "completed" {
