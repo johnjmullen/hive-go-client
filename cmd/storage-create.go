@@ -14,10 +14,17 @@ var storageCreateCmd = &cobra.Command{
 	Short: "Add a new storage pool",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		file, err := os.Open(args[0])
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		var file *os.File
+		var err error
+		if args[0] == "-" {
+			fmt.Println("reading stdin")
+			file = os.Stdin
+		} else {
+			file, err = os.Open(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 		defer file.Close()
 		data, _ := ioutil.ReadAll(file)
@@ -36,8 +43,6 @@ var storageCreateCmd = &cobra.Command{
 		}
 	},
 }
-
-var storagePoolFile string
 
 func init() {
 	storageCmd.AddCommand(storageCreateCmd)

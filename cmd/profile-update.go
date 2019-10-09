@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-var profileCreateCmd = &cobra.Command{
-	Use:   "create [file]",
-	Short: "Add a new profile",
+var profileUpdateCmd = &cobra.Command{
+	Use:   "update [file]",
+	Short: "update a profile",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			cmd.MarkFlagRequired("name")
@@ -67,7 +67,7 @@ var profileCreateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		fmt.Println(formatString(profile))
-		msg, err := profile.Create(restClient)
+		msg, err := profile.Update(restClient)
 		fmt.Println(msg)
 		if err != nil {
 			fmt.Println(err)
@@ -77,32 +77,32 @@ var profileCreateCmd = &cobra.Command{
 }
 
 func init() {
-	profileCmd.AddCommand(profileCreateCmd)
-	profileCreateCmd.Flags().StringP("id", "i", "", "profile id")
-	profileCreateCmd.Flags().StringP("name", "n", "", "profile name")
-	profileCreateCmd.Flags().String("timezone", "disabled", "timezone to inject")
+	profileCmd.AddCommand(profileUpdateCmd)
+	profileUpdateCmd.Flags().StringP("id", "i", "", "profile id")
+	profileUpdateCmd.Flags().StringP("name", "n", "", "profile name")
+	profileUpdateCmd.Flags().String("timezone", "disabled", "timezone to inject")
 
-	profileCreateCmd.Flags().Bool("enable-ad", false, "enable active directory options")
-	profileCreateCmd.Flags().String("ad-domain", "", "AD realm")
-	profileCreateCmd.Flags().String("ad-username", "", "user to join guests to AD")
-	profileCreateCmd.Flags().String("ad-password", "", "Password for the join user")
-	profileCreateCmd.Flags().String("ad-user-group", "", "User group")
+	profileUpdateCmd.Flags().Bool("enable-ad", false, "enable active directory options")
+	profileUpdateCmd.Flags().String("ad-domain", "", "AD realm")
+	profileUpdateCmd.Flags().String("ad-username", "", "user to join guests to AD")
+	profileUpdateCmd.Flags().String("ad-password", "", "Password for the join user")
+	profileUpdateCmd.Flags().String("ad-user-group", "", "User group")
 
-	profileCreateCmd.Flags().Bool("enable-broker-options", false, "enable broker options")
-	profileCreateCmd.Flags().Bool("broker-allow-desktop-composition", true, "Allow Destop compositing")
-	profileCreateCmd.Flags().Bool("broker-audio-capture", true, "audio capture")
-	profileCreateCmd.Flags().Bool("broker-redirect-cssp", true, "CredSSP redirection")
-	profileCreateCmd.Flags().Bool("broker-redirect-clipboard", true, "Clipboard redirection")
-	profileCreateCmd.Flags().Bool("broker-redirect-pnp", true, "Plug-and-Play redirection")
-	profileCreateCmd.Flags().Bool("broker-redirect-usb", true, "USB redirection")
-	profileCreateCmd.Flags().Bool("broker-redirect-printer", true, "Printer redirection")
-	profileCreateCmd.Flags().Bool("broker-redirect-smartcard", true, "Smartcard redirection")
-	profileCreateCmd.Flags().Bool("broker-smart-resize", true, "Smart screen resize")
-	profileCreateCmd.Flags().Bool("broker-hide-certificate-warnings", false, "Hide certificate warnings")
+	profileUpdateCmd.Flags().Bool("enable-broker-options", false, "enable broker options")
+	profileUpdateCmd.Flags().Bool("broker-allow-desktop-composition", true, "Allow Destop compositing")
+	profileUpdateCmd.Flags().Bool("broker-audio-capture", true, "audio capture")
+	profileUpdateCmd.Flags().Bool("broker-redirect-cssp", true, "CredSSP redirection")
+	profileUpdateCmd.Flags().Bool("broker-redirect-clipboard", true, "Clipboard redirection")
+	profileUpdateCmd.Flags().Bool("broker-redirect-pnp", true, "Plug-and-Play redirection")
+	profileUpdateCmd.Flags().Bool("broker-redirect-usb", true, "USB redirection")
+	profileUpdateCmd.Flags().Bool("broker-redirect-printer", true, "Printer redirection")
+	profileUpdateCmd.Flags().Bool("broker-redirect-smartcard", true, "Smartcard redirection")
+	profileUpdateCmd.Flags().Bool("broker-smart-resize", true, "Smart screen resize")
+	profileUpdateCmd.Flags().Bool("broker-hide-certificate-warnings", false, "Hide certificate warnings")
 
-	profileCreateCmd.Flags().Bool("enable-uv", false, "Enable user volumes")
-	profileCreateCmd.Flags().Int("uv-backup-schedule", 28800, "User volume backup schedule (s)")
-	profileCreateCmd.Flags().String("uv-repository", "", "Storage pool for storing the user volume")
-	profileCreateCmd.Flags().Int("uv-size", 10, "User volume size (GB)")
-	profileCreateCmd.Flags().String("uv-target", "disk", "Local cache (disk/ram)")
+	profileUpdateCmd.Flags().Bool("enable-uv", false, "Enable user volumes")
+	profileUpdateCmd.Flags().Int("uv-backup-schedule", 28800, "User volume backup schedule (s)")
+	profileUpdateCmd.Flags().String("uv-repository", "", "Storage pool for storing the user volume")
+	profileUpdateCmd.Flags().Int("uv-size", 10, "User volume size (GB)")
+	profileUpdateCmd.Flags().String("uv-target", "disk", "Local cache (disk/ram)")
 }

@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var poolCreateCmd = &cobra.Command{
-	Use:   "create [file]",
-	Short: "Add a new guest pool",
+var templateUpdateCmd = &cobra.Command{
+	Use:   "update [file]",
+	Short: "update a template",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var file *os.File
@@ -28,14 +28,14 @@ var poolCreateCmd = &cobra.Command{
 		}
 		defer file.Close()
 		data, _ := ioutil.ReadAll(file)
-		var pool rest.Pool
-		err = unmarshal(data, &pool)
+		var template rest.Template
+		err = unmarshal(data, &template)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		msg, err := pool.Create(restClient)
+		msg, err := template.Update(restClient)
 		fmt.Println(msg)
 		if err != nil {
 			fmt.Println(err)
@@ -45,5 +45,5 @@ var poolCreateCmd = &cobra.Command{
 }
 
 func init() {
-	poolCmd.AddCommand(poolCreateCmd)
+	templateCmd.AddCommand(templateUpdateCmd)
 }
