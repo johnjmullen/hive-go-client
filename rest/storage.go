@@ -113,11 +113,30 @@ func (pool *StoragePool) ConvertDisk(client *Client, srcFilename, dstStorageId, 
 	return client.getTaskFromResponse(client.request("POST", "template/convert", jsonValue))
 }
 
+func (pool *StoragePool) CopyUrl(client *Client, url, filePath string) (*Task, error) {
+	if pool.ID == "" {
+		return nil, errors.New("Invalid Storage Pool")
+	}
+	jsonData := map[string]interface{}{
+		"format":     "auto",
+		"dstStorage": pool.ID,
+		"url":        url,
+		"filePath":   filePath}
+	jsonValue, err := json.Marshal(jsonData)
+	if err != nil {
+		return nil, err
+	}
+	return client.getTaskFromResponse(client.request("POST", "template/copyUrl", jsonValue))
+}
+
 func (pool *StoragePool) DeleteFile(client *Client, filename string) error {
 	if pool.ID == "" {
 		return errors.New("Invalid Storage Pool")
 	}
 	body, err := client.request("DELETE", fmt.Sprintf("storage/pool/%s/%s", pool.ID, filename), nil)
+	if err != nil {
+		return err
+	}
 	var res struct {
 		Deleted bool `json:"deleted"`
 	}

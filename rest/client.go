@@ -31,11 +31,11 @@ func (client *Client) getTaskFromResponse(body []byte, err error) (*Task, error)
 	}
 	var objMap map[string]string
 	err = json.Unmarshal(body, &objMap)
-	taskId, ok := objMap["taskId"]
-	if err != nil || !ok {
-		return nil, fmt.Errorf("Error parsing data.  taskId not found")
+	taskID, ok := objMap["taskId"]
+	if err != nil || !ok || taskID == "" {
+		return nil, fmt.Errorf("Error parsing data. taskId not found")
 	}
-	return client.GetTask(taskId)
+	return client.GetTask(taskID)
 }
 
 func checkResponse(res *http.Response, err error) ([]byte, error) {

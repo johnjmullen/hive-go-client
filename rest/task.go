@@ -48,16 +48,16 @@ func (client *Client) ListTasks(filter string) ([]Task, error) {
 }
 
 func (client *Client) GetTask(id string) (*Task, error) {
-	var task *Task
+	var task Task
 	if id == "" {
-		return task, errors.New("Id cannot be empty")
+		return &task, errors.New("Id cannot be empty")
 	}
 	body, err := client.request("GET", "task/"+id, nil)
 	if err != nil {
-		return task, err
+		return &task, err
 	}
 	err = json.Unmarshal(body, &task)
-	return task, err
+	return &task, err
 }
 
 func (client *Client) GetTaskByName(name string) (*Task, error) {
