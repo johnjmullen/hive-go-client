@@ -7,17 +7,33 @@ import (
 )
 
 type StoragePool struct {
-	ID           string   `json:"id,omitempty"`
-	Name         string   `json:"name"`
-	Type         string   `json:"type"`
-	Server       string   `json:"server"`
-	Path         string   `json:"path"`
-	Username     string   `json:"username,omitempty"`
-	Password     string   `json:"password,omitempty"`
-	Key          string   `json:"key,omitempty"`
-	MountOptions []string `json:"mountOptions,omitempty"`
-	Roles        []string `json:"roles,omitempty"`
-	Tags         []string `json:"tags,omitempty"`
+	ID                string   `json:"id,omitempty"`
+	Name              string   `json:"name"`
+	Type              string   `json:"type"`
+	Server            string   `json:"server,omitempty"`
+	Path              string   `json:"path,omitempty"`
+	URL               string   `json:"url,omitempty"`
+	Username          string   `json:"username,omitempty"`
+	Password          string   `json:"password,omitempty"`
+	Key               string   `json:"key,omitempty"`
+	MountOptions      []string `json:"mountOptions,omitempty"`
+	Roles             []string `json:"roles,omitempty"`
+	Tags              []string `json:"tags,omitempty"`
+	S3AccessKeyID     string   `json:"s3AccessKeyId,omitempty"`
+	S3SecretAccessKey string   `json:"s3SecretAccessKey,omitempty"`
+	S3Region          string   `json:"s3Region,omitempty"`
+}
+
+type DiskInfo struct {
+	Filename            string   `json:"filename,omitempty"`
+	VirtualSize         uint     `json:"virtual-size,omitempty"`
+	ActualSize          uint     `json:"actual-size,omitempty"`
+	DirtyFlag           bool     `json:"dirty-flag,omitempty"`
+	ClusterSize         uint     `json:"cluster-size,omitempty"`
+	Encrypted           bool     `json:"encrypted,omitempty"`
+	BackingFilename     string   `json:"backing-filename,omitempty"`
+	FullBackingFilename string   `json:"full-backing-filename,omitempty"`
+	Snapshots           []string `json:"snapshots,omitempty"`
 }
 
 func (sp StoragePool) String() string {
@@ -61,7 +77,7 @@ func (client *Client) GetStoragePool(id string) (*StoragePool, error) {
 	if err != nil {
 		return pool, err
 	}
-	err = json.Unmarshal(body, &pool)
+	err = json.Unmarshal(body, pool)
 	return pool, err
 }
 
@@ -118,15 +134,44 @@ func (pool *StoragePool) CopyUrl(client *Client, url, filePath string) (*Task, e
 		return nil, errors.New("Invalid Storage Pool")
 	}
 	jsonData := map[string]interface{}{
-		"format":     "auto",
-		"dstStorage": pool.ID,
-		"url":        url,
-		"filePath":   filePath}
+		"url":      url,
+		"filePath": filePath}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
 		return nil, err
 	}
-	return client.getTaskFromResponse(client.request("POST", "template/copyUrl", jsonValue))
+	return client.getTaskFromResponse(client.request("POST", "storage/pool/"+pool.ID+"/copyUrl", jsonValue))
+}
+
+func (pool *StoragePool) DiskInfo(client *Client, filePath string) (DiskInfo, error) {
+	var disk DiskInfo
+	if pool.ID == "" {
+		return disk, errors.New("Invalid Storage Pool")
+	}
+	jsonData := map[string]interface{}{"filePath": filePath}
+	jsonValue, err := json.Marshal(jsonData)
+	if err != nil {
+		return disk, err
+	}
+	body, err := client.request("POST", "storage/pool/"+pool.ID+"/diskInfo", jsonValue)
+	if err != nil {
+		return disk, err
+	}
+	err = json.Unmarshal(body, &disk)
+	return disk, err
+}
+
+func (pool *StoragePool) GrowDisk(client *Client, filePath string, size uint) error {
+	if pool.ID == "" {
+		return errors.New("Invalid Storage Pool")
+	}
+	jsonData := map[string]interface{}{"filePath": filePath, "size": size}
+	jsonValue, err := json.Marshal(jsonData)
+	if err != nil {
+		return err
+	}
+	_, err = client.request("POST", "storage/pool/"+pool.ID+"/growDisk", jsonValue)
+	return err
 }
 
 func (pool *StoragePool) DeleteFile(client *Client, filename string) error {
