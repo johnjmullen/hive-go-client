@@ -69,7 +69,7 @@ func (client *Client) GetStoragePoolByName(name string) (*StoragePool, error) {
 }
 
 func (client *Client) GetStoragePool(id string) (*StoragePool, error) {
-	var pool *StoragePool
+	pool := &StoragePool{}
 	if id == "" {
 		return pool, errors.New("id cannot be empty")
 	}
