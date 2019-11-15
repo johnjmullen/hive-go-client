@@ -205,3 +205,31 @@ func (pool *StoragePool) Browse(client *Client) ([]string, error) {
 	err = json.Unmarshal(body, &files)
 	return files, err
 }
+
+func (client *Client) CopyFile(srcStorageID, srcFilePath, destStorageID, destFilePath string) (*Task, error) {
+	data := map[string]string{
+		"srcStorageId":  srcStorageID,
+		"srcFilePath":   srcFilePath,
+		"destStorageId": destStorageID,
+		"destFilePath":  destFilePath,
+	}
+	jsonValue, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return client.getTaskFromResponse(client.request("POST", "storage/pool/copyFile", jsonValue))
+}
+
+func (client *Client) MoveFile(srcStorageID, srcFilePath, destStorageID, destFilePath string) (*Task, error) {
+	data := map[string]string{
+		"srcStorageId":  srcStorageID,
+		"srcFilePath":   srcFilePath,
+		"destStorageId": destStorageID,
+		"destFilePath":  destFilePath,
+	}
+	jsonValue, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return client.getTaskFromResponse(client.request("POST", "storage/pool/moveFile", jsonValue))
+}
