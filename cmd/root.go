@@ -13,6 +13,8 @@ import (
 
 var cfgFile string
 var restClient *rest.Client
+
+//RootCmd root command for hioctl
 var RootCmd = &cobra.Command{
 	Use:              "hioctl",
 	Short:            "hiveio cli",
@@ -20,6 +22,7 @@ var RootCmd = &cobra.Command{
 	TraverseChildren: true,
 }
 
+//Execute run root command
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)

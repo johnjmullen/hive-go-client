@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"os"
+
+	"github.com/eventials/go-tus"
 )
 
 type StoragePool struct {
@@ -204,6 +208,48 @@ func (pool *StoragePool) Browse(client *Client) ([]string, error) {
 	}
 	err = json.Unmarshal(body, &files)
 	return files, err
+}
+
+func (pool *StoragePool) Upload(client *Client, filename string) error {
+	if pool.ID == "" {
+		return errors.New("Invalid Storage Pool")
+	}
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	header := make(http.Header)
+	header.Add("Authorization", "Bearer "+client.token)
+	conf := tus.Config{
+		ChunkSize:           2 * 1024 * 1024,
+		Resume:              false,
+		OverridePatchMethod: false,
+		Store:               nil,
+		Header:              header,
+		HttpClient:          client.httpClient,
+	}
+
+	uploadUrl := fmt.Sprintf("https://%s:%d/upload/", client.Host, client.Port)
+	tusClient, err := tus.NewClient(uploadUrl, &conf)
+	if err != nil {
+		return err
+	}
+
+	upload, err := tus.NewUploadFromFile(f)
+	upload.Metadata["storageId"] = pool.ID
+	if err != nil {
+		return err
+	}
+
+	uploader, err := tusClient.CreateUpload(upload)
+	if err != nil {
+		return err
+	}
+
+	err = uploader.Upload()
+	return err
 }
 
 func (client *Client) CopyFile(srcStorageID, srcFilePath, destStorageID, destFilePath string) (*Task, error) {
