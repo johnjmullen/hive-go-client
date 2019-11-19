@@ -165,17 +165,16 @@ func (pool *StoragePool) DiskInfo(client *Client, filePath string) (DiskInfo, er
 	return disk, err
 }
 
-func (pool *StoragePool) GrowDisk(client *Client, filePath string, size uint) error {
+func (pool *StoragePool) GrowDisk(client *Client, filePath string, size uint) (*Task, error) {
 	if pool.ID == "" {
-		return errors.New("Invalid Storage Pool")
+		return nil, errors.New("Invalid Storage Pool")
 	}
 	jsonData := map[string]interface{}{"filePath": filePath, "size": size}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	_, err = client.request("POST", "storage/pool/"+pool.ID+"/growDisk", jsonValue)
-	return err
+	return client.getTaskFromResponse(client.request("POST", "storage/pool/"+pool.ID+"/growDisk", jsonValue))
 }
 
 func (pool *StoragePool) DeleteFile(client *Client, filename string) error {

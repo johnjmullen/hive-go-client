@@ -358,6 +358,7 @@ var storageGrowDiskCmd = &cobra.Command{
 		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
 		viper.BindPFlag("filename", cmd.Flags().Lookup("filename"))
 		viper.BindPFlag("disk-size", cmd.Flags().Lookup("disk-size"))
+		bindTaskFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var pool *rest.StoragePool
@@ -375,11 +376,7 @@ var storageGrowDiskCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		err = pool.GrowDisk(restClient, viper.GetString("filename"), uint(viper.GetInt("disk-size")))
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		handleTask(pool.GrowDisk(restClient, viper.GetString("filename"), uint(viper.GetInt("disk-size"))))
 	},
 }
 
@@ -522,6 +519,7 @@ func init() {
 	initIDFlags(storageGrowDiskCmd)
 	storageGrowDiskCmd.Flags().String("filename", "", "filename for the disk")
 	storageGrowDiskCmd.Flags().Int("disk-size", 0, "size to add in GB")
+	addTaskFlags(storageGrowDiskCmd)
 
 	storageCmd.AddCommand(storageMoveFileCmd)
 	storageMoveFileCmd.Flags().String("srcStorageId", "", "Source storage pool id")
