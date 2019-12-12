@@ -6,104 +6,65 @@ import (
 )
 
 type Guest struct {
-	SessionInfo struct {
+	SessionInfo *struct {
 		SessionID     int    `json:"SessionID"`
 		SourceIP      string `json:"SourceIP"`
 		SourceName    string `json:"SourceName"`
 		SessionState  int    `json:"sessionState"`
 		SessionStatus string `json:"sessionStatus"`
-	} `json:"SessionInfo"`
+	} `json:"SessionInfo,omitempty"`
 	AgentInstalled bool `json:"agentInstalled"`
-	Cpus           int  `json:"cpus"`
-	Currentmem     int  `json:"currentmem"`
+	Cpus           int  `json:"cpus,omitempty"`
+	Currentmem     int  `json:"currentmem,omitempty"`
 	Disks          []struct {
 		Backing    string `json:"backing,omitempty"`
-		Dev        string `json:"dev"`
-		DiskDriver string `json:"diskDriver"`
+		Dev        string `json:"dev,omitempty"`
+		DiskDriver string `json:"diskDriver,omitempty"`
 		Format     string `json:"format,omitempty"`
 		Path       string `json:"path,omitempty"`
 		Size       int64  `json:"size,omitempty"`
 		StorageID  string `json:"storageId,omitempty"`
-		Type       string `json:"type"`
-	} `json:"disks"`
-	GuestState string `json:"guestState"`
-	Hostid     string `json:"hostid"`
-	Hostname   string `json:"hostname"`
+		Type       string `json:"type,omitempty"`
+	} `json:"disks,omitempty"`
+	GuestState string `json:"guestState,omitempty"`
+	Hostid     string `json:"hostid,omitempty"`
+	Hostname   string `json:"hostname,omitempty"`
 	Interfaces []struct {
-		Emulation  string `json:"emulation"`
-		IPAddress  string `json:"ipAddress"`
-		MacAddress string `json:"macAddress"`
-		Network    string `json:"network"`
-		Vlan       int    `json:"vlan"`
-	} `json:"interfaces"`
-	Memory             int      `json:"memory"`
-	Name               string   `json:"name"`
-	Os                 string   `json:"os"`
-	Persistent         bool     `json:"persistent"`
-	PoolID             string   `json:"poolId"`
-	PreviousGuestState string   `json:"previousGuestState"`
-	ProfileID          string   `json:"profileId"`
-	PublishedIP        string   `json:"publishedIp"`
-	RdpUserInjected    bool     `json:"rdpUserInjected"`
-	Realm              string   `json:"realm"`
-	Stamp              float64  `json:"stamp"`
-	Standalone         bool     `json:"standalone"`
-	Tags               []string `json:"tags"`
-	TargetState        []string `json:"targetState"`
-	TemplateName       string   `json:"templateName"`
+		Emulation  string `json:"emulation,omitempty"`
+		IPAddress  string `json:"ipAddress,omitempty"`
+		MacAddress string `json:"macAddress,omitempty"`
+		Network    string `json:"network,omitempty"`
+		Vlan       int    `json:"vlan,omitempty"`
+	} `json:"interfaces,omitempty"`
+	Memory             int      `json:"memory,omitempty"`
+	Name               string   `json:"name,omitempty"`
+	Os                 string   `json:"os,omitempty"`
+	Persistent         bool     `json:"persistent,omitempty"`
+	PoolID             string   `json:"poolId,omitempty"`
+	PreviousGuestState string   `json:"previousGuestState,omitempty"`
+	ProfileID          string   `json:"profileId,omitempty"`
+	PublishedIP        string   `json:"publishedIp,omitempty"`
+	RdpUserInjected    bool     `json:"rdpUserInjected,omitempty"`
+	Realm              string   `json:"realm,omitempty"`
+	Stamp              float64  `json:"stamp,omitempty"`
+	Standalone         bool     `json:"standalone,omitempty"`
+	Tags               []string `json:"tags,omitempty"`
+	TargetState        []string `json:"targetState,omitempty"`
+	TemplateName       string   `json:"templateName,omitempty"`
 	UserVolume         struct {
-		State         string `json:"state"`
-		RunningBackup bool   `json:"runningBackup"`
-	} `json:"userVolume"`
-	Username string `json:"username"`
-	UUID     string `json:"uuid"`
+		State         string `json:"state,omitempty"`
+		RunningBackup bool   `json:"runningBackup,omitempty"`
+	} `json:"userVolume,omitempty"`
+	Username string `json:"username,omitempty"`
+	UUID     string `json:"uuid,omitempty"`
+	Backup   *struct {
+		State           string      `json:"state,omitempty"`
+		Frequency       string      `json:"frequency"`
+		TargetStorageID string      `json:"targetStorageId"`
+		LastBackup      interface{} `json:"lastBackup,omitempty"`
+		StateMessage    string      `json:"stateMessage,omitempty"`
+	} `json:"backup,omitempty"`
 }
-
-/*type Guest struct {
-	AgentInstalled bool `json:"agentInstalled"`
-	Cpus           int  `json:"cpus"`
-	Currentmem     int  `json:"currentmem"`
-	Disks          []struct {
-		Backing    string `json:"backing,omitempty"`
-		Dev        string `json:"dev"`
-		DiskDriver string `json:"diskDriver"`
-		Format     string `json:"format,omitempty"`
-		Path       string `json:"path,omitempty"`
-		Size       int    `json:"size,omitempty"`
-		StorageID  string `json:"storageId,omitempty"`
-		Type       string `json:"type"`
-	} `json:"disks"`
-	GuestState string `json:"guestState"`
-	Hostid     string `json:"hostid"`
-	Hostname   string `json:"hostname"`
-	Interfaces []struct {
-		Emulation  string `json:"emulation"`
-		MacAddress string `json:"macAddress"`
-		Network    string `json:"network"`
-		Vlan       int    `json:"vlan"`
-	} `json:"interfaces"`
-	Memory             int      `json:"memory"`
-	Name               string   `json:"name"`
-	Os                 string   `json:"os"`
-	Persistent         bool     `json:"persistent"`
-	PoolID             string   `json:"poolId"`
-	PreviousGuestState string   `json:"previousGuestState"`
-	ProfileID          string   `json:"profileId"`
-	PublishedIP        string   `json:"publishedIp"`
-	Realm              string   `json:"realm"`
-	Stamp              float64  `json:"stamp"`
-	Standalone         bool     `json:"standalone"`
-	Tags               []string `json:"tags"`
-	TargetState        []string `json:"targetState"`
-	TemplateName       string   `json:"templateName"`
-	Username           string   `json:"username"`
-	UUID               string   `json:"uuid"`
-	RdpUserInjected    bool     `json:"rdpUserInjected"`
-	HostDetails        struct {
-		Hostname string `json:"hostname"`
-		IP       string `json:"ip"`
-	} `json:"hostDetails"`
-}*/
 
 func (guest Guest) String() string {
 	json, _ := json.MarshalIndent(guest, "", "  ")
@@ -179,6 +140,16 @@ func (guest *Guest) Reset(client *Client) error {
 		return err
 	}
 	return err
+}
+
+func (guest *Guest) Update(client *Client) (string, error) {
+	var result string
+	jsonValue, _ := json.Marshal(guest)
+	body, err := client.request("PUT", "guest/"+guest.Name, jsonValue)
+	if err == nil {
+		result = string(body)
+	}
+	return result, err
 }
 
 //Why is this POST instad of DELETE?

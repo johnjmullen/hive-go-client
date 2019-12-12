@@ -47,6 +47,11 @@ type PoolInterface struct {
 	MacAddress string `json:"macAddress,omitempty"`
 }
 
+type PoolBackup struct {
+	Frequency       string `json:"frequency"`
+	TargetStorageID string `json:"targetStorageId"`
+}
+
 type Pool struct {
 	ID                        string            `json:"id,omitempty"`
 	Density                   []int             `json:"density"`
@@ -63,6 +68,7 @@ type Pool struct {
 	TargetState               []string          `json:"targetState,omitempty"`
 	Type                      string            `json:"type"`
 	UserSessionLoginThreshold int               `json:"userSessionLoginThreshold,omitempty"`
+	Backup                    *PoolBackup       `json:"backup,omitempty"`
 }
 
 func (pool Pool) String() string {

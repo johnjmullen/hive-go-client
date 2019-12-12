@@ -30,14 +30,15 @@ type Broker struct {
 
 //Gateway settings from the cluster table
 type Gateway struct {
-	Enabled bool `json:"enabled"`
-	PortMap struct {
-		F91577A2F6F8 struct {
-			EndPort   int `json:"endPort"`
-			StartPort int `json:"startPort"`
-		} `json:"f91577a2f6f8"`
-	} `json:"portMap"`
-	URI string `json:"uri"`
+	Enabled bool                   `json:"enabled"`
+	PortMap map[string]interface{} `json:"portMap"`
+	URI     string                 `json:"uri"`
+}
+
+type ClusterBackup struct {
+	Enabled     bool   `json:"enabled"`
+	StartWindow string `json:"startWindow"`
+	EndWindow   string `json:"endWindow"`
 }
 
 //Cluster record from hive-rest
@@ -71,7 +72,8 @@ type Cluster struct {
 		State              string `json:"state"`
 		StorageUtilization int    `json:"storageUtilization"`
 	} `json:"sharedStorage"`
-	Tags []string `json:"tags"`
+	Backup *ClusterBackup `json:"clusterBackup,omitempty"`
+	Tags   []string       `json:"tags"`
 }
 
 func (cluster Cluster) String() string {

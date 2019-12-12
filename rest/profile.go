@@ -32,6 +32,13 @@ type ProfileUserVolumes struct {
 	Target         string `json:"target,omitempty"`
 }
 
+type ProfileBackup struct {
+	Frequency       string      `json:"frequency"`
+	TargetStorageId string      `json:"targetStorageId"`
+	UserVolumeList  []string    `json:"userVolumeList,omitempty"`
+	LastBackup      interface{} `json:"date,omitempty"`
+}
+
 type Profile struct {
 	AdConfig      *ProfileADConfig      `json:"adConfig,omitempty"`
 	BrokerOptions *ProfileBrokerOptions `json:"brokerOptions,omitempty"`
@@ -42,6 +49,7 @@ type Profile struct {
 	Timezone      string                `json:"timezone,omitempty"`
 	UserVolumes   *ProfileUserVolumes   `json:"userVolumes,omitempty"`
 	Vlan          int                   `json:"vlan,omitempty"`
+	Backup        *ProfileBackup        `json:"backup,omitempty"`
 }
 
 func (profile Profile) String() string {

@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -114,6 +116,40 @@ var guestListCmd = &cobra.Command{
 				guestList = append(guestList, guest.Name)
 			}
 			fmt.Println(formatString(guestList))
+		}
+	},
+}
+
+var guestUpdateCmd = &cobra.Command{
+	Use:   "update [file]",
+	Short: "update a guest",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		var file *os.File
+		var err error
+		if args[0] == "-" {
+			file = os.Stdin
+		} else {
+			file, err = os.Open(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+		defer file.Close()
+		data, _ := ioutil.ReadAll(file)
+		var guest rest.Guest
+		err = unmarshal(data, &guest)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		msg, err := guest.Update(restClient)
+		fmt.Println(msg)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
 	},
 }
@@ -229,4 +265,5 @@ func init() {
 	guestCmd.AddCommand(guestReleaseCmd)
 	guestCmd.AddCommand(guestResetCmd)
 	guestCmd.AddCommand(guestShutdownCmd)
+	guestCmd.AddCommand(guestUpdateCmd)
 }
