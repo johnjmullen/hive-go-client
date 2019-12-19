@@ -13,6 +13,12 @@ type PoolDisk struct {
 	Type       string `json:"type,omitempty"`
 }
 
+type PoolCloudInit struct {
+	Enabled       bool   `json:"enabled"`
+	UserData      string `json:"userData,omitempty"`
+	NetworkConfig string `json:"networkConfig,omitempty"`
+}
+
 type PoolGuestProfile struct {
 	AgentInstalled bool              `json:"agentInstalled"`
 	CPU            []int             `json:"cpu,omitempty"`
@@ -28,6 +34,7 @@ type PoolGuestProfile struct {
 	Protocol       string            `json:"protocol,omitempty"`
 	TemplateName   string            `json:"templateName,omitempty"`
 	Vga            string            `json:"vga,omitempty"`
+	CloudInit      *PoolCloudInit    `json:"cloudInit,omitempty"`
 }
 
 type PoolHostDevice struct {
