@@ -10,6 +10,7 @@ require (
 	github.com/gosuri/uilive v0.0.3 // indirect
 	github.com/gosuri/uiprogress v0.0.1
 	github.com/hashicorp/terraform v0.12.9 // indirect
+	github.com/hashicorp/terraform-plugin-sdk v1.4.1 // indirect
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.4.0

@@ -22,19 +22,20 @@ type TemplateDisk struct {
 }
 
 type Template struct {
-	Name               string               `json:"name"`
-	Vcpu               int                  `json:"vcpu"`
-	Mem                int                  `json:"mem"`
-	OS                 string               `json:"os"`
-	Firmware           string               `json:"firmware,omitempty"`
-	Gpu                bool                 `json:"gpu,omitempty"`
-	DisplayDriver      string               `json:"displayDriver,omitempty"`
-	Interfaces         []*TemplateInterface `json:"interfaces,omitempty"`
-	Drivers            bool                 `json:"drivers"`
-	Disks              []*TemplateDisk      `json:"disks,omitempty"`
-	State              string               `json:"state,omitempty"`
-	StateMessage       string               `json:"stateMessage,omitempty"`
-	ManualAgentInstall bool                 `json:"manualAgentInstall"`
+	Name               string                 `json:"name"`
+	Vcpu               int                    `json:"vcpu"`
+	Mem                int                    `json:"mem"`
+	OS                 string                 `json:"os"`
+	Firmware           string                 `json:"firmware,omitempty"`
+	Gpu                bool                   `json:"gpu,omitempty"`
+	DisplayDriver      string                 `json:"displayDriver,omitempty"`
+	Interfaces         []*TemplateInterface   `json:"interfaces,omitempty"`
+	Drivers            bool                   `json:"drivers"`
+	Disks              []*TemplateDisk        `json:"disks,omitempty"`
+	State              string                 `json:"state,omitempty"`
+	StateMessage       string                 `json:"stateMessage,omitempty"`
+	ManualAgentInstall bool                   `json:"manualAgentInstall"`
+	TemplateMap        map[string]interface{} `json:"templateMap,omitempty"`
 }
 
 func (template Template) String() string {
