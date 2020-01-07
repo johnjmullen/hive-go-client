@@ -34,7 +34,7 @@ type ProfileUserVolumes struct {
 
 type ProfileBackup struct {
 	Frequency       string      `json:"frequency"`
-	TargetStorageId string      `json:"targetStorageId"`
+	TargetStorageID string      `json:"targetStorageId"`
 	UserVolumeList  []string    `json:"userVolumeList,omitempty"`
 	LastBackup      interface{} `json:"date,omitempty"`
 }
