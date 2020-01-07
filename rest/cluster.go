@@ -138,3 +138,18 @@ func (cluster *Cluster) SetLicense(client *Client, key string) error {
 	_, err = client.request("PUT", "cluster/"+cluster.ID+"/license", jsonValue)
 	return err
 }
+
+func (cluster *Cluster) EnableBackup(client *Client, startWindow string) error {
+	jsonData := map[string]string{"startWindow": startWindow}
+	jsonValue, err := json.Marshal(jsonData)
+	if err != nil {
+		return err
+	}
+	_, err = client.request("POST", "cluster/"+cluster.ID+"/enableBackup", jsonValue)
+	return err
+}
+
+func (cluster *Cluster) DisableBackup(client *Client) error {
+	_, err := client.request("POST", "cluster/"+cluster.ID+"/disableBackup", nil)
+	return err
+}

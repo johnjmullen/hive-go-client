@@ -87,6 +87,37 @@ var setLicenseCmd = &cobra.Command{
 	},
 }
 
+var enableBackupCmd = &cobra.Command{
+	Use:   "enable-backup",
+	Short: "Enable Backup",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("start-window", cmd.Flags().Lookup("start-window"))
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterID, err := restClient.ClusterId()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		cluster, err := restClient.GetCluster(clusterID)
+		cluster.EnableBackup(restClient, viper.GetString("start-window"))
+	},
+}
+
+var disableBackupCmd = &cobra.Command{
+	Use:   "disable-backup",
+	Short: "Disable Backup",
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterID, err := restClient.ClusterId()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		cluster, err := restClient.GetCluster(clusterID)
+		cluster.DisableBackup(restClient)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(clusterCmd)
 	clusterCmd.AddCommand(addHostCmd)
@@ -101,4 +132,7 @@ func init() {
 	clusterListCmd.Flags().String("filter", "", "filter query string")
 
 	clusterCmd.AddCommand(setLicenseCmd)
+	clusterCmd.AddCommand(enableBackupCmd)
+	enableBackupCmd.Flags().String("start-window", "*-*-* 00:00:00", "Time to start running backups")
+	clusterCmd.AddCommand(disableBackupCmd)
 }
