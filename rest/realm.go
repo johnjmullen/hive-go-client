@@ -5,12 +5,18 @@ import (
 	"errors"
 )
 
+type RealmServiceAccount struct {
+	Username string `json:"username"`
+	Password string `json:"password`
+}
+
 type Realm struct {
-	Enabled  bool     `json:"enabled"`
-	FQDN     string   `json:"fqdn"`
-	Name     string   `json:"name"`
-	Tags     []string `json:"tags,omitempty"`
-	Verified bool     `json:"verified"`
+	Enabled        bool                 `json:"enabled"`
+	FQDN           string               `json:"fqdn"`
+	Name           string               `json:"name"`
+	Tags           []string             `json:"tags,omitempty"`
+	Verified       bool                 `json:"verified"`
+	ServiceAccount *RealmServiceAccount `json:"serviceAccount,omitempty"`
 }
 
 func (realm Realm) String() string {
