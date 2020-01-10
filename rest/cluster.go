@@ -72,7 +72,7 @@ type Cluster struct {
 		State              string `json:"state"`
 		StorageUtilization int    `json:"storageUtilization"`
 	} `json:"sharedStorage"`
-	Backup *ClusterBackup `json:"clusterBackup,omitempty"`
+	Backup *ClusterBackup `json:"backup,omitempty"`
 	Tags   []string       `json:"tags"`
 }
 
@@ -139,8 +139,8 @@ func (cluster *Cluster) SetLicense(client *Client, key string) error {
 	return err
 }
 
-func (cluster *Cluster) EnableBackup(client *Client, startWindow string) error {
-	jsonData := map[string]string{"startWindow": startWindow}
+func (cluster *Cluster) EnableBackup(client *Client, startWindow string, endWindow string) error {
+	jsonData := map[string]string{"startWindow": startWindow, "endWindow": endWindow}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
 		return err
