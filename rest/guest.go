@@ -103,9 +103,6 @@ func (guest *Guest) Shutdown(client *Client) error {
 		return errors.New("name cannot be empty")
 	}
 	_, err := client.request("POST", "guest/"+guest.Name+"/shutdown", nil)
-	if err != nil {
-		return err
-	}
 	return err
 }
 
@@ -114,9 +111,6 @@ func (guest *Guest) Reboot(client *Client) error {
 		return errors.New("name cannot be empty")
 	}
 	_, err := client.request("POST", "guest/"+guest.Name+"/reboot", nil)
-	if err != nil {
-		return err
-	}
 	return err
 }
 
@@ -125,9 +119,6 @@ func (guest *Guest) Poweroff(client *Client) error {
 		return errors.New("name cannot be empty")
 	}
 	_, err := client.request("POST", "guest/"+guest.Name+"/poweroff", nil)
-	if err != nil {
-		return err
-	}
 	return err
 }
 
@@ -136,9 +127,6 @@ func (guest *Guest) Reset(client *Client) error {
 		return errors.New("name cannot be empty")
 	}
 	_, err := client.request("POST", "guest/"+guest.Name+"/reset", nil)
-	if err != nil {
-		return err
-	}
 	return err
 }
 
@@ -158,8 +146,20 @@ func (guest *Guest) Delete(client *Client) error {
 		return errors.New("name cannot be empty")
 	}
 	_, err := client.request("POST", "guest/"+guest.Name+"/delete", nil)
-	if err != nil {
-		return err
-	}
 	return err
+}
+
+func (guest *Guest) StartBackup(client *Client) error {
+	if guest.Name == "" {
+		return errors.New("name cannot be empty")
+	}
+	_, err := client.request("POST", "guest/"+guest.Name+"/backup", nil)
+	return err
+}
+
+func (guest *Guest) Restore(client *Client) (*Task, error) {
+	if guest.Name == "" {
+		return nil, errors.New("name cannot be empty")
+	}
+	return client.getTaskFromResponse(client.request("POST", "guest/"+guest.Name+"/restore", nil))
 }

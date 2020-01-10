@@ -244,6 +244,42 @@ var guestShutdownCmd = &cobra.Command{
 	},
 }
 
+var guestBackupCmd = &cobra.Command{
+	Use:   "backup [Name]",
+	Short: "start guest backup",
+	Args:  cobra.ExactArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		bindTaskFlags(cmd)
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		guest, err := restClient.GetGuest(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		guest.StartBackup(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var guestRestoreCmd = &cobra.Command{
+	Use:   "backup [Name]",
+	Short: "start guest backup",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		guest, err := restClient.GetGuest(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		handleTask(guest.Restore(restClient))
+
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(guestCmd)
 
@@ -266,4 +302,8 @@ func init() {
 	guestCmd.AddCommand(guestResetCmd)
 	guestCmd.AddCommand(guestShutdownCmd)
 	guestCmd.AddCommand(guestUpdateCmd)
+
+	guestCmd.AddCommand(guestBackupCmd)
+	guestCmd.AddCommand(guestRestoreCmd)
+	addTaskFlags(guestRestoreCmd)
 }
