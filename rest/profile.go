@@ -33,6 +33,7 @@ type ProfileUserVolumes struct {
 }
 
 type ProfileBackup struct {
+	Enabled         bool        `json:"enabled"`
 	Frequency       string      `json:"frequency"`
 	TargetStorageID string      `json:"targetStorageId"`
 	UserVolumeList  []string    `json:"userVolumeList,omitempty"`

@@ -55,6 +55,7 @@ type PoolInterface struct {
 }
 
 type PoolBackup struct {
+	Enabled         bool   `json:"enabled"`
 	Frequency       string `json:"frequency"`
 	TargetStorageID string `json:"targetStorageId"`
 }
