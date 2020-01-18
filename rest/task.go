@@ -81,12 +81,12 @@ func (task *Task) ForceComplete(client *Client) error {
 	return err
 }
 
-func (task *Task) WatchTask(client *Client, taskData chan Task, done chan struct{}) {
+func (task Task) WatchTask(client *Client, taskData chan Task, done chan struct{}) {
 	defer close(done)
 	if task.State == "completed" || task.State == "failed" {
 		return
 	}
-	var newVal Task
+	newVal := Task{}
 	feed, err := client.GetChangeFeed("task", map[string]string{"id": task.ID})
 	if err != nil {
 		return
