@@ -3,7 +3,6 @@ package rest
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 )
 
 type Host struct {
@@ -230,8 +229,7 @@ func (host *Host) Delete(client *Client) error {
 }
 
 func (host *Host) RestartServices(client *Client) error {
-	body, err := client.request("POST", "host/"+host.Hostid+"/services/hive-services/restart", nil)
-	fmt.Println(string(body))
+	_, err := client.request("POST", "host/"+host.Hostid+"/services/hive-services/restart", nil)
 	return err
 }
 
@@ -284,4 +282,9 @@ func (host *Host) GetState(client *Client) (string, error) {
 	var state string
 	err = json.Unmarshal(body, &state)
 	return state, err
+}
+
+func (host *Host) UnjoinCluster(client *Client) error {
+	_, err := client.request("POST", "host/"+host.Hostid+"/cluster/unjoin", nil)
+	return err
 }

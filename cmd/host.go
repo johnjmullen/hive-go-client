@@ -129,6 +129,25 @@ var hostRestartServicesCmd = &cobra.Command{
 	},
 }
 
+var hostUnjoinCmd = &cobra.Command{
+	Use:   "unjoin [hostid]",
+	Short: "remove host from cluster",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		host, err := restClient.GetHost(args[0])
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = host.UnjoinCluster(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 var hostStateCmd = &cobra.Command{
 	Use:   "state [hostid]",
 	Short: "get or set host state",
@@ -173,6 +192,7 @@ func init() {
 	hostLogLevelCmd.Flags().StringP("set", "s", "", "set log level (error/warn/info/debug)")
 
 	hostCmd.AddCommand(hostRestartServicesCmd)
+	hostCmd.AddCommand(hostUnjoinCmd)
 
 	hostCmd.AddCommand(hostStateCmd)
 	hostStateCmd.Flags().StringP("set", "s", "", "set host state (available/maintenance)")
