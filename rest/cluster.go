@@ -47,21 +47,21 @@ type Cluster struct {
 	Broker        *Broker  `json:"broker"`
 	Gateway       *Gateway `json:"gateway"`
 	HiveSense     struct {
-		AwsAccessKeyID     string `json:"awsAccessKeyId"`
-		AwsSecretAccessKey string `json:"awsSecretAccessKey"`
-		CustomerName       string `json:"customerName"`
+		AwsAccessKeyID     string `json:"awsAccessKeyId,omitempty"`
+		AwsSecretAccessKey string `json:"awsSecretAccessKey,omitempty"`
+		CustomerName       string `json:"customerName,omitempty"`
 		Enabled            bool   `json:"enabled"`
-		LogStatus          string `json:"logStatus"`
-		UploadFrequency    int    `json:"uploadFrequency"`
+		LogStatus          string `json:"logStatus,omitempty"`
+		UploadFrequency    int    `json:"uploadFrequency,omitempty"`
 	} `json:"hiveSense"`
 	ID      string `json:"id"`
-	License struct {
+	License *struct {
 		Expiration        time.Time `json:"expiration"`
 		Type              string    `json:"type"`
 		LicenseExpiration time.Time `json:"license.expiration"`
 	} `json:"license"`
 	Name          string `json:"name"`
-	SharedStorage struct {
+	SharedStorage *struct {
 		Enabled bool `json:"enabled"`
 		Hosts   []struct {
 			Hostid string `json:"hostid"`
