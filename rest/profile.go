@@ -5,6 +5,7 @@ import (
 	"errors"
 )
 
+//ProfileADConfig contains the active directory settings for a profile
 type ProfileADConfig struct {
 	Domain    string `json:"domain,omitempty"`
 	Ou        string `json:"ou,omitempty"`
@@ -13,6 +14,7 @@ type ProfileADConfig struct {
 	Username  string `json:"username,omitempty"`
 }
 
+//ProfileBrokerOptions contains rdp settings for a profile
 type ProfileBrokerOptions struct {
 	AllowDesktopComposition bool `json:"allowDesktopComposition,omitempty"`
 	AudioCapture            bool `json:"audioCapture,omitempty"`
@@ -25,6 +27,7 @@ type ProfileBrokerOptions struct {
 	SmartResize             bool `json:"smartResize,omitempty"`
 }
 
+//ProfileUserVolumes contains user volume settings for a profile
 type ProfileUserVolumes struct {
 	BackupSchedule int    `json:"backupSchedule,omitempty"`
 	Repository     string `json:"repository,omitempty"`
@@ -32,6 +35,7 @@ type ProfileUserVolumes struct {
 	Target         string `json:"target,omitempty"`
 }
 
+//ProfileBackup contains data protection settings for a profile
 type ProfileBackup struct {
 	Enabled         bool        `json:"enabled"`
 	Frequency       string      `json:"frequency"`
@@ -40,6 +44,7 @@ type ProfileBackup struct {
 	LastBackup      interface{} `json:"date,omitempty"`
 }
 
+// Profile is a profile record from the rest api
 type Profile struct {
 	AdConfig      *ProfileADConfig      `json:"adConfig,omitempty"`
 	BrokerOptions *ProfileBrokerOptions `json:"brokerOptions,omitempty"`
@@ -58,6 +63,7 @@ func (profile Profile) String() string {
 	return string(json)
 }
 
+//Create creates a new profile
 func (profile *Profile) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(profile)
@@ -68,6 +74,7 @@ func (profile *Profile) Create(client *Client) (string, error) {
 	return result, err
 }
 
+//Update updates an existing profile
 func (profile *Profile) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(profile)
@@ -78,6 +85,7 @@ func (profile *Profile) Update(client *Client) (string, error) {
 	return result, err
 }
 
+//Delete deletes a profile
 func (profile *Profile) Delete(client *Client) error {
 	if profile.ID == "" {
 		return errors.New("Id cannot be empty")
@@ -89,6 +97,7 @@ func (profile *Profile) Delete(client *Client) error {
 	return err
 }
 
+// ListProfiles returns an array of all profiles with an optional filter string
 func (client *Client) ListProfiles(filter string) ([]Profile, error) {
 	var Profiles []Profile
 	path := "profiles"
@@ -103,6 +112,7 @@ func (client *Client) ListProfiles(filter string) ([]Profile, error) {
 	return Profiles, err
 }
 
+// GetProfile requests a profile by id
 func (client *Client) GetProfile(id string) (*Profile, error) {
 	var profile *Profile
 	if id == "" {
@@ -116,6 +126,7 @@ func (client *Client) GetProfile(id string) (*Profile, error) {
 	return profile, err
 }
 
+// GetProfileByName requests a profile by name
 func (client *Client) GetProfileByName(name string) (*Profile, error) {
 	var profiles, err = client.ListProfiles("name=" + name)
 	if err != nil {

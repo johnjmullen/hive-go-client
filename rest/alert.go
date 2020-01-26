@@ -5,6 +5,7 @@ import (
 	"errors"
 )
 
+// Alert structure for alerts
 type Alert struct {
 	Acknowledged bool   `json:"acknowledged"`
 	Class        string `json:"class"`
@@ -26,6 +27,7 @@ func (alert Alert) String() string {
 	return string(json)
 }
 
+// ListAlerts lists all alerts with an optional filter string
 func (client *Client) ListAlerts(filter string) ([]Alert, error) {
 	var alerts []Alert
 	path := "alerts"
@@ -40,6 +42,7 @@ func (client *Client) ListAlerts(filter string) ([]Alert, error) {
 	return alerts, err
 }
 
+// GetAlert requests a single Alert by id
 func (client *Client) GetAlert(id string) (Alert, error) {
 	var alert Alert
 	if id == "" {
@@ -53,6 +56,7 @@ func (client *Client) GetAlert(id string) (Alert, error) {
 	return alert, err
 }
 
+// Acknowledge marks an alert as acknowledged
 func (alert *Alert) Acknowledge(client *Client) error {
 	if alert.ID == "" {
 		return errors.New("Id cannot be empty")

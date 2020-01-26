@@ -5,11 +5,13 @@ import (
 	"errors"
 )
 
+//RealmServiceAccount contains an active directory service account for the realm
 type RealmServiceAccount struct {
 	Username string `json:"username"`
-	Password string `json:"password`
+	Password string `json:"password"`
 }
 
+// Realm describes a realm from the rest api
 type Realm struct {
 	Enabled        bool                 `json:"enabled"`
 	FQDN           string               `json:"fqdn"`
@@ -24,6 +26,7 @@ func (realm Realm) String() string {
 	return string(json)
 }
 
+// ListRealms returns an array of all realms with an optional filter string
 func (client *Client) ListRealms(filter string) ([]Realm, error) {
 	var realms []Realm
 	path := "realms"
@@ -38,6 +41,7 @@ func (client *Client) ListRealms(filter string) ([]Realm, error) {
 	return realms, err
 }
 
+// GetRealm requests a realm by name
 func (client *Client) GetRealm(name string) (Realm, error) {
 	var realm Realm
 	if name == "" {
@@ -51,6 +55,7 @@ func (client *Client) GetRealm(name string) (Realm, error) {
 	return realm, err
 }
 
+// Create creates a new realm
 func (realm *Realm) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(realm)
@@ -61,6 +66,7 @@ func (realm *Realm) Create(client *Client) (string, error) {
 	return result, err
 }
 
+//Update updates an existing realm
 func (realm *Realm) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(realm)
@@ -71,6 +77,7 @@ func (realm *Realm) Update(client *Client) (string, error) {
 	return result, err
 }
 
+//Delete deletes a realm
 func (realm *Realm) Delete(client *Client) error {
 	if realm.Name == "" {
 		return errors.New("Name cannot be empty")

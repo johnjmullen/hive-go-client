@@ -5,6 +5,7 @@ import (
 	"errors"
 )
 
+// Guest describes a guest record from the rest api
 type Guest struct {
 	SessionInfo *struct {
 		SessionID     int    `json:"SessionID"`
@@ -71,6 +72,7 @@ func (guest Guest) String() string {
 	return string(json)
 }
 
+// ListGuests returns an array of all guests with an optional filter string
 func (client *Client) ListGuests(filter string) ([]Guest, error) {
 	var guests []Guest
 	path := "guests"
@@ -85,6 +87,7 @@ func (client *Client) ListGuests(filter string) ([]Guest, error) {
 	return guests, err
 }
 
+// GetGuest requests a single guest by name
 func (client *Client) GetGuest(name string) (*Guest, error) {
 	var guest Guest
 	if name == "" {
@@ -98,6 +101,7 @@ func (client *Client) GetGuest(name string) (*Guest, error) {
 	return &guest, err
 }
 
+// Shutdown asks the guest operation system to shutdown
 func (guest *Guest) Shutdown(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
@@ -106,6 +110,7 @@ func (guest *Guest) Shutdown(client *Client) error {
 	return err
 }
 
+// Reboot asks the guest operation system to reboot
 func (guest *Guest) Reboot(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
@@ -114,6 +119,7 @@ func (guest *Guest) Reboot(client *Client) error {
 	return err
 }
 
+// Poweroff forces a guest to powers off
 func (guest *Guest) Poweroff(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
@@ -122,6 +128,7 @@ func (guest *Guest) Poweroff(client *Client) error {
 	return err
 }
 
+// Reset forces a guest to hard reset
 func (guest *Guest) Reset(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
@@ -130,6 +137,7 @@ func (guest *Guest) Reset(client *Client) error {
 	return err
 }
 
+// Update a guest record
 func (guest *Guest) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(guest)
@@ -140,7 +148,7 @@ func (guest *Guest) Update(client *Client) (string, error) {
 	return result, err
 }
 
-//Why is this POST instad of DELETE?
+//Delete deletes a guest
 func (guest *Guest) Delete(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
@@ -149,6 +157,7 @@ func (guest *Guest) Delete(client *Client) error {
 	return err
 }
 
+//StartBackup requests starting a backup immediately
 func (guest *Guest) StartBackup(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
@@ -157,6 +166,7 @@ func (guest *Guest) StartBackup(client *Client) error {
 	return err
 }
 
+//Restore restores a guest from a backup
 func (guest *Guest) Restore(client *Client) (*Task, error) {
 	if guest.Name == "" {
 		return nil, errors.New("name cannot be empty")

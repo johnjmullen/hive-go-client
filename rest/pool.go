@@ -5,6 +5,7 @@ import (
 	"errors"
 )
 
+// PoolDisk disk structure for a pool record
 type PoolDisk struct {
 	BootOrder  int    `json:"bootOrder,omitempty"`
 	DiskDriver string `json:"diskDriver,omitempty"`
@@ -13,12 +14,14 @@ type PoolDisk struct {
 	Type       string `json:"type,omitempty"`
 }
 
+// PoolCloudInit cloud-init settings for a pool record
 type PoolCloudInit struct {
 	Enabled       bool   `json:"enabled"`
 	UserData      string `json:"userData,omitempty"`
 	NetworkConfig string `json:"networkConfig,omitempty"`
 }
 
+// PoolGuestProfile guestProfile section of a pool record
 type PoolGuestProfile struct {
 	AgentInstalled bool              `json:"agentInstalled"`
 	CPU            []int             `json:"cpu,omitempty"`
@@ -37,6 +40,7 @@ type PoolGuestProfile struct {
 	CloudInit      *PoolCloudInit    `json:"cloudInit,omitempty"`
 }
 
+// PoolHostDevice a hostdevice to share with a virtual machine
 type PoolHostDevice struct {
 	Bus    int    `json:"bus,omitempty"`
 	Domain int    `json:"domain,omitempty"`
@@ -46,6 +50,7 @@ type PoolHostDevice struct {
 	UUID   string `json:"uuid,omitempty"`
 }
 
+// PoolInterface network interface settings for a pool
 type PoolInterface struct {
 	BootOrder  int    `json:"bootOrder,omitempty"`
 	Emulation  string `json:"emulation,omitempty"`
@@ -54,12 +59,14 @@ type PoolInterface struct {
 	MacAddress string `json:"macAddress,omitempty"`
 }
 
+// PoolBackup data protection settings from a pool record
 type PoolBackup struct {
 	Enabled         bool   `json:"enabled"`
 	Frequency       string `json:"frequency"`
 	TargetStorageID string `json:"targetStorageId"`
 }
 
+// Pool describes a guest pool record from the rest api
 type Pool struct {
 	ID                        string            `json:"id,omitempty"`
 	Density                   []int             `json:"density"`
@@ -84,6 +91,7 @@ func (pool Pool) String() string {
 	return string(json)
 }
 
+// ListGuestPools returns an array of all guest pools with an optional filter string
 func (client *Client) ListGuestPools(filter string) ([]Pool, error) {
 	var pools []Pool
 	path := "pools"
@@ -98,6 +106,7 @@ func (client *Client) ListGuestPools(filter string) ([]Pool, error) {
 	return pools, err
 }
 
+// GetPool request a pool by id
 func (client *Client) GetPool(id string) (*Pool, error) {
 	var pool *Pool
 	if id == "" {
@@ -111,6 +120,7 @@ func (client *Client) GetPool(id string) (*Pool, error) {
 	return pool, err
 }
 
+// GetPoolByName request a task by name
 func (client *Client) GetPoolByName(name string) (*Pool, error) {
 	var pools, err = client.ListGuestPools("name=" + name)
 	if err != nil {
@@ -124,6 +134,7 @@ func (client *Client) GetPoolByName(name string) (*Pool, error) {
 	return nil, errors.New("Pool not found")
 }
 
+//Create creates a new pool
 func (pool *Pool) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(pool)
@@ -134,6 +145,7 @@ func (pool *Pool) Create(client *Client) (string, error) {
 	return result, err
 }
 
+//Update updates an existing pool record
 func (pool *Pool) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(pool)
@@ -144,6 +156,7 @@ func (pool *Pool) Update(client *Client) (string, error) {
 	return result, err
 }
 
+//Delete removes a pool record
 func (pool *Pool) Delete(client *Client) error {
 	if pool.ID == "" || client == nil {
 		return errors.New("Invalid pool")
@@ -152,6 +165,7 @@ func (pool *Pool) Delete(client *Client) error {
 	return err
 }
 
+//Refresh refreshes a pool to ensure the definition is applied
 func (pool *Pool) Refresh(client *Client) error {
 	if pool.ID == "" || client == nil {
 		return errors.New("Invalid pool")

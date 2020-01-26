@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-//Broker information from the cluster table
+// Broker settings from the cluster table
 type Broker struct {
 	AutoConnectUserDesktop    bool        `json:"autoConnectUserDesktop,omitempty"`
 	BackgroundColor           string      `json:"backgroundColor,omitempty"`
@@ -28,20 +28,21 @@ type Broker struct {
 	TwoFormAuth               interface{} `json:"twoFormAuth"`
 }
 
-//Gateway settings from the cluster table
+// Gateway settings from the cluster table
 type Gateway struct {
 	Enabled bool                   `json:"enabled"`
 	PortMap map[string]interface{} `json:"portMap"`
 	URI     string                 `json:"uri"`
 }
 
+//ClusterBackup data protection settings from the cluster table
 type ClusterBackup struct {
 	Enabled     bool   `json:"enabled"`
 	StartWindow string `json:"startWindow"`
 	EndWindow   string `json:"endWindow"`
 }
 
-//Cluster record from hive-rest
+// Cluster record from the rest api
 type Cluster struct {
 	AdminPassword string   `json:"adminPassword"`
 	Broker        *Broker  `json:"broker"`
@@ -81,6 +82,7 @@ func (cluster Cluster) String() string {
 	return string(json)
 }
 
+// ListClusters request a list of all clusters
 func (client *Client) ListClusters(filter string) ([]Cluster, error) {
 	var clusters []Cluster
 	path := "clusters"
@@ -95,6 +97,7 @@ func (client *Client) ListClusters(filter string) ([]Cluster, error) {
 	return clusters, err
 }
 
+// GetCluster request a cluster by id
 func (client *Client) GetCluster(id string) (Cluster, error) {
 	var cluster Cluster
 	if id == "" {
@@ -108,6 +111,7 @@ func (client *Client) GetCluster(id string) (Cluster, error) {
 	return cluster, err
 }
 
+// JoinHost Add a new host to the cluster
 func (client *Client) JoinHost(username, password, ipAddress string) (*Task, error) {
 	jsonData := map[string]string{"remoteUsername": username, "remotePassword": password, "remoteIpAddress": ipAddress}
 	jsonValue, err := json.Marshal(jsonData)
@@ -118,6 +122,7 @@ func (client *Client) JoinHost(username, password, ipAddress string) (*Task, err
 	return client.getTaskFromResponse(client.request("POST", "cluster/joinHost", jsonValue))
 }
 
+// GetLicenseInfo Lookup license information for the current cluster
 func (cluster *Cluster) GetLicenseInfo(client *Client) (string, string, error) {
 	body, err := client.request("GET", "cluster/"+cluster.ID+"/license", nil)
 	if err != nil {
@@ -129,6 +134,7 @@ func (cluster *Cluster) GetLicenseInfo(client *Client) (string, string, error) {
 	return objMap["expiration"], objMap["type"], err
 }
 
+//SetLicense replaces the license for the cluster
 func (cluster *Cluster) SetLicense(client *Client, key string) error {
 	jsonData := map[string]string{"key": key}
 	jsonValue, err := json.Marshal(jsonData)
@@ -139,6 +145,8 @@ func (cluster *Cluster) SetLicense(client *Client, key string) error {
 	return err
 }
 
+// EnableBackup enable automatic data protection
+// startWindow and endWindow must be strings in the format "01:00:00"
 func (cluster *Cluster) EnableBackup(client *Client, startWindow string, endWindow string) error {
 	jsonData := map[string]string{"startWindow": startWindow, "endWindow": endWindow}
 	jsonValue, err := json.Marshal(jsonData)
@@ -149,6 +157,7 @@ func (cluster *Cluster) EnableBackup(client *Client, startWindow string, endWind
 	return err
 }
 
+// DisableBackup disable automatic data protection
 func (cluster *Cluster) DisableBackup(client *Client) error {
 	_, err := client.request("POST", "cluster/"+cluster.ID+"/disableBackup", nil)
 	return err

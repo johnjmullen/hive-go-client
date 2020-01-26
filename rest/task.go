@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Task describes a task record from the rest api
 type Task struct {
 	Cancellable     bool      `json:"cancellable"`
 	Description     string    `json:"description"`
@@ -33,6 +34,7 @@ func (task Task) String() string {
 	return string(json)
 }
 
+// ListTasks returns an array of tasks with an optional filter string
 func (client *Client) ListTasks(filter string) ([]Task, error) {
 	var tasks []Task
 	path := "tasks"
@@ -47,6 +49,7 @@ func (client *Client) ListTasks(filter string) ([]Task, error) {
 	return tasks, err
 }
 
+// GetTask request a task by id
 func (client *Client) GetTask(id string) (*Task, error) {
 	var task Task
 	if id == "" {
@@ -60,6 +63,7 @@ func (client *Client) GetTask(id string) (*Task, error) {
 	return &task, err
 }
 
+// GetTaskByName request a task by name
 func (client *Client) GetTaskByName(name string) (*Task, error) {
 	var tasks, err = client.ListTasks("name=" + name)
 	if err != nil {
@@ -73,6 +77,7 @@ func (client *Client) GetTaskByName(name string) (*Task, error) {
 	return nil, errors.New("Task not found")
 }
 
+// ForceComplete marks a task as completed in the database
 func (task *Task) ForceComplete(client *Client) error {
 	if task.ID == "" {
 		return errors.New("Id cannot be empty")
@@ -81,6 +86,7 @@ func (task *Task) ForceComplete(client *Client) error {
 	return err
 }
 
+// WatchTask monitors a task changefeed and sends updates to taskData
 func (task Task) WatchTask(client *Client, taskData chan Task, done chan struct{}) {
 	defer close(done)
 	if task.State == "completed" || task.State == "failed" {
@@ -125,7 +131,8 @@ func (task Task) WatchTask(client *Client, taskData chan Task, done chan struct{
 	}
 }
 
-func (task *Task) WaitForTask(client *Client, printProgress bool) *Task {
+//WaitForTask blocks until a task is complete and returns the task
+func (task Task) WaitForTask(client *Client, printProgress bool) *Task {
 	var progress int
 	var newVal Task
 	done := make(chan struct{})

@@ -10,6 +10,7 @@ import (
 	"github.com/eventials/go-tus"
 )
 
+// StoragePool describes a storage pool returned from the rest api
 type StoragePool struct {
 	ID                string   `json:"id,omitempty"`
 	Name              string   `json:"name"`
@@ -28,6 +29,7 @@ type StoragePool struct {
 	S3Region          string   `json:"s3Region,omitempty"`
 }
 
+//DiskInfo contains information about a disk from a storage pool
 type DiskInfo struct {
 	Filename            string   `json:"filename,omitempty"`
 	VirtualSize         uint     `json:"virtual-size,omitempty"`
@@ -40,11 +42,12 @@ type DiskInfo struct {
 	Snapshots           []string `json:"snapshots,omitempty"`
 }
 
-func (sp StoragePool) String() string {
-	json, _ := json.MarshalIndent(sp, "", "  ")
+func (pool StoragePool) String() string {
+	json, _ := json.MarshalIndent(pool, "", "  ")
 	return string(json)
 }
 
+// ListStoragePools returns an array of storage pools with an optional filter string
 func (client *Client) ListStoragePools(filter string) ([]StoragePool, error) {
 	var pools []StoragePool
 	path := "storage/pools"
@@ -59,6 +62,7 @@ func (client *Client) ListStoragePools(filter string) ([]StoragePool, error) {
 	return pools, err
 }
 
+// GetStoragePoolByName requests a storage pool by name
 func (client *Client) GetStoragePoolByName(name string) (*StoragePool, error) {
 	var pools, err = client.ListStoragePools("name=" + name)
 	if err != nil {
@@ -72,6 +76,7 @@ func (client *Client) GetStoragePoolByName(name string) (*StoragePool, error) {
 	return nil, errors.New("Storage Pool not found")
 }
 
+// GetStoragePool requests a storage pool by id
 func (client *Client) GetStoragePool(id string) (*StoragePool, error) {
 	pool := &StoragePool{}
 	if id == "" {
@@ -85,6 +90,7 @@ func (client *Client) GetStoragePool(id string) (*StoragePool, error) {
 	return pool, err
 }
 
+//Create creates a new storage pool
 func (pool *StoragePool) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(pool)
@@ -95,6 +101,7 @@ func (pool *StoragePool) Create(client *Client) (string, error) {
 	return result, err
 }
 
+//Delete deletes a storage pool
 func (pool *StoragePool) Delete(client *Client) error {
 	if pool.ID == "" {
 		return errors.New("Invalid Storage Pool")
@@ -103,6 +110,7 @@ func (pool *StoragePool) Delete(client *Client) error {
 	return err
 }
 
+//CreateDisk creates a new disk in the storage pool
 func (pool *StoragePool) CreateDisk(client *Client, filename, format string, size uint) (*Task, error) {
 	if pool.ID == "" {
 		return nil, errors.New("Invalid Storage Pool")
@@ -115,7 +123,8 @@ func (pool *StoragePool) CreateDisk(client *Client, filename, format string, siz
 	return client.getTaskFromResponse(client.request("POST", "storage/pool/"+pool.ID+"/createDisk", jsonValue))
 }
 
-func (pool *StoragePool) ConvertDisk(client *Client, srcFilename, dstStorageId, dstFilename, dstFormat string) (*Task, error) {
+//ConvertDisk converts or copies a disk to a new file
+func (pool *StoragePool) ConvertDisk(client *Client, srcFilename, dstStorageID, dstFilename, dstFormat string) (*Task, error) {
 	if pool.ID == "" {
 		return nil, errors.New("Invalid Storage Pool")
 	}
@@ -123,7 +132,7 @@ func (pool *StoragePool) ConvertDisk(client *Client, srcFilename, dstStorageId, 
 		"srcStorage":  pool.ID,
 		"srcFilename": srcFilename,
 		"format":      "auto",
-		"dstStorage":  dstStorageId,
+		"dstStorage":  dstStorageID,
 		"dstFilename": dstFilename,
 		"output":      dstFormat}
 	jsonValue, err := json.Marshal(jsonData)
@@ -133,7 +142,8 @@ func (pool *StoragePool) ConvertDisk(client *Client, srcFilename, dstStorageId, 
 	return client.getTaskFromResponse(client.request("POST", "template/convert", jsonValue))
 }
 
-func (pool *StoragePool) CopyUrl(client *Client, url, filePath string) (*Task, error) {
+//CopyURL downloads a file from a http url into a storage pool
+func (pool *StoragePool) CopyURL(client *Client, url, filePath string) (*Task, error) {
 	if pool.ID == "" {
 		return nil, errors.New("Invalid Storage Pool")
 	}
@@ -147,6 +157,7 @@ func (pool *StoragePool) CopyUrl(client *Client, url, filePath string) (*Task, e
 	return client.getTaskFromResponse(client.request("POST", "storage/pool/"+pool.ID+"/copyUrl", jsonValue))
 }
 
+// DiskInfo retrieves information about a disk in the storage pool
 func (pool *StoragePool) DiskInfo(client *Client, filePath string) (DiskInfo, error) {
 	var disk DiskInfo
 	if pool.ID == "" {
@@ -165,6 +176,7 @@ func (pool *StoragePool) DiskInfo(client *Client, filePath string) (DiskInfo, er
 	return disk, err
 }
 
+//GrowDisk increases the size of a disk in a storage pool by size GB
 func (pool *StoragePool) GrowDisk(client *Client, filePath string, size uint) (*Task, error) {
 	if pool.ID == "" {
 		return nil, errors.New("Invalid Storage Pool")
@@ -177,6 +189,7 @@ func (pool *StoragePool) GrowDisk(client *Client, filePath string, size uint) (*
 	return client.getTaskFromResponse(client.request("POST", "storage/pool/"+pool.ID+"/growDisk", jsonValue))
 }
 
+//DeleteFile deletes a file from a storage pool
 func (pool *StoragePool) DeleteFile(client *Client, filename string) error {
 	if pool.ID == "" {
 		return errors.New("Invalid Storage Pool")
@@ -195,6 +208,7 @@ func (pool *StoragePool) DeleteFile(client *Client, filename string) error {
 	return err
 }
 
+//Browse returns a list of files from a storage pool
 func (pool *StoragePool) Browse(client *Client) ([]string, error) {
 	var files []string
 	if pool.ID == "" {
@@ -209,6 +223,7 @@ func (pool *StoragePool) Browse(client *Client) ([]string, error) {
 	return files, err
 }
 
+//Upload uploads a local file into a storage pool
 func (pool *StoragePool) Upload(client *Client, filename string) error {
 	if pool.ID == "" {
 		return errors.New("Invalid Storage Pool")
@@ -230,8 +245,8 @@ func (pool *StoragePool) Upload(client *Client, filename string) error {
 		HttpClient:          client.httpClient,
 	}
 
-	uploadUrl := fmt.Sprintf("https://%s:%d/upload/", client.Host, client.Port)
-	tusClient, err := tus.NewClient(uploadUrl, &conf)
+	uploadURL := fmt.Sprintf("https://%s:%d/upload/", client.Host, client.Port)
+	tusClient, err := tus.NewClient(uploadURL, &conf)
 	if err != nil {
 		return err
 	}
@@ -251,6 +266,7 @@ func (pool *StoragePool) Upload(client *Client, filename string) error {
 	return err
 }
 
+//CopyFile copies a file in a storage pool to a new file in another storage pool
 func (client *Client) CopyFile(srcStorageID, srcFilePath, destStorageID, destFilePath string) (*Task, error) {
 	data := map[string]string{
 		"srcStorageId":  srcStorageID,
@@ -265,6 +281,7 @@ func (client *Client) CopyFile(srcStorageID, srcFilePath, destStorageID, destFil
 	return client.getTaskFromResponse(client.request("POST", "storage/pool/copyFile", jsonValue))
 }
 
+//MoveFile moves or renames a file in a storage pool
 func (client *Client) MoveFile(srcStorageID, srcFilePath, destStorageID, destFilePath string) (*Task, error) {
 	data := map[string]string{
 		"srcStorageId":  srcStorageID,

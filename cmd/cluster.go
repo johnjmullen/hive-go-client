@@ -77,7 +77,7 @@ var setLicenseCmd = &cobra.Command{
 	Short: "add a license for the cluster",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		clusterID, err := restClient.ClusterId()
+		clusterID, err := restClient.ClusterID()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -95,7 +95,7 @@ var enableBackupCmd = &cobra.Command{
 		viper.BindPFlag("end-window", cmd.Flags().Lookup("end-window"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		clusterID, err := restClient.ClusterId()
+		clusterID, err := restClient.ClusterID()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -117,7 +117,7 @@ var disableBackupCmd = &cobra.Command{
 	Use:   "disable-backup",
 	Short: "Disable Backup",
 	Run: func(cmd *cobra.Command, args []string) {
-		clusterID, err := restClient.ClusterId()
+		clusterID, err := restClient.ClusterID()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

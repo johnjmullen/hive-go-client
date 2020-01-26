@@ -36,7 +36,7 @@ var hostInfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "hostid and version",
 	Run: func(cmd *cobra.Command, args []string) {
-		hostid, err := restClient.HostId()
+		hostid, err := restClient.HostID()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

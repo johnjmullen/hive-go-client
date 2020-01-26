@@ -5,12 +5,14 @@ import (
 	"errors"
 )
 
+//TemplateInterface a network interface from a template record
 type TemplateInterface struct {
 	Network   string `json:"network"`
 	Vlan      int    `json:"vlan"`
 	Emulation string `json:"emulation"`
 }
 
+//TemplateDisk a disk from a template record
 type TemplateDisk struct {
 	DiskDriver string `json:"diskDriver"`
 	Filename   string `json:"filename"`
@@ -21,6 +23,7 @@ type TemplateDisk struct {
 	Type       string `json:"type"`
 }
 
+//Template a template record from the rest interface
 type Template struct {
 	Name               string                 `json:"name"`
 	Vcpu               int                    `json:"vcpu"`
@@ -43,14 +46,7 @@ func (template Template) String() string {
 	return string(json)
 }
 
-func (template *Template) ToJson() ([]byte, error) {
-	return json.Marshal(template)
-}
-
-func (template *Template) FromJson(data []byte) error {
-	return json.Unmarshal(data, template)
-}
-
+// ListTemplates returns an array of templates with an optional filter string
 func (client *Client) ListTemplates(filter string) ([]Template, error) {
 	path := "templates"
 	if filter != "" {
@@ -65,6 +61,7 @@ func (client *Client) ListTemplates(filter string) ([]Template, error) {
 	return templates, err
 }
 
+// GetTemplate request a template by name
 func (client *Client) GetTemplate(name string) (Template, error) {
 	var template Template
 	if name == "" {
@@ -78,6 +75,7 @@ func (client *Client) GetTemplate(name string) (Template, error) {
 	return template, err
 }
 
+//Create creates a new template
 func (template *Template) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(template)
@@ -88,6 +86,7 @@ func (template *Template) Create(client *Client) (string, error) {
 	return result, err
 }
 
+//Update updates an existing template
 func (template *Template) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(template)
@@ -98,6 +97,7 @@ func (template *Template) Update(client *Client) (string, error) {
 	return result, err
 }
 
+//Delete deletes a template record
 func (template *Template) Delete(client *Client) error {
 	if template.Name == "" {
 		return errors.New("name cannot be empty")
@@ -109,6 +109,8 @@ func (template *Template) Delete(client *Client) error {
 	return err
 }
 
+// Load stages a template to storage across the cluster
+// stoarge can be "disk" or "ram"
 func (template *Template) Load(client *Client, storage string) error {
 	if template.Name == "" {
 		return errors.New("name cannot be empty")
@@ -120,6 +122,7 @@ func (template *Template) Load(client *Client, storage string) error {
 	return err
 }
 
+// Unload removes a staged template from local storage across the cluster
 func (template *Template) Unload(client *Client) error {
 	if template.Name == "" {
 		return errors.New("name cannot be empty")
@@ -128,6 +131,7 @@ func (template *Template) Unload(client *Client) error {
 	return err
 }
 
+//Analyze validates a template
 func (template *Template) Analyze(client *Client) error {
 	if template.Name == "" {
 		return errors.New("name cannot be empty")
@@ -136,6 +140,7 @@ func (template *Template) Analyze(client *Client) error {
 	return err
 }
 
+//Author creates a virtual machine to author a template
 func (template *Template) Author(client *Client) error {
 	if template.Name == "" {
 		return errors.New("name cannot be empty")
@@ -144,12 +149,16 @@ func (template *Template) Author(client *Client) error {
 	return err
 }
 
-/*func (template *Template) Duplicate(client *Client, dstName, dstStorage, dstFilename) error {
+//Duplicate copies a template
+func (template *Template) Duplicate(client *Client, dstName, dstStorage, dstFilename string) error {
 	if template.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	jsonData := map[string]string{"dstName": dstName, "dstStorage": dstStorage, "dstFilename": dstFilename, "srcStorage":template. }
+	if len(template.Disks) < 1 {
+		return errors.New("No disks found")
+	}
+	jsonData := map[string]string{"dstName": dstName, "dstStorage": dstStorage, "dstFilename": dstFilename, "srcStorage": template.Disks[0].StorageID}
 	jsonValue, _ := json.Marshal(jsonData)
 	_, err := client.request("POST", "template/"+template.Name+"/author", jsonValue)
 	return err
-}*/
+}

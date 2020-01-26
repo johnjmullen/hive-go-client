@@ -135,7 +135,7 @@ var storageCopyURLCmd = &cobra.Command{
 		if viper.GetBool("wait") && viper.GetBool("progress-bar") {
 			fmt.Println("\nDownloading " + viper.GetString("url"))
 		}
-		handleTask(pool.CopyUrl(restClient, viper.GetString("url"), viper.GetString("filename")))
+		handleTask(pool.CopyURL(restClient, viper.GetString("url"), viper.GetString("filename")))
 	},
 }
 

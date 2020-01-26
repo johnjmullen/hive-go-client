@@ -17,6 +17,7 @@ type authToken struct {
 	Token string `json:"token"`
 }
 
+// Client is a wrapper around the hiveio rest api
 type Client struct {
 	Host          string
 	Port          uint
@@ -83,6 +84,7 @@ func (client *Client) request(method, path string, data []byte) ([]byte, error) 
 	return checkResponse(client.httpClient.Do(req))
 }
 
+// Login attempts to connect to the server specified in Client with the provided username, password, and realm
 func (client *Client) Login(username, password, realm string) error {
 	if client.Host == "localhost" || client.Host == "::1" || client.Host == "127.0.0.1" {
 		return nil
@@ -105,12 +107,14 @@ func (client *Client) Login(username, password, realm string) error {
 	return err
 }
 
+// ChangeFeed wrapper around a websocket to monitor database changes
 type ChangeFeed struct {
 	Data chan ChangeFeedMessage
 	Done chan struct{}
 	conn *websocket.Conn
 }
 
+// ChangeFeedMessage contains a change from the database
 type ChangeFeedMessage struct {
 	OldValue json.RawMessage `json:"old_val"`
 	NewValue json.RawMessage `json:"new_val"`
@@ -157,10 +161,15 @@ func (feed *ChangeFeed) changeFeedKeepAlive(timeout time.Duration) {
 	}
 }
 
+// Close disconnects the changefeed websocket
 func (feed *ChangeFeed) Close() error {
 	return feed.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 }
 
+// GetChangeFeed returns a ChangeFeed for monitoring the specified table
+// filter can be use to limit the changes monitored.
+// example to monitor a single task:
+// client.GetChangeFeed("task", map[string]string{"id": task.ID})
 func (client *Client) GetChangeFeed(table string, filter map[string]string) (*ChangeFeed, error) {
 	protocol := "wss"
 	var token string
@@ -197,4 +206,37 @@ func (client *Client) GetChangeFeed(table string, filter map[string]string) (*Ch
 	go feed.monitorChangeFeed()
 
 	return &feed, nil
+}
+
+// HostVersion returns the software version of the host the client is connected to
+func (client *Client) HostVersion() (Version, error) {
+	var version Version
+	body, err := client.request("GET", "host/version", nil)
+	if err != nil {
+		return version, err
+	}
+	err = json.Unmarshal(body, &version)
+	return version, err
+}
+
+// HostID returns the hostid of the host the client is connected to
+func (client *Client) HostID() (string, error) {
+	body, err := client.request("GET", "host/hostid", nil)
+	if err != nil {
+		return "", err
+	}
+	var objMap map[string]string
+	err = json.Unmarshal(body, &objMap)
+	return objMap["id"], err
+}
+
+// ClusterID returns the cluster id of the host the client is connected to
+func (client *Client) ClusterID() (string, error) {
+	body, err := client.request("GET", "host/clusterid", nil)
+	if err != nil {
+		return "", err
+	}
+	var objMap map[string]string
+	err = json.Unmarshal(body, &objMap)
+	return objMap["id"], err
 }

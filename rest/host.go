@@ -5,6 +5,7 @@ import (
 	"errors"
 )
 
+// Host describes a host record from the rest api
 type Host struct {
 	Appliance struct {
 		Broker      bool   `json:"broker"`
@@ -179,6 +180,7 @@ func (host Host) String() string {
 	return string(json)
 }
 
+// ListHosts returns an array of all host with an optional filter string
 func (client *Client) ListHosts(filter string) ([]Host, error) {
 	var hosts []Host
 	path := "hosts"
@@ -193,6 +195,7 @@ func (client *Client) ListHosts(filter string) ([]Host, error) {
 	return hosts, err
 }
 
+// GetHost requests a single guest by hostid
 func (client *Client) GetHost(hostid string) (Host, error) {
 	var host Host
 	if hostid == "" {
@@ -206,6 +209,7 @@ func (client *Client) GetHost(hostid string) (Host, error) {
 	return host, err
 }
 
+//UpdateAppliance updates settings from Host.appliance
 func (host *Host) UpdateAppliance(client *Client) (string, error) {
 	var result string
 	data := map[string]interface{}{"appliance": host.Appliance}
@@ -217,6 +221,7 @@ func (host *Host) UpdateAppliance(client *Client) (string, error) {
 	return result, err
 }
 
+// Delete removes a host from the database
 func (host *Host) Delete(client *Client) error {
 	if host.Hostid == "" {
 		return errors.New("Id cannot be empty")
@@ -228,11 +233,13 @@ func (host *Host) Delete(client *Client) error {
 	return err
 }
 
+// RestartServices calls restarts hive services
 func (host *Host) RestartServices(client *Client) error {
 	_, err := client.request("POST", "host/"+host.Hostid+"/services/hive-services/restart", nil)
 	return err
 }
 
+// Version is a structure containing version information returned by HostVersion
 type Version struct {
 	Major   uint   `json:"major"`
 	Minor   uint   `json:"minor"`
@@ -240,40 +247,12 @@ type Version struct {
 	Version string `json:"version"`
 }
 
-func (client *Client) HostVersion() (Version, error) {
-	var version Version
-	body, err := client.request("GET", "host/version", nil)
-	if err != nil {
-		return version, err
-	}
-	err = json.Unmarshal(body, &version)
-	return version, err
-}
-
-func (client *Client) HostId() (string, error) {
-	body, err := client.request("GET", "host/hostid", nil)
-	if err != nil {
-		return "", err
-	}
-	var objMap map[string]string
-	err = json.Unmarshal(body, &objMap)
-	return objMap["id"], err
-}
-
-func (client *Client) ClusterId() (string, error) {
-	body, err := client.request("GET", "host/clusterid", nil)
-	if err != nil {
-		return "", err
-	}
-	var objMap map[string]string
-	err = json.Unmarshal(body, &objMap)
-	return objMap["id"], err
-}
-
+// SetState can be used to set a host's state to available or maintenance
 func (host *Host) SetState(client *Client, state string) (*Task, error) {
 	return client.getTaskFromResponse(client.request("POST", "host/"+host.Hostid+"/state?state="+state, nil))
 }
 
+// GetState gets the current state of the host
 func (host *Host) GetState(client *Client) (string, error) {
 	body, err := client.request("GET", "host/"+host.Hostid+"/state", nil)
 	if err != nil {
@@ -284,6 +263,7 @@ func (host *Host) GetState(client *Client) (string, error) {
 	return state, err
 }
 
+// UnjoinCluster removes a host from the cluster
 func (host *Host) UnjoinCluster(client *Client) error {
 	_, err := client.request("POST", "host/"+host.Hostid+"/cluster/unjoin", nil)
 	return err

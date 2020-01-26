@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 )
 
+//BrokerPool describes a pool received from BrokerLogin
 type BrokerPool struct {
 	ID        string        `json:"id"`
 	Name      string        `json:"name"`
@@ -17,6 +18,8 @@ type brokerLoginResponse struct {
 	Pools []BrokerPool `json:"pools"`
 }
 
+// BrokerLogin connects to the broker with the provided username, password, and realm
+// returns a list of available pools for the user or an error
 func (client *Client) BrokerLogin(username, password, realm string) ([]BrokerPool, error) {
 	jsonData := map[string]string{"username": username, "password": password, "realm": realm}
 	jsonValue, err := json.Marshal(jsonData)
@@ -36,6 +39,7 @@ func (client *Client) BrokerLogin(username, password, realm string) ([]BrokerPoo
 	return resp.Pools, err
 }
 
+// BrokerAssignments returns an array of assignments for the logged in user
 func (client *Client) BrokerAssignments() ([]interface{}, error) {
 	body, err := client.request("GET", "broker/assignments", nil)
 	var assignments []interface{}
@@ -46,8 +50,9 @@ func (client *Client) BrokerAssignments() ([]interface{}, error) {
 	return assignments, err
 }
 
-func (client *Client) BrokerAssign(poolId string) (interface{}, error) {
-	body, err := client.request("POST", "broker/assign/"+poolId, nil)
+// BrokerAssign requests a desktop from a pool
+func (client *Client) BrokerAssign(poolID string) (interface{}, error) {
+	body, err := client.request("POST", "broker/assign/"+poolID, nil)
 	var result interface{}
 	if err != nil {
 		return result, err
@@ -56,6 +61,7 @@ func (client *Client) BrokerAssign(poolId string) (interface{}, error) {
 	return result, err
 }
 
+// BrokerConnectRDP request the rdp file to connect to a guest.
 func (client *Client) BrokerConnectRDP(guest string, remote bool) ([]byte, error) {
 	jsonData := map[string]interface{}{"guest": guest, "remote": remote, "outputType": "rdp"}
 	jsonValue, err := json.Marshal(jsonData)
@@ -66,14 +72,15 @@ func (client *Client) BrokerConnectRDP(guest string, remote bool) ([]byte, error
 	return body, err
 }
 
-func (client *Client) AssignGuest(poolId, username, realm, guest string) (interface{}, error) {
+// AssignGuest assign a user to aspecific guest
+func (client *Client) AssignGuest(poolID, username, realm, guest string) (interface{}, error) {
 	var result interface{}
 	jsonData := map[string]string{"realm": realm, "username": username, "guest": guest}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
 		return result, err
 	}
-	body, err := client.request("POST", "broker/assign/"+poolId, jsonValue)
+	body, err := client.request("POST", "broker/assign/"+poolID, jsonValue)
 	if err != nil {
 		return result, err
 	}
@@ -81,8 +88,9 @@ func (client *Client) AssignGuest(poolId, username, realm, guest string) (interf
 	return result, err
 }
 
-func (client *Client) ReleaseGuest(poolId, username, guest string) error {
-	jsonData := map[string]string{"poolId": poolId, "username": username, "guest": guest}
+// ReleaseGuest release a guest that is currently assigned
+func (client *Client) ReleaseGuest(poolID, username, guest string) error {
+	jsonData := map[string]string{"poolId": poolID, "username": username, "guest": guest}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
 		return err
