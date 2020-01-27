@@ -266,8 +266,8 @@ var guestBackupCmd = &cobra.Command{
 }
 
 var guestRestoreCmd = &cobra.Command{
-	Use:   "backup [Name]",
-	Short: "start guest backup",
+	Use:   "restore [Name]",
+	Short: "restore guest from a backup",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		guest, err := restClient.GetGuest(args[0])
