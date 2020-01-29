@@ -233,7 +233,7 @@ func (host *Host) Delete(client *Client) error {
 	return err
 }
 
-// RestartServices calls restarts hive services
+// RestartServices calls restart hive services
 func (host *Host) RestartServices(client *Client) error {
 	_, err := client.request("POST", "host/"+host.Hostid+"/services/hive-services/restart", nil)
 	return err

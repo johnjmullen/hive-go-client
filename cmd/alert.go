@@ -22,6 +22,8 @@ func init() {
 	alertCmd.AddCommand(alertListCmd)
 	alertListCmd.Flags().Bool("details", false, "show details")
 	alertListCmd.Flags().String("filter", "", "filter query string")
+	alertCmd.AddCommand(alertGetCmd)
+	alertCmd.AddCommand(alertAcknowledgeCmd)
 }
 
 // listCmd represents the list command
@@ -46,6 +48,38 @@ var alertListCmd = &cobra.Command{
 				list = append(list, info)
 			}
 			fmt.Println(formatString(list))
+		}
+	},
+}
+
+var alertGetCmd = &cobra.Command{
+	Use:   "get [id]",
+	Short: "get alert details",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		alert, err := restClient.GetAlert(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(formatString(alert))
+	},
+}
+
+var alertAcknowledgeCmd = &cobra.Command{
+	Use:   "acknowledge [id]",
+	Short: "Mark an alert as acknowledged",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		alert, err := restClient.GetAlert(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = alert.Acknowledge(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
 	},
 }
