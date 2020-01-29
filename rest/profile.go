@@ -16,15 +16,15 @@ type ProfileADConfig struct {
 
 //ProfileBrokerOptions contains rdp settings for a profile
 type ProfileBrokerOptions struct {
-	AllowDesktopComposition bool `json:"allowDesktopComposition,omitempty"`
-	AudioCapture            bool `json:"audioCapture,omitempty"`
-	RedirectCSSP            bool `json:"redirectCSSP,omitempty"`
-	RedirectClipboard       bool `json:"redirectClipboard,omitempty"`
-	RedirectDisk            bool `json:"redirectDisk,omitempty"`
-	RedirectPNP             bool `json:"redirectPNP,omitempty"`
-	RedirectPrinter         bool `json:"redirectPrinter,omitempty"`
-	RedirectUSB             bool `json:"redirectUSB,omitempty"`
-	SmartResize             bool `json:"smartResize,omitempty"`
+	AllowDesktopComposition bool `json:"allowDesktopComposition"`
+	AudioCapture            bool `json:"audioCapture"`
+	RedirectCSSP            bool `json:"redirectCSSP"`
+	RedirectClipboard       bool `json:"redirectClipboard"`
+	RedirectDisk            bool `json:"redirectDisk"`
+	RedirectPNP             bool `json:"redirectPNP"`
+	RedirectPrinter         bool `json:"redirectPrinter"`
+	RedirectUSB             bool `json:"redirectUSB"`
+	SmartResize             bool `json:"smartResize"`
 }
 
 //ProfileUserVolumes contains user volume settings for a profile

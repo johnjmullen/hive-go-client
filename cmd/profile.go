@@ -38,8 +38,22 @@ var profileCreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		v := viper.New()
 		if len(args) == 1 {
+			var file *os.File
+			var err error
+			if args[0] == "-" {
+				fmt.Println("reading stdin")
+				file = os.Stdin
+			} else {
+				file, err = os.Open(args[0])
+				if err != nil {
+					fmt.Println(err)
+					os.Exit(1)
+				}
+			}
+			defer file.Close()
+			v.SetConfigType(viper.GetString("format"))
 			v.SetConfigFile(args[0])
-			v.ReadInConfig()
+			v.ReadConfig(file)
 		}
 		v.BindPFlag("id", cmd.Flags().Lookup("id"))
 		v.BindPFlag("name", cmd.Flags().Lookup("name"))
@@ -75,9 +89,8 @@ var profileCreateCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		fmt.Println(formatString(profile))
 		msg, err := profile.Create(restClient)
-		fmt.Println(msg)
+		fmt.Println(formatString(msg))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -254,9 +267,8 @@ var profileUpdateCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		fmt.Println(formatString(profile))
 		msg, err := profile.Update(restClient)
-		fmt.Println(msg)
+		fmt.Println(formatString(msg))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
