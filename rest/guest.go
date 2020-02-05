@@ -158,12 +158,11 @@ func (guest *Guest) Delete(client *Client) error {
 }
 
 //StartBackup requests starting a backup immediately
-func (guest *Guest) StartBackup(client *Client) error {
+func (guest *Guest) StartBackup(client *Client) (*Task, error) {
 	if guest.Name == "" {
-		return errors.New("name cannot be empty")
+		return nil, errors.New("name cannot be empty")
 	}
-	_, err := client.request("POST", "guest/"+guest.Name+"/backup", nil)
-	return err
+	return client.getTaskFromResponse(client.request("POST", "guest/"+guest.Name+"/backup", nil))
 }
 
 //Restore restores a guest from a backup

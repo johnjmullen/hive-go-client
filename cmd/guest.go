@@ -257,11 +257,7 @@ var guestBackupCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		guest.StartBackup(restClient)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		handleTask(guest.StartBackup(restClient))
 	},
 }
 
@@ -269,6 +265,9 @@ var guestRestoreCmd = &cobra.Command{
 	Use:   "restore [Name]",
 	Short: "restore guest from a backup",
 	Args:  cobra.ExactArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		bindTaskFlags(cmd)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		guest, err := restClient.GetGuest(args[0])
 		if err != nil {
@@ -276,7 +275,6 @@ var guestRestoreCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		handleTask(guest.Restore(restClient))
-
 	},
 }
 
@@ -291,7 +289,6 @@ func init() {
 	guestCmd.AddCommand(guestDiffCmd)
 	guestCmd.AddCommand(guestGetCmd)
 
-	//list
 	guestCmd.AddCommand(guestListCmd)
 	guestListCmd.Flags().Bool("details", false, "show details")
 	guestListCmd.Flags().String("filter", "", "filter query string")
@@ -304,6 +301,7 @@ func init() {
 	guestCmd.AddCommand(guestUpdateCmd)
 
 	guestCmd.AddCommand(guestBackupCmd)
+	addTaskFlags(guestBackupCmd)
 	guestCmd.AddCommand(guestRestoreCmd)
 	addTaskFlags(guestRestoreCmd)
 }
