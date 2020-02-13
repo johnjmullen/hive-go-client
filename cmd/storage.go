@@ -52,11 +52,13 @@ var storageBrowseCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		if viper.GetBool("details") == false {
-			names := []string{}
+			paths := []string{}
 			for _, file := range files {
-				names = append(names, file.Name)
-				fmt.Println(formatString(names))
+				if file.IsDir == false {
+					paths = append(paths, file.Path)
+				}
 			}
+			fmt.Println(formatString(paths))
 		} else {
 			fmt.Println(formatString(files))
 		}

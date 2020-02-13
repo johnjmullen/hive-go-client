@@ -229,7 +229,7 @@ func (pool *StoragePool) Browse(client *Client, filePath string, recursive bool)
 		options += "&filePath=" + filePath
 	}
 	if recursive == true {
-		options += "recursive=true"
+		options += "&recursive=true"
 	}
 	body, err := client.request("GET", fmt.Sprintf("storage/pool/%s/browse?%s", pool.ID, options), nil)
 	if err != nil {
