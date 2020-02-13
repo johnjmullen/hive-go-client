@@ -162,3 +162,20 @@ func (cluster *Cluster) DisableBackup(client *Client) error {
 	_, err := client.request("POST", "cluster/"+cluster.ID+"/disableBackup", nil)
 	return err
 }
+
+// EnableSharedStorage enable shared storage on a cluster
+// storageUtilization is a percentage for the amount of storage to be allocated for shared storage
+// minSetSize is the number of host to grow the storage by (2 or 3)
+func (cluster *Cluster) EnableSharedStorage(client *Client, storageUtilization int, minSetSize int) (*Task, error) {
+	jsonData := map[string]int{"minSetSize": minSetSize, "storageUtilization": storageUtilization}
+	jsonValue, err := json.Marshal(jsonData)
+	if err != nil {
+		return nil, err
+	}
+	return client.getTaskFromResponse(client.request("POST", "cluster/"+cluster.ID+"/enableSharedStorage", jsonValue))
+}
+
+// DisableSharedStorage disables shared storage on the cluster
+func (cluster *Cluster) DisableSharedStorage(client *Client) (*Task, error) {
+	return client.getTaskFromResponse(client.request("POST", "cluster/"+cluster.ID+"/disableSharedStorage", nil))
+}

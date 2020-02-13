@@ -102,13 +102,12 @@ func (task Task) WatchTask(client *Client, taskData chan Task, done chan struct{
 		select {
 		case <-timer.C:
 			//work around race condition
-			t, err := client.GetTask(task.ID)
+			t, _ := client.GetTask(task.ID)
 			if t.State == "completed" || t.State == "failed" {
 				taskData <- *t
 				feed.Close()
 				continue
 			}
-			fmt.Println(err)
 		case msg := <-feed.Data:
 			if msg.Error != nil {
 				fmt.Println(msg.Error)

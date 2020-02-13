@@ -90,11 +90,11 @@ var profileCreateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		msg, err := profile.Create(restClient)
-		fmt.Println(formatString(msg))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+		fmt.Println(formatString(msg))
 	},
 }
 

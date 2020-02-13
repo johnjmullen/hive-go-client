@@ -135,6 +135,50 @@ var disableBackupCmd = &cobra.Command{
 	},
 }
 
+var enableSharedStorageCmd = &cobra.Command{
+	Use:   "enable-shared-storage",
+	Short: "Enable Shared Storage",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("storage-utilization", cmd.Flags().Lookup("storage-utilization"))
+		viper.BindPFlag("set-size", cmd.Flags().Lookup("set-size"))
+		bindTaskFlags(cmd)
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		cluster, err := restClient.GetCluster(clusterID)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		handleTask(cluster.EnableSharedStorage(restClient, viper.GetInt("storage-utilization"), viper.GetInt("set-size")))
+	},
+}
+
+var disableSharedStorageCmd = &cobra.Command{
+	Use:   "disable-shared-storage",
+	Short: "Disable Shared Storage",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		bindTaskFlags(cmd)
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		cluster, err := restClient.GetCluster(clusterID)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		handleTask(cluster.DisableSharedStorage(restClient))
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(clusterCmd)
 	clusterCmd.AddCommand(addHostCmd)
@@ -153,4 +197,11 @@ func init() {
 	enableBackupCmd.Flags().String("start-window", "00:00:00", "Time to start running backups")
 	enableBackupCmd.Flags().String("end-window", "04:00:00", "Time to stop running backups")
 	clusterCmd.AddCommand(disableBackupCmd)
+
+	clusterCmd.AddCommand(enableSharedStorageCmd)
+	enableSharedStorageCmd.Flags().IntP("storage-utilization", "s", 75, "Percentage of disk to allocate to shared storage")
+	enableSharedStorageCmd.Flags().Int("set-size", 3, "minimum number of hosts to increase the shared storage by")
+	addTaskFlags(enableSharedStorageCmd)
+	clusterCmd.AddCommand(disableSharedStorageCmd)
+	addTaskFlags(disableSharedStorageCmd)
 }
