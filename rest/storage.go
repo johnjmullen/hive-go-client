@@ -208,14 +208,30 @@ func (pool *StoragePool) DeleteFile(client *Client, filename string) error {
 	return err
 }
 
+//StoragePoolFileInfo contains information about the files returned by Browse
+type StoragePoolFileInfo struct {
+	Path     string `json:"Path"`
+	Name     string `json:"Name"`
+	Size     int    `json:"Size"`
+	MimeType string `json:"MimeType"`
+	ModTime  string `json:"ModTime"`
+	IsDir    bool   `json:"IsDir"`
+}
+
 //Browse returns a list of files from a storage pool
-func (pool *StoragePool) Browse(client *Client) ([]string, error) {
-	var files []string
+func (pool *StoragePool) Browse(client *Client, filePath string, recursive bool) ([]StoragePoolFileInfo, error) {
+	var files []StoragePoolFileInfo
 	if pool.ID == "" {
 		return files, errors.New("Invalid Storage Pool")
 	}
-
-	body, err := client.request("GET", fmt.Sprintf("storage/pool/%s/browse", pool.ID), nil)
+	options := "details=true"
+	if len(filePath) > 0 {
+		options += "&filePath=" + filePath
+	}
+	if recursive == true {
+		options += "recursive=true"
+	}
+	body, err := client.request("GET", fmt.Sprintf("storage/pool/%s/browse?%s", pool.ID, options), nil)
 	if err != nil {
 		return files, err
 	}

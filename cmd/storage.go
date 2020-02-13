@@ -25,6 +25,9 @@ var storageBrowseCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("id", cmd.Flags().Lookup("id"))
 		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
+		viper.BindPFlag("path", cmd.Flags().Lookup("path"))
+		viper.BindPFlag("details", cmd.Flags().Lookup("details"))
+		viper.BindPFlag("recursive", cmd.Flags().Lookup("recursive"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var pool *rest.StoragePool
@@ -43,12 +46,20 @@ var storageBrowseCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		files, err := pool.Browse(restClient)
+		files, err := pool.Browse(restClient, viper.GetString("path"), viper.GetBool("recursive"))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		fmt.Println(formatString(files))
+		if viper.GetBool("details") == false {
+			names := []string{}
+			for _, file := range files {
+				names = append(names, file.Name)
+				fmt.Println(formatString(names))
+			}
+		} else {
+			fmt.Println(formatString(files))
+		}
 	},
 }
 
@@ -474,6 +485,9 @@ func init() {
 
 	storageCmd.AddCommand(storageBrowseCmd)
 	initIDFlags(storageBrowseCmd)
+	storageBrowseCmd.Flags().String("path", "", "path inside the storage pool to browse")
+	storageBrowseCmd.Flags().Bool("details", false, "detailed directory listing")
+	storageBrowseCmd.Flags().Bool("recursive", false, "recursively list files")
 
 	storageCmd.AddCommand(storageConvertDiskCmd)
 	storageConvertDiskCmd.Flags().String("src-storage", "", "Source storage pool name")
