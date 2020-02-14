@@ -150,15 +150,14 @@ func (template *Template) Author(client *Client) error {
 }
 
 //Duplicate copies a template
-func (template *Template) Duplicate(client *Client, dstName, dstStorage, dstFilename string) error {
+func (template *Template) Duplicate(client *Client, dstName, dstStorage, dstFilename string) (*Task, error) {
 	if template.Name == "" {
-		return errors.New("name cannot be empty")
+		return nil, errors.New("name cannot be empty")
 	}
 	if len(template.Disks) < 1 {
-		return errors.New("No disks found")
+		return nil, errors.New("No disks found")
 	}
-	jsonData := map[string]string{"dstName": dstName, "dstStorage": dstStorage, "dstFilename": dstFilename, "srcStorage": template.Disks[0].StorageID}
+	jsonData := map[string]string{"srcStorage": template.Disks[0].StorageID, "srcFilename": template.Disks[0].Filename, "dstName": dstName, "dstStorage": dstStorage, "dstFilename": dstFilename}
 	jsonValue, _ := json.Marshal(jsonData)
-	_, err := client.request("POST", "template/"+template.Name+"/author", jsonValue)
-	return err
+	return client.getTaskFromResponse(client.request("POST", "template/"+template.Name+"/duplicate", jsonValue))
 }

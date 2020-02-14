@@ -241,6 +241,32 @@ var templateUpdateCmd = &cobra.Command{
 	},
 }
 
+var templateDuplicateCmd = &cobra.Command{
+	Use:   "duplicate [name] ",
+	Short: "Make a copy of a template",
+	Args:  cobra.ExactArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		cmd.MarkFlagRequired("dest-name")
+		cmd.MarkFlagRequired("dest-storage")
+		cmd.MarkFlagRequired("dest-filename")
+		viper.BindPFlag("dest-name", cmd.Flags().Lookup("dest-name"))
+		viper.BindPFlag("dest-storage", cmd.Flags().Lookup("dest-storage"))
+		viper.BindPFlag("dest-filename", cmd.Flags().Lookup("dest-filename"))
+		bindTaskFlags(cmd)
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		srcTemplate, err := restClient.GetTemplate(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		if viper.GetBool("wait") && viper.GetBool("progress-bar") {
+			fmt.Println("Duplicating Template")
+		}
+		handleTask(srcTemplate.Duplicate(restClient, viper.GetString("dest-name"), viper.GetString("dest-storage"), viper.GetString("dest-filename")))
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(templateCmd)
 	templateCmd.AddCommand(templateAnalyzeCmd)
@@ -263,4 +289,10 @@ func init() {
 
 	templateCmd.AddCommand(templateUnloadCmd)
 	templateCmd.AddCommand(templateUpdateCmd)
+
+	templateCmd.AddCommand(templateDuplicateCmd)
+	templateDuplicateCmd.Flags().String("dest-name", "", "Name for the new Template")
+	templateDuplicateCmd.Flags().String("dest-storage", "", "Destination storage pool id")
+	templateDuplicateCmd.Flags().String("dest-filename", "", "Destination filename")
+	addTaskFlags(templateDuplicateCmd)
 }
