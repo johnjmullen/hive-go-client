@@ -278,6 +278,24 @@ var guestRestoreCmd = &cobra.Command{
 	},
 }
 
+var guestMigrateCmd = &cobra.Command{
+	Use:   "migrate [Name]",
+	Short: "migrate a guest",
+	Args:  cobra.ExactArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		cmd.MarkFlagRequired("hostid")
+		viper.BindPFlag("hostid", cmd.Flags().Lookup("hostid"))
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		guest, err := restClient.GetGuest(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		guest.Migrate(restClient, viper.GetString("hostid"))
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(guestCmd)
 
@@ -304,4 +322,7 @@ func init() {
 	addTaskFlags(guestBackupCmd)
 	guestCmd.AddCommand(guestRestoreCmd)
 	addTaskFlags(guestRestoreCmd)
+
+	guestCmd.AddCommand(guestMigrateCmd)
+	guestMigrateCmd.Flags().String("hostid", "", "The host the guest will be migrated to")
 }

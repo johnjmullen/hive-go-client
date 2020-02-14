@@ -172,3 +172,17 @@ func (guest *Guest) Restore(client *Client) (*Task, error) {
 	}
 	return client.getTaskFromResponse(client.request("POST", "guest/"+guest.Name+"/restore", nil))
 }
+
+//Migrate migrate a guest to a different host
+func (guest *Guest) Migrate(client *Client, destinationHostid string) error {
+	if guest.Name == "" {
+		return errors.New("name cannot be empty")
+	}
+	jsonData := map[string]string{"destinationId": destinationHostid}
+	jsonValue, err := json.Marshal(jsonData)
+	if err != nil {
+		return err
+	}
+	_, err = client.request("POST", "guest/"+guest.Name+"/migrate", jsonValue)
+	return err
+}
