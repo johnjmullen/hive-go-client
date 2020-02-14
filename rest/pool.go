@@ -84,6 +84,7 @@ type Pool struct {
 	Type                      string            `json:"type"`
 	UserSessionLoginThreshold int               `json:"userSessionLoginThreshold,omitempty"`
 	Backup                    *PoolBackup       `json:"backup,omitempty"`
+	AllowedHostIds            []string          `json:"allowedHostIds,omitempty"`
 }
 
 func (pool Pool) String() string {
