@@ -58,15 +58,8 @@ type Host struct {
 			ProductName  string `json:"productName"`
 		} `json:"System"`
 		TotalPhysicalMemory int `json:"TotalPhysicalMemory"`
-		CPUFeatures         struct {
-			Arch     string `json:"arch"`
-			Features []struct {
-				Name   string `json:"name"`
-				Policy string `json:"policy"`
-			} `json:"features"`
-			ModelName string `json:"modelName"`
-		} `json:"cpuFeatures"`
-		Memory []struct {
+		CPUFeatures         interface{}
+		Memory              []struct {
 			Size int    `json:"size"`
 			Type string `json:"type"`
 		} `json:"memory"`
