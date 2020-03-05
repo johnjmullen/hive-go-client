@@ -66,6 +66,13 @@ type PoolBackup struct {
 	TargetStorageID string `json:"targetStorageId"`
 }
 
+//PoolAffinity host affinity settings for the pool
+type PoolAffinity struct {
+	CustomCPUFeatures  string   `json:"customCPUFeatures,omitempty"`
+	UseHostPassthrough bool     `json:"useHostPassthrough"`
+	AllowedHostIDs     []string `json:"allowedHostIds,omitempty"`
+}
+
 // Pool describes a guest pool record from the rest api
 type Pool struct {
 	ID                        string            `json:"id,omitempty"`
@@ -84,7 +91,7 @@ type Pool struct {
 	Type                      string            `json:"type"`
 	UserSessionLoginThreshold int               `json:"userSessionLoginThreshold,omitempty"`
 	Backup                    *PoolBackup       `json:"backup,omitempty"`
-	AllowedHostIds            []string          `json:"allowedHostIds,omitempty"`
+	PoolAffinity              *PoolAffinity     `json:"poolAffinity,omitempty"`
 }
 
 func (pool Pool) String() string {

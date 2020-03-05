@@ -45,7 +45,7 @@ var guestAssignCmd = &cobra.Command{
 
 var guestDeleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "delete guest pool",
+	Short: "delete guest",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
