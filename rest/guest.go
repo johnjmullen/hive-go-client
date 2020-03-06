@@ -3,6 +3,8 @@ package rest
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"time"
 )
 
 // Guest describes a guest record from the rest api
@@ -185,4 +187,50 @@ func (guest *Guest) Migrate(client *Client, destinationHostid string) error {
 	}
 	_, err = client.request("POST", "guest/"+guest.Name+"/migrate", jsonValue)
 	return err
+}
+
+func checkGuestState(guest Guest) bool {
+	for _, v := range guest.TargetState {
+		if v == guest.GuestState {
+			return true
+		}
+	}
+	return false
+}
+
+// WaitForGuest waits for a guest state to match the targetState
+func (guest Guest) WaitForGuest(client *Client, timeout time.Duration) error {
+	if checkGuestState(guest) {
+		return nil
+	}
+	newVal := Guest{}
+	feed, err := client.GetChangeFeed("guest", map[string]string{"name": guest.Name})
+	if err != nil {
+		return err
+	}
+	timer := time.NewTimer(timeout)
+	if timeout <= 0 && !timer.Stop() {
+		<-timer.C
+	}
+	for {
+		select {
+		case <-timer.C:
+			return fmt.Errorf("Timed out")
+		case msg := <-feed.Data:
+			if msg.Error != nil {
+				feed.Close()
+				return msg.Error
+			}
+			err = json.Unmarshal(msg.NewValue, &newVal)
+			if err != nil {
+				err = fmt.Errorf("Error with json unmarshal: %v", err)
+				feed.Close()
+				return err
+			}
+			if checkGuestState(newVal) {
+				feed.Close()
+				return nil
+			}
+		}
+	}
 }

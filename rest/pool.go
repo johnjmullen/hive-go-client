@@ -3,6 +3,8 @@ package rest
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"time"
 )
 
 // PoolDisk disk structure for a pool record
@@ -180,4 +182,41 @@ func (pool *Pool) Refresh(client *Client) error {
 	}
 	_, err := client.request("POST", "pool/"+pool.ID+"/refresh", nil)
 	return err
+}
+
+// WaitForPool waits for a pool to reach the desired state
+func (pool Pool) WaitForPool(client *Client, targetState string, timeout time.Duration) error {
+	if pool.State == targetState {
+		return nil
+	}
+	newVal := Pool{}
+	feed, err := client.GetChangeFeed("pool", map[string]string{"id": pool.ID})
+	if err != nil {
+		return err
+	}
+	timer := time.NewTimer(timeout)
+	if timeout <= 0 && !timer.Stop() {
+		<-timer.C
+	}
+	for {
+		select {
+		case <-timer.C:
+			return fmt.Errorf("Timed out")
+		case msg := <-feed.Data:
+			if msg.Error != nil {
+				feed.Close()
+				return msg.Error
+			}
+			err = json.Unmarshal(msg.NewValue, &newVal)
+			if err != nil {
+				err = fmt.Errorf("Error with json unmarshal: %v", err)
+				feed.Close()
+				return err
+			}
+			if newVal.State == targetState {
+				feed.Close()
+				return nil
+			}
+		}
+	}
 }
