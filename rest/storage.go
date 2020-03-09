@@ -240,7 +240,7 @@ func (pool *StoragePool) Browse(client *Client, filePath string, recursive bool)
 }
 
 //Upload uploads a local file into a storage pool
-func (pool *StoragePool) Upload(client *Client, filename string) error {
+func (pool *StoragePool) Upload(client *Client, filename, targetFilename string) error {
 	if pool.ID == "" {
 		return errors.New("Invalid Storage Pool")
 	}
@@ -269,6 +269,7 @@ func (pool *StoragePool) Upload(client *Client, filename string) error {
 
 	upload, err := tus.NewUploadFromFile(f)
 	upload.Metadata["storageId"] = pool.ID
+	upload.Metadata["filename"] = targetFilename
 	if err != nil {
 		return err
 	}

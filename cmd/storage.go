@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 
 	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
@@ -102,18 +103,19 @@ var storageCopyFileCmd = &cobra.Command{
 	Use:   "copy-file",
 	Short: "copy a storage pool file",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		cmd.MarkFlagRequired("srcStorageId")
-		cmd.MarkFlagRequired("srcFilePath")
-		cmd.MarkFlagRequired("destFilePath")
-		cmd.MarkFlagRequired("destFilePath")
-		viper.BindPFlag("srcStorageId", cmd.Flags().Lookup("srcStorageId"))
-		viper.BindPFlag("srcFilePath", cmd.Flags().Lookup("srcFilePath"))
-		viper.BindPFlag("destStorageId", cmd.Flags().Lookup("destStorageId"))
-		viper.BindPFlag("destFilePath", cmd.Flags().Lookup("destFilePath"))
+		cmd.MarkFlagRequired("src-storage")
+		cmd.MarkFlagRequired("src-filename")
+		cmd.MarkFlagRequired("dest-storage")
+		cmd.MarkFlagRequired("dest-filename")
+		viper.BindPFlag("src-storage", cmd.Flags().Lookup("src-storage"))
+		viper.BindPFlag("src-filename", cmd.Flags().Lookup("src-filename"))
+		viper.BindPFlag("dest-storage", cmd.Flags().Lookup("dest-storage"))
+		viper.BindPFlag("dest-filename", cmd.Flags().Lookup("dest-filename"))
+		viper.BindPFlag("dest-format", cmd.Flags().Lookup("dest-format"))
 		bindTaskFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		handleTask(restClient.CopyFile(viper.GetString("srcStorageId"), viper.GetString("srcFilePath"), viper.GetString("destStorageId"), viper.GetString("destFilePath")))
+		handleTask(restClient.CopyFile(viper.GetString("src-storage"), viper.GetString("src-filename"), viper.GetString("dest-storage"), viper.GetString("dest-filename")))
 	},
 }
 
@@ -422,18 +424,19 @@ var storageMoveFileCmd = &cobra.Command{
 	Use:   "move-file",
 	Short: "move a storage pool file",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		cmd.MarkFlagRequired("srcStorageId")
-		cmd.MarkFlagRequired("srcFilePath")
-		cmd.MarkFlagRequired("destFilePath")
-		cmd.MarkFlagRequired("destFilePath")
-		viper.BindPFlag("srcStorageId", cmd.Flags().Lookup("srcStorageId"))
-		viper.BindPFlag("srcFilePath", cmd.Flags().Lookup("srcFilePath"))
-		viper.BindPFlag("destStorageId", cmd.Flags().Lookup("destStorageId"))
-		viper.BindPFlag("destFilePath", cmd.Flags().Lookup("destFilePath"))
+		cmd.MarkFlagRequired("src-storage")
+		cmd.MarkFlagRequired("src-filename")
+		cmd.MarkFlagRequired("dest-storage")
+		cmd.MarkFlagRequired("dest-filename")
+		viper.BindPFlag("src-storage", cmd.Flags().Lookup("src-storage"))
+		viper.BindPFlag("src-filename", cmd.Flags().Lookup("src-filename"))
+		viper.BindPFlag("dest-storage", cmd.Flags().Lookup("dest-storage"))
+		viper.BindPFlag("dest-filename", cmd.Flags().Lookup("dest-filename"))
+		viper.BindPFlag("dest-format", cmd.Flags().Lookup("dest-format"))
 		bindTaskFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		handleTask(restClient.MoveFile(viper.GetString("srcStorageId"), viper.GetString("srcFilePath"), viper.GetString("destStorageId"), viper.GetString("destFilePath")))
+		handleTask(restClient.MoveFile(viper.GetString("src-storage"), viper.GetString("src-filename"), viper.GetString("dest-storage"), viper.GetString("dest-filename")))
 	},
 }
 
@@ -445,6 +448,7 @@ var storageUploadCmd = &cobra.Command{
 		cmd.MarkFlagRequired("storageId")
 		viper.BindPFlag("id", cmd.Flags().Lookup("id"))
 		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
+		viper.BindPFlag("dest-filename", cmd.Flags().Lookup("dest-filename"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var pool *rest.StoragePool
@@ -462,7 +466,13 @@ var storageUploadCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		err = pool.Upload(restClient, args[0])
+		var filename string
+		if cmd.Flags().Changed("dest-filename") {
+			filename = viper.GetString("dest-filename")
+		} else {
+			filename = path.Base(args[0])
+		}
+		err = pool.Upload(restClient, args[0], filename)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -500,10 +510,10 @@ func init() {
 	addTaskFlags(storageConvertDiskCmd)
 
 	storageCmd.AddCommand(storageCopyFileCmd)
-	storageCopyFileCmd.Flags().String("srcStorageId", "", "Source storage pool id")
-	storageCopyFileCmd.Flags().String("srcFilePath", "", "path to file in the source storage pool")
-	storageCopyFileCmd.Flags().String("destStorageId", "", "Destination storage pool id")
-	storageCopyFileCmd.Flags().String("destFilePath", "", "path to file in the destination storage pool")
+	storageCopyFileCmd.Flags().String("src-storage", "", "Source storage pool id")
+	storageCopyFileCmd.Flags().String("src-filename", "", "path to the file in the source storage pool")
+	storageCopyFileCmd.Flags().String("dest-storage", "", "Destination storage pool id")
+	storageCopyFileCmd.Flags().String("dest-filename", "", "path to the file in the destination storage pool")
 	addTaskFlags(storageCopyFileCmd)
 
 	storageCmd.AddCommand(storageCopyURLCmd)
@@ -538,12 +548,14 @@ func init() {
 	addTaskFlags(storageGrowDiskCmd)
 
 	storageCmd.AddCommand(storageMoveFileCmd)
-	storageMoveFileCmd.Flags().String("srcStorageId", "", "Source storage pool id")
-	storageMoveFileCmd.Flags().String("srcFilePath", "", "path to file in the source storage pool")
-	storageMoveFileCmd.Flags().String("destStorageId", "", "Destination storage pool id")
-	storageMoveFileCmd.Flags().String("destFilePath", "", "path to file in the destination storage pool")
+	storageMoveFileCmd.Flags().String("src-storage", "", "Source storage pool id")
+	storageMoveFileCmd.Flags().String("src-filename", "", "path to the file in the source storage pool")
+	storageMoveFileCmd.Flags().String("dest-storage", "", "Destination storage pool id")
+	storageMoveFileCmd.Flags().String("dest-filename", "", "path to the file in the destination storage pool")
 	addTaskFlags(storageMoveFileCmd)
 
 	storageCmd.AddCommand(storageUploadCmd)
 	initIDFlags(storageUploadCmd)
+	storageUploadCmd.Flags().String("dest-filename", "", "path to the file in the destination storage pool")
+
 }
