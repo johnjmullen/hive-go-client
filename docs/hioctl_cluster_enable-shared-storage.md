@@ -1,21 +1,24 @@
-## hioctl cluster enable-backup
+## hioctl cluster enable-shared-storage
 
-Enable Backup
+Enable Shared Storage
 
 ### Synopsis
 
-Enable Backup
+Enable Shared Storage
 
 ```
-hioctl cluster enable-backup [flags]
+hioctl cluster enable-shared-storage [flags]
 ```
 
 ### Options
 
 ```
-      --end-window string     Time to stop running backups (default "04:00:00")
-  -h, --help                  help for enable-backup
-      --start-window string   Time to start running backups (default "00:00:00")
+  -h, --help                      help for enable-shared-storage
+      --progress-bar              show a progress bar with --wait
+      --raw-progress              print progress as a number with --wait
+      --set-size int              minimum number of hosts to increase the shared storage by (default 3)
+  -s, --storage-utilization int   Percentage of disk to allocate to shared storage (default 75)
+      --wait                      wait for task to complete
 ```
 
 ### Options inherited from parent commands

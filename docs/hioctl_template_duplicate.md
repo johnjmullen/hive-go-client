@@ -1,19 +1,25 @@
-## hioctl template unload
+## hioctl template duplicate
 
-unload template from all hosts
+Make a copy of a template
 
 ### Synopsis
 
-unload template from all hosts
+Make a copy of a template
 
 ```
-hioctl template unload [Name] [flags]
+hioctl template duplicate [name]  [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for unload
+      --dest-filename string   Destination filename
+      --dest-name string       Name for the new Template
+      --dest-storage string    Destination storage pool id
+  -h, --help                   help for duplicate
+      --progress-bar           show a progress bar with --wait
+      --raw-progress           print progress as a number with --wait
+      --wait                   wait for task to complete
 ```
 
 ### Options inherited from parent commands
