@@ -75,11 +75,11 @@ func (guest Guest) String() string {
 }
 
 // ListGuests returns an array of all guests with an optional filter string
-func (client *Client) ListGuests(filter string) ([]Guest, error) {
+func (client *Client) ListGuests(query string) ([]Guest, error) {
 	var guests []Guest
 	path := "guests"
-	if filter != "" {
-		path += "?" + filter
+	if query != "" {
+		path += "?" + query
 	}
 	body, err := client.request("GET", path, nil)
 	if err != nil {

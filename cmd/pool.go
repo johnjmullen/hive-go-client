@@ -135,10 +135,10 @@ var poolListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list pools",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("filter", cmd.Flags().Lookup("filter"))
+		bindListFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		pools, err := restClient.ListGuestPools(viper.GetString("filter"))
+		pools, err := restClient.ListGuestPools(listFlagsToQuery())
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -205,8 +205,7 @@ func init() {
 	poolGetCmd.Flags().StringP("name", "n", "", "pool name")
 
 	poolCmd.AddCommand(poolListCmd)
-	poolListCmd.Flags().Bool("details", false, "show details")
-	poolListCmd.Flags().String("filter", "", "filter query string")
+	addListFlags(poolListCmd)
 
 	poolCmd.AddCommand(poolUpdateCmd)
 }

@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var alertCmd = &cobra.Command{
@@ -20,8 +19,7 @@ var alertCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(alertCmd)
 	alertCmd.AddCommand(alertListCmd)
-	alertListCmd.Flags().Bool("details", false, "show details")
-	alertListCmd.Flags().String("filter", "", "filter query string")
+	addListFlags(alertListCmd)
 	alertCmd.AddCommand(alertGetCmd)
 	alertCmd.AddCommand(alertAcknowledgeCmd)
 }
@@ -31,10 +29,10 @@ var alertListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list alerts",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("filter", cmd.Flags().Lookup("filter"))
+		bindListFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		alerts, err := restClient.ListAlerts(viper.GetString("filter"))
+		alerts, err := restClient.ListAlerts(listFlagsToQuery())
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

@@ -28,11 +28,11 @@ func (alert Alert) String() string {
 }
 
 // ListAlerts lists all alerts with an optional filter string
-func (client *Client) ListAlerts(filter string) ([]Alert, error) {
+func (client *Client) ListAlerts(query string) ([]Alert, error) {
 	var alerts []Alert
 	path := "alerts"
-	if filter != "" {
-		path += "?" + filter
+	if query != "" {
+		path += "?" + query
 	}
 	body, err := client.request("GET", path, nil)
 	if err != nil {

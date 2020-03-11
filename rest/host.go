@@ -174,11 +174,11 @@ func (host Host) String() string {
 }
 
 // ListHosts returns an array of all host with an optional filter string
-func (client *Client) ListHosts(filter string) ([]Host, error) {
+func (client *Client) ListHosts(query string) ([]Host, error) {
 	var hosts []Host
 	path := "hosts"
-	if filter != "" {
-		path += "?" + filter
+	if query != "" {
+		path += "?" + query
 	}
 	body, err := client.request("GET", path, nil)
 	if err != nil {

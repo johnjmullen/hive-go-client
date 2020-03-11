@@ -89,10 +89,10 @@ var realmListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list realms",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("filter", cmd.Flags().Lookup("filter"))
+		bindListFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		realms, err := restClient.ListRealms(viper.GetString("filter"))
+		realms, err := restClient.ListRealms(listFlagsToQuery())
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -123,6 +123,5 @@ func init() {
 	realmCmd.AddCommand(realmGetCmd)
 
 	realmCmd.AddCommand(realmListCmd)
-	realmListCmd.Flags().Bool("details", false, "show details")
-	realmListCmd.Flags().String("filter", "", "filter query string")
+	addListFlags(realmListCmd)
 }

@@ -47,10 +47,10 @@ func (template Template) String() string {
 }
 
 // ListTemplates returns an array of templates with an optional filter string
-func (client *Client) ListTemplates(filter string) ([]Template, error) {
+func (client *Client) ListTemplates(query string) ([]Template, error) {
 	path := "templates"
-	if filter != "" {
-		path += "?" + filter
+	if query != "" {
+		path += "?" + query
 	}
 	var templates []Template
 	body, err := client.request("GET", path, nil)

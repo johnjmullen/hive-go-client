@@ -3,7 +3,9 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
+	"strconv"
 
 	"github.com/ghodss/yaml"
 	"github.com/hive-io/hive-go-client/rest"
@@ -131,4 +133,29 @@ func unmarshal(data []byte, obj interface{}) error {
 		err = (fmt.Errorf("Error: Unsupported format %s", format))
 	}
 	return err
+}
+
+func addListFlags(cmd *cobra.Command) {
+	cmd.Flags().Bool("details", false, "show details")
+	cmd.Flags().String("filter", "", "filter results based on a field.")
+	cmd.Flags().Int("count", 1000, "number of results to show")
+	cmd.Flags().Int("offset", 0, "first result to show")
+}
+
+func bindListFlags(cmd *cobra.Command) {
+	viper.BindPFlag("details", cmd.Flags().Lookup("details"))
+	viper.BindPFlag("filter", cmd.Flags().Lookup("filter"))
+	viper.BindPFlag("count", cmd.Flags().Lookup("count"))
+	viper.BindPFlag("offset", cmd.Flags().Lookup("offset"))
+}
+
+func listFlagsToQuery() string {
+	Values, err := url.ParseQuery(viper.GetString("filter"))
+	if err != nil {
+		fmt.Println("Error: Unable to parse filter")
+		os.Exit(1)
+	}
+	Values.Add("count", strconv.Itoa(viper.GetInt("count")))
+	Values.Add("offset", strconv.Itoa(viper.GetInt("offset")))
+	return Values.Encode()
 }

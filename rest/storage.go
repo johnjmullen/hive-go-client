@@ -48,11 +48,11 @@ func (pool StoragePool) String() string {
 }
 
 // ListStoragePools returns an array of storage pools with an optional filter string
-func (client *Client) ListStoragePools(filter string) ([]StoragePool, error) {
+func (client *Client) ListStoragePools(query string) ([]StoragePool, error) {
 	var pools []StoragePool
 	path := "storage/pools"
-	if filter != "" {
-		path += "?" + filter
+	if query != "" {
+		path += "?" + query
 	}
 	body, err := client.request("GET", path, nil)
 	if err != nil {

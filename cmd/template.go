@@ -147,10 +147,10 @@ var templateListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list templates",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("filter", cmd.Flags().Lookup("filter"))
+		bindListFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		templates, err := restClient.ListTemplates(viper.GetString("filter"))
+		templates, err := restClient.ListTemplates(listFlagsToQuery())
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

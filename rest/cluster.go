@@ -83,11 +83,11 @@ func (cluster Cluster) String() string {
 }
 
 // ListClusters request a list of all clusters
-func (client *Client) ListClusters(filter string) ([]Cluster, error) {
+func (client *Client) ListClusters(query string) ([]Cluster, error) {
 	var clusters []Cluster
 	path := "clusters"
-	if filter != "" {
-		path += "?" + filter
+	if query != "" {
+		path += "?" + query
 	}
 	body, err := client.request("GET", path, nil)
 	if err != nil {

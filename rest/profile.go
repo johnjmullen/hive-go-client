@@ -98,11 +98,11 @@ func (profile *Profile) Delete(client *Client) error {
 }
 
 // ListProfiles returns an array of all profiles with an optional filter string
-func (client *Client) ListProfiles(filter string) ([]Profile, error) {
+func (client *Client) ListProfiles(query string) ([]Profile, error) {
 	var Profiles []Profile
 	path := "profiles"
-	if filter != "" {
-		path += "?" + filter
+	if query != "" {
+		path += "?" + query
 	}
 	body, err := client.request("GET", path, nil)
 	if err != nil {

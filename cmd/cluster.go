@@ -52,10 +52,10 @@ var clusterListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list clusters",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("filter", cmd.Flags().Lookup("filter"))
+		bindListFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		clusters, err := restClient.ListClusters(viper.GetString("filter"))
+		clusters, err := restClient.ListClusters(listFlagsToQuery())
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -189,8 +189,7 @@ func init() {
 	clusterCmd.AddCommand(clusterGetCmd)
 
 	clusterCmd.AddCommand(clusterListCmd)
-	clusterListCmd.Flags().Bool("details", false, "show details")
-	clusterListCmd.Flags().String("filter", "", "filter query string")
+	addListFlags(clusterListCmd)
 
 	clusterCmd.AddCommand(setLicenseCmd)
 	clusterCmd.AddCommand(enableBackupCmd)

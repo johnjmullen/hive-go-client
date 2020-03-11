@@ -85,10 +85,10 @@ var taskListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list tasks",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("filter", cmd.Flags().Lookup("filter"))
+		bindListFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		tasks, err := restClient.ListTasks(viper.GetString("filter"))
+		tasks, err := restClient.ListTasks(listFlagsToQuery())
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -155,8 +155,7 @@ func init() {
 	taskGetCmd.Flags().StringP("name", "n", "", "task name")
 
 	taskCmd.AddCommand(taskListCmd)
-	taskListCmd.Flags().Bool("details", false, "show details")
-	taskListCmd.Flags().String("filter", "", "filter query string")
+	addListFlags(taskListCmd)
 
 	taskCmd.AddCommand(taskWaitCmd)
 	taskWaitCmd.Flags().StringP("id", "i", "", "task id")

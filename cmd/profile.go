@@ -189,10 +189,10 @@ var profileListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list profiles",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("filter", cmd.Flags().Lookup("filter"))
+		bindListFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		profiles, err := restClient.ListProfiles(viper.GetString("filter"))
+		profiles, err := restClient.ListProfiles(listFlagsToQuery())
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -291,8 +291,7 @@ func init() {
 	profileGetCmd.Flags().StringP("name", "n", "", "profile name")
 
 	profileCmd.AddCommand(profileListCmd)
-	profileListCmd.Flags().Bool("details", false, "show details")
-	profileListCmd.Flags().String("filter", "", "filter query string")
+	addListFlags(profileListCmd)
 
 	profileCmd.AddCommand(profileUpdateCmd)
 	addProfileFlags(profileUpdateCmd)

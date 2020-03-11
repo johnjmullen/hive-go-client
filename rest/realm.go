@@ -27,11 +27,11 @@ func (realm Realm) String() string {
 }
 
 // ListRealms returns an array of all realms with an optional filter string
-func (client *Client) ListRealms(filter string) ([]Realm, error) {
+func (client *Client) ListRealms(query string) ([]Realm, error) {
 	var realms []Realm
 	path := "realms"
-	if filter != "" {
-		path += "?" + filter
+	if query != "" {
+		path += "?" + query
 	}
 	body, err := client.request("GET", path, nil)
 	if err != nil {

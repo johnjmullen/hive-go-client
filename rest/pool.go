@@ -102,11 +102,11 @@ func (pool Pool) String() string {
 }
 
 // ListGuestPools returns an array of all guest pools with an optional filter string
-func (client *Client) ListGuestPools(filter string) ([]Pool, error) {
+func (client *Client) ListGuestPools(query string) ([]Pool, error) {
 	var pools []Pool
 	path := "pools"
-	if filter != "" {
-		path += "?" + filter
+	if query != "" {
+		path += "?" + query
 	}
 	body, err := client.request("GET", path, nil)
 	if err != nil {

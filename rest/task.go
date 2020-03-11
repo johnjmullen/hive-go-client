@@ -35,11 +35,11 @@ func (task Task) String() string {
 }
 
 // ListTasks returns an array of tasks with an optional filter string
-func (client *Client) ListTasks(filter string) ([]Task, error) {
+func (client *Client) ListTasks(query string) ([]Task, error) {
 	var tasks []Task
 	path := "tasks"
-	if filter != "" {
-		path += "?" + filter
+	if query != "" {
+		path += "?" + query
 	}
 	body, err := client.request("GET", path, nil)
 	if err != nil {

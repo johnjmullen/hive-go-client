@@ -62,10 +62,10 @@ var hostListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list hosts",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("filter", cmd.Flags().Lookup("filter"))
+		bindListFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		hosts, err := restClient.ListHosts(viper.GetString("filter"))
+		hosts, err := restClient.ListHosts(listFlagsToQuery())
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -185,8 +185,7 @@ func init() {
 	hostCmd.AddCommand(hostInfoCmd)
 
 	hostCmd.AddCommand(hostListCmd)
-	hostListCmd.Flags().Bool("details", false, "show details")
-	hostListCmd.Flags().String("filter", "", "filter query string")
+	addListFlags(hostListCmd)
 
 	hostCmd.AddCommand(hostLogLevelCmd)
 	hostLogLevelCmd.Flags().StringP("set", "s", "", "set log level (error/warn/info/debug)")
