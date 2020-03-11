@@ -1,0 +1,1821 @@
+#compdef _hioctl hioctl
+
+
+function _hioctl {
+  local -a commands
+
+  _arguments -C \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "alert:alert operations"
+      "cluster:cluster operations"
+      "export:export data"
+      "guest:guest operations"
+      "help:Help about any command"
+      "host:host operations"
+      "pool:pool operations"
+      "profile:profile operations"
+      "realm:realm operations"
+      "storage:storage operations"
+      "task:task operations"
+      "template:template operations"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  alert)
+    _hioctl_alert
+    ;;
+  cluster)
+    _hioctl_cluster
+    ;;
+  export)
+    _hioctl_export
+    ;;
+  guest)
+    _hioctl_guest
+    ;;
+  help)
+    _hioctl_help
+    ;;
+  host)
+    _hioctl_host
+    ;;
+  pool)
+    _hioctl_pool
+    ;;
+  profile)
+    _hioctl_profile
+    ;;
+  realm)
+    _hioctl_realm
+    ;;
+  storage)
+    _hioctl_storage
+    ;;
+  task)
+    _hioctl_task
+    ;;
+  template)
+    _hioctl_template
+    ;;
+  esac
+}
+
+
+function _hioctl_alert {
+  local -a commands
+
+  _arguments -C \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "acknowledge:Mark an alert as acknowledged"
+      "get:get alert details"
+      "list:list alerts"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  acknowledge)
+    _hioctl_alert_acknowledge
+    ;;
+  get)
+    _hioctl_alert_get
+    ;;
+  list)
+    _hioctl_alert_list
+    ;;
+  esac
+}
+
+function _hioctl_alert_acknowledge {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_alert_get {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_alert_list {
+  _arguments \
+    '--count[number of results to show]:' \
+    '--details[show details]' \
+    '--filter[filter results based on a field.]:' \
+    '--offset[first result to show]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+
+function _hioctl_cluster {
+  local -a commands
+
+  _arguments -C \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "add-host:add a host to the cluster"
+      "disable-backup:Disable Backup"
+      "disable-shared-storage:Disable Shared Storage"
+      "enable-backup:Enable Backup"
+      "enable-shared-storage:Enable Shared Storage"
+      "get:get cluster details"
+      "list:list clusters"
+      "set-license:add a license for the cluster"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  add-host)
+    _hioctl_cluster_add-host
+    ;;
+  disable-backup)
+    _hioctl_cluster_disable-backup
+    ;;
+  disable-shared-storage)
+    _hioctl_cluster_disable-shared-storage
+    ;;
+  enable-backup)
+    _hioctl_cluster_enable-backup
+    ;;
+  enable-shared-storage)
+    _hioctl_cluster_enable-shared-storage
+    ;;
+  get)
+    _hioctl_cluster_get
+    ;;
+  list)
+    _hioctl_cluster_list
+    ;;
+  set-license)
+    _hioctl_cluster_set-license
+    ;;
+  esac
+}
+
+function _hioctl_cluster_add-host {
+  _arguments \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--remote-password[password for the remote host]:' \
+    '--remote-username[username for the remote host]:' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_cluster_disable-backup {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_cluster_disable-shared-storage {
+  _arguments \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_cluster_enable-backup {
+  _arguments \
+    '--end-window[Time to stop running backups]:' \
+    '--start-window[Time to start running backups]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_cluster_enable-shared-storage {
+  _arguments \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--set-size[minimum number of hosts to increase the shared storage by]:' \
+    '(-s --storage-utilization)'{-s,--storage-utilization}'[Percentage of disk to allocate to shared storage]:' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_cluster_get {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_cluster_list {
+  _arguments \
+    '--count[number of results to show]:' \
+    '--details[show details]' \
+    '--filter[filter results based on a field.]:' \
+    '--offset[first result to show]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_cluster_set-license {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_export {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+
+function _hioctl_guest {
+  local -a commands
+
+  _arguments -C \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "assign:assign guest to a user"
+      "backup:start guest backup"
+      "delete:delete guest"
+      "diff:compare 2 guests"
+      "get:get guest details"
+      "list:list guests"
+      "migrate:migrate a guest"
+      "poweroff:force power off guest"
+      "reboot:reboot guest"
+      "release:release guest assignment"
+      "reset:force reset guest"
+      "restore:restore guest from a backup"
+      "shutdown:shutdown guest"
+      "update:update a guest"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  assign)
+    _hioctl_guest_assign
+    ;;
+  backup)
+    _hioctl_guest_backup
+    ;;
+  delete)
+    _hioctl_guest_delete
+    ;;
+  diff)
+    _hioctl_guest_diff
+    ;;
+  get)
+    _hioctl_guest_get
+    ;;
+  list)
+    _hioctl_guest_list
+    ;;
+  migrate)
+    _hioctl_guest_migrate
+    ;;
+  poweroff)
+    _hioctl_guest_poweroff
+    ;;
+  reboot)
+    _hioctl_guest_reboot
+    ;;
+  release)
+    _hioctl_guest_release
+    ;;
+  reset)
+    _hioctl_guest_reset
+    ;;
+  restore)
+    _hioctl_guest_restore
+    ;;
+  shutdown)
+    _hioctl_guest_shutdown
+    ;;
+  update)
+    _hioctl_guest_update
+    ;;
+  esac
+}
+
+function _hioctl_guest_assign {
+  _arguments \
+    '--guest-realm[user'\''s realm]:' \
+    '--guest-user[user to assign to this guest]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_backup {
+  _arguments \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_delete {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_diff {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_get {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_list {
+  _arguments \
+    '--count[number of results to show]:' \
+    '--details[show details]' \
+    '--filter[filter results based on a field.]:' \
+    '--offset[first result to show]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_migrate {
+  _arguments \
+    '--hostid[The host the guest will be migrated to]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_poweroff {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_reboot {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_release {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_reset {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_restore {
+  _arguments \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_shutdown {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_update {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_help {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+
+function _hioctl_host {
+  local -a commands
+
+  _arguments -C \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "get:get host details"
+      "info:hostid and version"
+      "list:list hosts"
+      "log-level:get or set host log level"
+      "restart-services:restart hive servies"
+      "state:get or set host state"
+      "unjoin:remove host from cluster"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  get)
+    _hioctl_host_get
+    ;;
+  info)
+    _hioctl_host_info
+    ;;
+  list)
+    _hioctl_host_list
+    ;;
+  log-level)
+    _hioctl_host_log-level
+    ;;
+  restart-services)
+    _hioctl_host_restart-services
+    ;;
+  state)
+    _hioctl_host_state
+    ;;
+  unjoin)
+    _hioctl_host_unjoin
+    ;;
+  esac
+}
+
+function _hioctl_host_get {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_host_info {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_host_list {
+  _arguments \
+    '--count[number of results to show]:' \
+    '--details[show details]' \
+    '--filter[filter results based on a field.]:' \
+    '--offset[first result to show]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_host_log-level {
+  _arguments \
+    '(-s --set)'{-s,--set}'[set log level (error/warn/info/debug)]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_host_restart-services {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_host_state {
+  _arguments \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '(-s --set)'{-s,--set}'[set host state (available/maintenance)]:' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_host_unjoin {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+
+function _hioctl_pool {
+  local -a commands
+
+  _arguments -C \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "create:Add a new guest pool"
+      "delete:delete pool pool"
+      "diff:compare 2 pools"
+      "get:get pool details"
+      "list:list pools"
+      "update:update a guest pool"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  create)
+    _hioctl_pool_create
+    ;;
+  delete)
+    _hioctl_pool_delete
+    ;;
+  diff)
+    _hioctl_pool_diff
+    ;;
+  get)
+    _hioctl_pool_get
+    ;;
+  list)
+    _hioctl_pool_list
+    ;;
+  update)
+    _hioctl_pool_update
+    ;;
+  esac
+}
+
+function _hioctl_pool_create {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_pool_delete {
+  _arguments \
+    '(-i --id)'{-i,--id}'[pool pool Id]:' \
+    '(-n --name)'{-n,--name}'[pool pool Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_pool_diff {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_pool_get {
+  _arguments \
+    '(-i --id)'{-i,--id}'[pool id]:' \
+    '(-n --name)'{-n,--name}'[pool name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_pool_list {
+  _arguments \
+    '--count[number of results to show]:' \
+    '--details[show details]' \
+    '--filter[filter results based on a field.]:' \
+    '--offset[first result to show]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_pool_update {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+
+function _hioctl_profile {
+  local -a commands
+
+  _arguments -C \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "create:Add a new profile"
+      "delete:delete profile profile"
+      "get:get profile details"
+      "list:list profiles"
+      "update:update a profile"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  create)
+    _hioctl_profile_create
+    ;;
+  delete)
+    _hioctl_profile_delete
+    ;;
+  get)
+    _hioctl_profile_get
+    ;;
+  list)
+    _hioctl_profile_list
+    ;;
+  update)
+    _hioctl_profile_update
+    ;;
+  esac
+}
+
+function _hioctl_profile_create {
+  _arguments \
+    '--ad-domain[AD realm]:' \
+    '--ad-password[Password for the join user]:' \
+    '--ad-user-group[User group]:' \
+    '--ad-username[user to join guests to AD]:' \
+    '--broker-allow-desktop-composition[Allow Destop compositing]' \
+    '--broker-audio-capture[audio capture]' \
+    '--broker-hide-certificate-warnings[Hide certificate warnings]' \
+    '--broker-redirect-clipboard[Clipboard redirection]' \
+    '--broker-redirect-cssp[CredSSP redirection]' \
+    '--broker-redirect-pnp[Plug-and-Play redirection]' \
+    '--broker-redirect-printer[Printer redirection]' \
+    '--broker-redirect-smartcard[Smartcard redirection]' \
+    '--broker-redirect-usb[USB redirection]' \
+    '--broker-smart-resize[Smart screen resize]' \
+    '--enable-ad[enable active directory options]' \
+    '--enable-broker-options[enable broker options]' \
+    '--enable-uv[Enable user volumes]' \
+    '(-i --id)'{-i,--id}'[profile id]:' \
+    '(-n --name)'{-n,--name}'[profile name]:' \
+    '--timezone[timezone to inject]:' \
+    '--uv-backup-schedule[User volume backup schedule (s)]:' \
+    '--uv-repository[Storage pool for storing the user volume]:' \
+    '--uv-size[User volume size (GB)]:' \
+    '--uv-target[Local cache (disk/ram)]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_profile_delete {
+  _arguments \
+    '(-i --id)'{-i,--id}'[profile profile Id]:' \
+    '(-n --name)'{-n,--name}'[profile profile Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_profile_get {
+  _arguments \
+    '(-i --id)'{-i,--id}'[profile id]:' \
+    '(-n --name)'{-n,--name}'[profile name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_profile_list {
+  _arguments \
+    '--count[number of results to show]:' \
+    '--details[show details]' \
+    '--filter[filter results based on a field.]:' \
+    '--offset[first result to show]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_profile_update {
+  _arguments \
+    '--ad-domain[AD realm]:' \
+    '--ad-password[Password for the join user]:' \
+    '--ad-user-group[User group]:' \
+    '--ad-username[user to join guests to AD]:' \
+    '--broker-allow-desktop-composition[Allow Destop compositing]' \
+    '--broker-audio-capture[audio capture]' \
+    '--broker-hide-certificate-warnings[Hide certificate warnings]' \
+    '--broker-redirect-clipboard[Clipboard redirection]' \
+    '--broker-redirect-cssp[CredSSP redirection]' \
+    '--broker-redirect-pnp[Plug-and-Play redirection]' \
+    '--broker-redirect-printer[Printer redirection]' \
+    '--broker-redirect-smartcard[Smartcard redirection]' \
+    '--broker-redirect-usb[USB redirection]' \
+    '--broker-smart-resize[Smart screen resize]' \
+    '--enable-ad[enable active directory options]' \
+    '--enable-broker-options[enable broker options]' \
+    '--enable-uv[Enable user volumes]' \
+    '(-i --id)'{-i,--id}'[profile id]:' \
+    '(-n --name)'{-n,--name}'[profile name]:' \
+    '--timezone[timezone to inject]:' \
+    '--uv-backup-schedule[User volume backup schedule (s)]:' \
+    '--uv-repository[Storage pool for storing the user volume]:' \
+    '--uv-size[User volume size (GB)]:' \
+    '--uv-target[Local cache (disk/ram)]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+
+function _hioctl_realm {
+  local -a commands
+
+  _arguments -C \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "create:Add a new realm"
+      "delete:delete realm pool"
+      "get:get realm details"
+      "list:list realms"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  create)
+    _hioctl_realm_create
+    ;;
+  delete)
+    _hioctl_realm_delete
+    ;;
+  get)
+    _hioctl_realm_get
+    ;;
+  list)
+    _hioctl_realm_list
+    ;;
+  esac
+}
+
+function _hioctl_realm_create {
+  _arguments \
+    '--fqdn[FQDN]:' \
+    '(-n --name)'{-n,--name}'[Netbios Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_realm_delete {
+  _arguments \
+    '(-i --id)'{-i,--id}'[realm Pool Id]:' \
+    '(-n --name)'{-n,--name}'[realm Pool Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_realm_get {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_realm_list {
+  _arguments \
+    '--count[number of results to show]:' \
+    '--details[show details]' \
+    '--filter[filter results based on a field.]:' \
+    '--offset[first result to show]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+
+function _hioctl_storage {
+  local -a commands
+
+  _arguments -C \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "browse:list storage pool files"
+      "convert-disk:convert or copy a disk"
+      "copy-file:copy a storage pool file"
+      "copy-url:copy a url to the storage pool"
+      "create:Add a new storage pool"
+      "create-disk:create a disk in the storage pool"
+      "delete:delete storage pool"
+      "delete-file:delete a file from the storage pool"
+      "disk-info:get information for a disk in a storage pool"
+      "get:get storage pool details"
+      "get-id:get storage pool id from name"
+      "grow-disk:grow a disk in the storage pool"
+      "list:list storage pools"
+      "move-file:move a storage pool file"
+      "upload:upload a file to a storage pool"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  browse)
+    _hioctl_storage_browse
+    ;;
+  convert-disk)
+    _hioctl_storage_convert-disk
+    ;;
+  copy-file)
+    _hioctl_storage_copy-file
+    ;;
+  copy-url)
+    _hioctl_storage_copy-url
+    ;;
+  create)
+    _hioctl_storage_create
+    ;;
+  create-disk)
+    _hioctl_storage_create-disk
+    ;;
+  delete)
+    _hioctl_storage_delete
+    ;;
+  delete-file)
+    _hioctl_storage_delete-file
+    ;;
+  disk-info)
+    _hioctl_storage_disk-info
+    ;;
+  get)
+    _hioctl_storage_get
+    ;;
+  get-id)
+    _hioctl_storage_get-id
+    ;;
+  grow-disk)
+    _hioctl_storage_grow-disk
+    ;;
+  list)
+    _hioctl_storage_list
+    ;;
+  move-file)
+    _hioctl_storage_move-file
+    ;;
+  upload)
+    _hioctl_storage_upload
+    ;;
+  esac
+}
+
+function _hioctl_storage_browse {
+  _arguments \
+    '--details[detailed directory listing]' \
+    '(-i --id)'{-i,--id}'[Storage Pool Id]:' \
+    '(-n --name)'{-n,--name}'[Storage Pool Name]:' \
+    '--path[path inside the storage pool to browse]:' \
+    '--recursive[recursively list files]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_convert-disk {
+  _arguments \
+    '--dest-filename[Destination filename]:' \
+    '--dest-format[Destination file format]:' \
+    '--dest-storage[Destination storage pool name]:' \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--src-filename[Source filename]:' \
+    '--src-storage[Source storage pool name]:' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_copy-file {
+  _arguments \
+    '--dest-filename[path to the file in the destination storage pool]:' \
+    '--dest-storage[Destination storage pool id]:' \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--src-filename[path to the file in the source storage pool]:' \
+    '--src-storage[Source storage pool id]:' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_copy-url {
+  _arguments \
+    '--filename[filename for the disk]:' \
+    '(-i --id)'{-i,--id}'[Storage Pool Id]:' \
+    '(-n --name)'{-n,--name}'[Storage Pool Name]:' \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--url[url to download]:' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_create {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_create-disk {
+  _arguments \
+    '--disk-format[disk format ()]:' \
+    '--disk-size[size of the disk in GB]:' \
+    '--filename[filename for the disk]:' \
+    '(-i --id)'{-i,--id}'[Storage Pool Id]:' \
+    '(-n --name)'{-n,--name}'[Storage Pool Name]:' \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_delete {
+  _arguments \
+    '(-i --id)'{-i,--id}'[Storage Pool Id]:' \
+    '(-n --name)'{-n,--name}'[Storage Pool Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_delete-file {
+  _arguments \
+    '(-i --id)'{-i,--id}'[Storage Pool Id]:' \
+    '(-n --name)'{-n,--name}'[Storage Pool Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_disk-info {
+  _arguments \
+    '(-i --id)'{-i,--id}'[Storage Pool Id]:' \
+    '(-n --name)'{-n,--name}'[Storage Pool Name]:' \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_get {
+  _arguments \
+    '(-i --id)'{-i,--id}'[Storage Pool Id]:' \
+    '(-n --name)'{-n,--name}'[Storage Pool Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_get-id {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_grow-disk {
+  _arguments \
+    '--disk-size[size to add in GB]:' \
+    '--filename[filename for the disk]:' \
+    '(-i --id)'{-i,--id}'[Storage Pool Id]:' \
+    '(-n --name)'{-n,--name}'[Storage Pool Name]:' \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_list {
+  _arguments \
+    '--count[number of results to show]:' \
+    '--details[show details]' \
+    '--filter[filter results based on a field.]:' \
+    '--offset[first result to show]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_move-file {
+  _arguments \
+    '--dest-filename[path to the file in the destination storage pool]:' \
+    '--dest-storage[Destination storage pool id]:' \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--src-filename[path to the file in the source storage pool]:' \
+    '--src-storage[Source storage pool id]:' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_upload {
+  _arguments \
+    '--dest-filename[path to the file in the destination storage pool]:' \
+    '(-i --id)'{-i,--id}'[Storage Pool Id]:' \
+    '(-n --name)'{-n,--name}'[Storage Pool Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+
+function _hioctl_task {
+  local -a commands
+
+  _arguments -C \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "force-complete:force task state to completed"
+      "get:get task details"
+      "list:list tasks"
+      "wait:wait for a task to complete"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  force-complete)
+    _hioctl_task_force-complete
+    ;;
+  get)
+    _hioctl_task_get
+    ;;
+  list)
+    _hioctl_task_list
+    ;;
+  wait)
+    _hioctl_task_wait
+    ;;
+  esac
+}
+
+function _hioctl_task_force-complete {
+  _arguments \
+    '(-i --id)'{-i,--id}'[task id]:' \
+    '(-n --name)'{-n,--name}'[task name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_task_get {
+  _arguments \
+    '(-i --id)'{-i,--id}'[task id]:' \
+    '(-n --name)'{-n,--name}'[task name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_task_list {
+  _arguments \
+    '--count[number of results to show]:' \
+    '--details[show details]' \
+    '--filter[filter results based on a field.]:' \
+    '--offset[first result to show]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_task_wait {
+  _arguments \
+    '(-i --id)'{-i,--id}'[task id]:' \
+    '(-n --name)'{-n,--name}'[task name]:' \
+    '--progress[print progress]' \
+    '--progress-bar[print progress-bar]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+
+function _hioctl_template {
+  local -a commands
+
+  _arguments -C \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "analyze:analyze template"
+      "author:author template"
+      "create:Add a new template"
+      "delete:delete template pool"
+      "diff:compare 2 templates"
+      "duplicate:Make a copy of a template"
+      "get:get template details"
+      "list:list templates"
+      "load:load template to all hosts"
+      "unload:unload template from all hosts"
+      "update:update a template"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  analyze)
+    _hioctl_template_analyze
+    ;;
+  author)
+    _hioctl_template_author
+    ;;
+  create)
+    _hioctl_template_create
+    ;;
+  delete)
+    _hioctl_template_delete
+    ;;
+  diff)
+    _hioctl_template_diff
+    ;;
+  duplicate)
+    _hioctl_template_duplicate
+    ;;
+  get)
+    _hioctl_template_get
+    ;;
+  list)
+    _hioctl_template_list
+    ;;
+  load)
+    _hioctl_template_load
+    ;;
+  unload)
+    _hioctl_template_unload
+    ;;
+  update)
+    _hioctl_template_update
+    ;;
+  esac
+}
+
+function _hioctl_template_analyze {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_template_author {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_template_create {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_template_delete {
+  _arguments \
+    '(-i --id)'{-i,--id}'[template Pool Id]:' \
+    '(-n --name)'{-n,--name}'[template Pool Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_template_diff {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_template_duplicate {
+  _arguments \
+    '--dest-filename[Destination filename]:' \
+    '--dest-name[Name for the new Template]:' \
+    '--dest-storage[Destination storage pool id]:' \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_template_get {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_template_list {
+  _arguments \
+    '--details[show details]' \
+    '--filter[filter query string]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_template_load {
+  _arguments \
+    '(-s --storage)'{-s,--storage}'[Location to load the template (disk or ram)]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_template_unload {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_template_update {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
