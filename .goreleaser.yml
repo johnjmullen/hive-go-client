@@ -1,0 +1,41 @@
+before:
+  hooks:
+    - go mod download
+project_name: hioctl
+builds:
+- env:
+  - CGO_ENABLED=0
+  main: ./hioctl/main.go
+  goos:
+  - linux
+  - darwin
+  - windows
+  goarch:
+  - amd64
+archives:
+- format_overrides:
+  - goos: windows
+    format: zip
+nfpms:
+- package_name: hioctl
+  homepage:  https://hiveio.com
+  description: hiveio rest api client
+  maintainer: John Mullen <john.mullen@hiveio.com>
+  license: MPL
+  vendor: HiveIO
+  formats:
+  - deb
+  - rpm
+  bindir: /usr/bin
+  files:
+    'files/completion/bash/hioctl': '/usr/share/bash-completion/completions/hioctl'
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
