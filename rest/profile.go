@@ -16,15 +16,24 @@ type ProfileADConfig struct {
 
 //ProfileBrokerOptions contains rdp settings for a profile
 type ProfileBrokerOptions struct {
-	AllowDesktopComposition bool `json:"allowDesktopComposition"`
-	AudioCapture            bool `json:"audioCapture"`
-	RedirectCSSP            bool `json:"redirectCSSP"`
-	RedirectClipboard       bool `json:"redirectClipboard"`
-	RedirectDisk            bool `json:"redirectDisk"`
-	RedirectPNP             bool `json:"redirectPNP"`
-	RedirectPrinter         bool `json:"redirectPrinter"`
-	RedirectUSB             bool `json:"redirectUSB"`
-	SmartResize             bool `json:"smartResize"`
+	AllowDesktopComposition   bool `json:"allowDesktopComposition,omitempty"`
+	AudioCapture              bool `json:"audioCapture,omitempty"`
+	DisableFullWindowDrag     bool `json:"disableFullWindowDrag,omitempty"`
+	DisableMenuAnims          bool `json:"disableMenuAnims,omitempty"`
+	DisablePrinter            bool `json:"disablePrinter,omitempty"`
+	DisableThemes             bool `json:"disableThemes,omitempty"`
+	DisableWallpaper          bool `json:"disableWallpaper,omitempty"`
+	HideAuthenticationFailure bool `json:"hideAuthenticationFailure,omitempty"`
+	InjectPassword            bool `json:"injectPassword,omitempty"`
+	RedirectCSSP              bool `json:"redirectCSSP,omitempty"`
+	RedirectClipboard         bool `json:"redirectClipboard,omitempty"`
+	RedirectDisk              bool `json:"redirectDisk,omitempty"`
+	RedirectPNP               bool `json:"redirectPNP,omitempty"`
+	RedirectPrinter           bool `json:"redirectPrinter,omitempty"`
+	RedirectSmartCard         bool `json:"redirectSmartCard,omitempty"`
+	RedirectUSB               bool `json:"redirectUSB,omitempty"`
+	SmartResize               bool `json:"smartResize,omitempty"`
+	FailOnCertMismatch        bool `json:"failOnCertMismatch,omitempty"`
 }
 
 //ProfileUserVolumes contains user volume settings for a profile
