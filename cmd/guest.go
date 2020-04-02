@@ -296,6 +296,40 @@ var guestMigrateCmd = &cobra.Command{
 	},
 }
 
+var guestAddExternalCmd = &cobra.Command{
+	Use:   "add-external [Name]",
+	Short: "add an extrnal guest",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		var file *os.File
+		var err error
+		if args[0] == "-" {
+			file = os.Stdin
+		} else {
+			file, err = os.Open(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+		defer file.Close()
+		data, _ := ioutil.ReadAll(file)
+		var guest rest.ExternalGuest
+		err = unmarshal(data, &guest)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		msg, err := guest.Create(restClient)
+		fmt.Println(msg)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(guestCmd)
 
@@ -324,4 +358,5 @@ func init() {
 
 	guestCmd.AddCommand(guestMigrateCmd)
 	guestMigrateCmd.Flags().String("hostid", "", "The host the guest will be migrated to")
+	guestCmd.AddCommand(guestAddExternalCmd)
 }

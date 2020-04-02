@@ -54,7 +54,7 @@ type Guest struct {
 	Tags               []string `json:"tags,omitempty"`
 	TargetState        []string `json:"targetState,omitempty"`
 	TemplateName       string   `json:"templateName,omitempty"`
-	UserVolume         struct {
+	UserVolume         *struct {
 		State         string `json:"state,omitempty"`
 		RunningBackup bool   `json:"runningBackup,omitempty"`
 	} `json:"userVolume,omitempty"`
@@ -233,4 +233,24 @@ func (guest Guest) WaitForGuest(client *Client, timeout time.Duration) error {
 			}
 		}
 	}
+}
+
+//ExternalGuest is used to add external guest records to the system
+type ExternalGuest struct {
+	GuestName string `json:"guestName"`
+	Address   string `json:"address"`
+	Username  string `json:"username"`
+	Realm     string `json:"realm"`
+	OS        string `json:"os,omitempty"`
+}
+
+//Create creates a new pool
+func (guest *ExternalGuest) Create(client *Client) (string, error) {
+	var result string
+	jsonValue, _ := json.Marshal(guest)
+	body, err := client.request("POST", "guest/external", jsonValue)
+	if err == nil {
+		result = string(body)
+	}
+	return result, err
 }
