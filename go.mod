@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/eventials/go-tus v0.0.0-20190617130015-9db47421f6a0
 	github.com/ghodss/yaml v1.0.0
+	github.com/gocarina/gocsv v0.0.0-20200330101823-46266ca37bd3
 	github.com/google/go-cmp v0.3.1
 	github.com/gorilla/websocket v1.4.0
 	github.com/gosuri/uilive v0.0.3 // indirect

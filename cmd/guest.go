@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/gocarina/gocsv"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
@@ -300,6 +301,9 @@ var guestAddExternalCmd = &cobra.Command{
 	Use:   "add-external [Name]",
 	Short: "add an extrnal guest",
 	Args:  cobra.ExactArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("csv", cmd.Flags().Lookup("csv"))
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var file *os.File
 		var err error
@@ -313,20 +317,27 @@ var guestAddExternalCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
-		var guest rest.ExternalGuest
-		err = unmarshal(data, &guest)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		var guests []rest.ExternalGuest
+		if viper.GetBool("csv") {
+			if err := gocsv.UnmarshalFile(file, &guests); err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		} else {
+			data, _ := ioutil.ReadAll(file)
+			if err := unmarshal(data, &guests); err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 
-		msg, err := guest.Create(restClient)
-		fmt.Println(msg)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		for _, guest := range guests {
+			if _, err := guest.Create(restClient); err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
+		fmt.Println(formatString("Guests Added"))
 	},
 }
 
@@ -358,5 +369,7 @@ func init() {
 
 	guestCmd.AddCommand(guestMigrateCmd)
 	guestMigrateCmd.Flags().String("hostid", "", "The host the guest will be migrated to")
+
 	guestCmd.AddCommand(guestAddExternalCmd)
+	guestAddExternalCmd.Flags().Bool("csv", false, "read guests from a csv file")
 }
