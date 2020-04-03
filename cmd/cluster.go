@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 
+	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -39,7 +41,7 @@ var clusterGetCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		cluster, err := restClient.GetCluster(args[0])
-
+		cluster.Broker = nil //Hide broker settings because of base64 images
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -179,6 +181,78 @@ var disableSharedStorageCmd = &cobra.Command{
 	},
 }
 
+var clusterGetBrokerCmd = &cobra.Command{
+	Use:   "get-broker",
+	Short: "get broker settings",
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		broker, err := restClient.GetBroker(clusterID)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(formatString(broker))
+	},
+}
+
+var clusterSetBrokerCommand = &cobra.Command{
+	Use:   "set-broker [file]",
+	Short: "set broker settings",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		var file *os.File
+		var err error
+		if args[0] == "-" {
+			file = os.Stdin
+		} else {
+			file, err = os.Open(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+		defer file.Close()
+		data, _ := ioutil.ReadAll(file)
+		var broker rest.Broker
+		err = unmarshal(data, &broker)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = restClient.SetBroker(clusterID, broker)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var clusterResetBrokerCommand = &cobra.Command{
+	Use:   "reset-broker [file]",
+	Short: "reset broker settings to the defaults",
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = restClient.ResetBroker(clusterID)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(clusterCmd)
 	clusterCmd.AddCommand(addHostCmd)
@@ -203,4 +277,8 @@ func init() {
 	addTaskFlags(enableSharedStorageCmd)
 	clusterCmd.AddCommand(disableSharedStorageCmd)
 	addTaskFlags(disableSharedStorageCmd)
+
+	clusterCmd.AddCommand(clusterGetBrokerCmd)
+	clusterCmd.AddCommand(clusterSetBrokerCommand)
+	clusterCmd.AddCommand(clusterResetBrokerCommand)
 }

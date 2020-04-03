@@ -16,9 +16,10 @@ type Guest struct {
 		SessionState  int    `json:"sessionState"`
 		SessionStatus string `json:"sessionStatus"`
 	} `json:"SessionInfo,omitempty"`
-	AgentInstalled bool `json:"agentInstalled"`
-	Cpus           int  `json:"cpus,omitempty"`
-	Currentmem     int  `json:"currentmem,omitempty"`
+	Address        string `json:"address,omitempty"`
+	AgentInstalled bool   `json:"agentInstalled"`
+	Cpus           int    `json:"cpus,omitempty"`
+	Currentmem     int    `json:"currentmem,omitempty"`
 	Disks          []struct {
 		Backing    string `json:"backing,omitempty"`
 		Dev        string `json:"dev,omitempty"`
@@ -29,6 +30,7 @@ type Guest struct {
 		StorageID  string `json:"storageId,omitempty"`
 		Type       string `json:"type,omitempty"`
 	} `json:"disks,omitempty"`
+	External   bool   `json:"external"`
 	GuestState string `json:"guestState,omitempty"`
 	Hostid     string `json:"hostid,omitempty"`
 	Hostname   string `json:"hostname,omitempty"`

@@ -15,6 +15,8 @@ type Broker struct {
 	ButtonTextColor           string      `json:"buttonTextColor,omitempty"`
 	Disclaimer                string      `json:"disclaimer,omitempty"`
 	Enabled                   bool        `json:"enabled"`
+	External                  bool        `json:"external"`
+	ExternalProfile           string      `json:"externalProfile,omitempty"`
 	Favicon                   string      `json:"favicon,omitempty"`
 	FaviconFilename           string      `json:"faviconFilename,omitempty"`
 	HideRealms                bool        `json:"hideRealms,omitempty"`
@@ -25,7 +27,8 @@ type Broker struct {
 	PassthroughAuthentication bool        `json:"passthroughAuthentication,omitempty"`
 	TextColor                 string      `json:"textColor,omitempty"`
 	Title                     string      `json:"title,omitempty"`
-	TwoFormAuth               interface{} `json:"twoFormAuth"`
+	TwoFormAuth               interface{} `json:"twoFormAuth,omitempty"`
+	AllowPhysical             bool        `json:"allowPhysical,omitempty"`
 }
 
 // Gateway settings from the cluster table
@@ -178,4 +181,32 @@ func (cluster *Cluster) EnableSharedStorage(client *Client, storageUtilization i
 // DisableSharedStorage disables shared storage on the cluster
 func (cluster *Cluster) DisableSharedStorage(client *Client) (*Task, error) {
 	return client.getTaskFromResponse(client.request("POST", "cluster/"+cluster.ID+"/disableSharedStorage", nil))
+}
+
+//GetBroker returns the broker settings for the cluster
+func (client *Client) GetBroker(clusterID string) (Broker, error) {
+	var broker Broker
+	body, err := client.request("GET", "cluster/"+clusterID+"/broker", nil)
+	if err != nil {
+		return broker, err
+	}
+	err = json.Unmarshal(body, &broker)
+
+	return broker, err
+}
+
+//SetBroker updates broker settings for the cluster
+func (client *Client) SetBroker(clusterID string, brokerSettings Broker) error {
+	jsonValue, err := json.Marshal(brokerSettings)
+	if err != nil {
+		return err
+	}
+	_, err = client.request("PUT", "cluster/"+clusterID+"/broker", jsonValue)
+	return err
+}
+
+//ResetBroker updates broker settings for the cluster
+func (client *Client) ResetBroker(clusterID string) error {
+	_, err := client.request("POST", "cluster/"+clusterID+"/broker/reset", nil)
+	return err
 }
