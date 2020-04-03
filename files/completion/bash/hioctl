@@ -691,6 +691,45 @@ _hioctl_cluster_get()
     noun_aliases=()
 }
 
+_hioctl_cluster_get-broker()
+{
+    last_command="hioctl_cluster_get-broker"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _hioctl_cluster_list()
 {
     last_command="hioctl_cluster_list"
@@ -716,6 +755,84 @@ _hioctl_cluster_list()
     flags+=("--offset=")
     two_word_flags+=("--offset")
     local_nonpersistent_flags+=("--offset=")
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_cluster_reset-broker()
+{
+    last_command="hioctl_cluster_reset-broker"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_cluster_set-broker()
+{
+    last_command="hioctl_cluster_set-broker"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
     flags+=("--config=")
     two_word_flags+=("--config")
     flags+=("--format=")
@@ -793,7 +910,10 @@ _hioctl_cluster()
     commands+=("enable-backup")
     commands+=("enable-shared-storage")
     commands+=("get")
+    commands+=("get-broker")
     commands+=("list")
+    commands+=("reset-broker")
+    commands+=("set-broker")
     commands+=("set-license")
 
     flags=()
@@ -830,6 +950,45 @@ _hioctl_cluster()
 _hioctl_export()
 {
     last_command="hioctl_export"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_hioctl_guest_add-external()
+{
+    last_command="hioctl_guest_add-external"
 
     command_aliases=()
 
@@ -1451,6 +1610,7 @@ _hioctl_guest()
     command_aliases=()
 
     commands=()
+    commands+=("add-external")
     commands+=("assign")
     commands+=("backup")
     commands+=("delete")

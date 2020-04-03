@@ -181,7 +181,10 @@ function _hioctl_cluster {
       "enable-backup:Enable Backup"
       "enable-shared-storage:Enable Shared Storage"
       "get:get cluster details"
+      "get-broker:get broker settings"
       "list:list clusters"
+      "reset-broker:reset broker settings to the defaults"
+      "set-broker:set broker settings"
       "set-license:add a license for the cluster"
     )
     _describe "command" commands
@@ -207,8 +210,17 @@ function _hioctl_cluster {
   get)
     _hioctl_cluster_get
     ;;
+  get-broker)
+    _hioctl_cluster_get-broker
+    ;;
   list)
     _hioctl_cluster_list
+    ;;
+  reset-broker)
+    _hioctl_cluster_reset-broker
+    ;;
+  set-broker)
+    _hioctl_cluster_set-broker
     ;;
   set-license)
     _hioctl_cluster_set-license
@@ -303,12 +315,48 @@ function _hioctl_cluster_get {
     '(-u --user)'{-u,--user}'[Admin username]:'
 }
 
+function _hioctl_cluster_get-broker {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
 function _hioctl_cluster_list {
   _arguments \
     '--count[number of results to show]:' \
     '--details[show details]' \
     '--filter[filter results based on a field.]:' \
     '--offset[first result to show]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_cluster_reset-broker {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_cluster_set-broker {
+  _arguments \
     '--config[config file]:' \
     '--format[format (json/yaml)]:' \
     '--host[Hostname or ip address]:' \
@@ -362,6 +410,7 @@ function _hioctl_guest {
   case $state in
   cmnds)
     commands=(
+      "add-external:add extrnal guests from a file"
       "assign:assign guest to a user"
       "backup:start guest backup"
       "delete:delete guest"
@@ -382,6 +431,9 @@ function _hioctl_guest {
   esac
 
   case "$words[1]" in
+  add-external)
+    _hioctl_guest_add-external
+    ;;
   assign)
     _hioctl_guest_assign
     ;;
@@ -425,6 +477,18 @@ function _hioctl_guest {
     _hioctl_guest_update
     ;;
   esac
+}
+
+function _hioctl_guest_add-external {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
 }
 
 function _hioctl_guest_assign {

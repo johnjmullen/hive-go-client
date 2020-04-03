@@ -1,20 +1,45 @@
-## hioctl guest migrate
+## hioctl guest add-external
 
-migrate a guest
+add extrnal guests from a file
 
 ### Synopsis
 
-migrate a guest
+Add guests to the Physical Machines pool from a file
+The file must contain a list of guests in json, yaml, or csv specified by --format
+
+Example files:
+
+json:
+[
+  {
+    "guestName": "test1",
+    "address": "10.10.0.1",
+    "username": "user1",
+    "realm": "TEST",
+		"os": "win10"
+  },
+]
+
+yaml:
+- guestName: test2
+  address: 10.10.0.2
+  username: user2
+  realm: TEST
+
+csv:
+GuestName,Address,Username,Realm,OS
+test1,test1.domain.net,user1,TEST,win10
+test2,10.0.0.2,user2,TEST
+	
 
 ```
-hioctl guest migrate [Name] [flags]
+hioctl guest add-external [File] [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help            help for migrate
-      --hostid string   The host the guest will be migrated to
+  -h, --help   help for add-external
 ```
 
 ### Options inherited from parent commands

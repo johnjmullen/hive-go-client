@@ -70,7 +70,10 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('enable-backup', 'enable-backup', [CompletionResultType]::ParameterValue, 'Enable Backup')
             [CompletionResult]::new('enable-shared-storage', 'enable-shared-storage', [CompletionResultType]::ParameterValue, 'Enable Shared Storage')
             [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get cluster details')
+            [CompletionResult]::new('get-broker', 'get-broker', [CompletionResultType]::ParameterValue, 'get broker settings')
             [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list clusters')
+            [CompletionResult]::new('reset-broker', 'reset-broker', [CompletionResultType]::ParameterValue, 'reset broker settings to the defaults')
+            [CompletionResult]::new('set-broker', 'set-broker', [CompletionResultType]::ParameterValue, 'set broker settings')
             [CompletionResult]::new('set-license', 'set-license', [CompletionResultType]::ParameterValue, 'add a license for the cluster')
             break
         }
@@ -108,11 +111,20 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
         'hioctl;cluster;get' {
             break
         }
+        'hioctl;cluster;get-broker' {
+            break
+        }
         'hioctl;cluster;list' {
             [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
             [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
             [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
             [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
+            break
+        }
+        'hioctl;cluster;reset-broker' {
+            break
+        }
+        'hioctl;cluster;set-broker' {
             break
         }
         'hioctl;cluster;set-license' {
@@ -122,6 +134,7 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             break
         }
         'hioctl;guest' {
+            [CompletionResult]::new('add-external', 'add-external', [CompletionResultType]::ParameterValue, 'add extrnal guests from a file')
             [CompletionResult]::new('assign', 'assign', [CompletionResultType]::ParameterValue, 'assign guest to a user')
             [CompletionResult]::new('backup', 'backup', [CompletionResultType]::ParameterValue, 'start guest backup')
             [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete guest')
@@ -136,6 +149,9 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('restore', 'restore', [CompletionResultType]::ParameterValue, 'restore guest from a backup')
             [CompletionResult]::new('shutdown', 'shutdown', [CompletionResultType]::ParameterValue, 'shutdown guest')
             [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'update a guest')
+            break
+        }
+        'hioctl;guest;add-external' {
             break
         }
         'hioctl;guest;assign' {

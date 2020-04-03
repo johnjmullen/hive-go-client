@@ -298,12 +298,36 @@ var guestMigrateCmd = &cobra.Command{
 }
 
 var guestAddExternalCmd = &cobra.Command{
-	Use:   "add-external [Name]",
-	Short: "add an extrnal guest",
-	Args:  cobra.ExactArgs(1),
-	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("csv", cmd.Flags().Lookup("csv"))
-	},
+	Use:   "add-external [File]",
+	Short: "add extrnal guests from a file",
+	Long: `Add guests to the Physical Machines pool from a file
+The file must contain a list of guests in json, yaml, or csv specified by --format
+
+Example files:
+
+json:
+[
+  {
+    "guestName": "test1",
+    "address": "10.10.0.1",
+    "username": "user1",
+    "realm": "TEST",
+		"os": "win10"
+  },
+]
+
+yaml:
+- guestName: test2
+  address: 10.10.0.2
+  username: user2
+  realm: TEST
+
+csv:
+GuestName,Address,Username,Realm,OS
+test1,test1.domain.net,user1,TEST,win10
+test2,10.0.0.2,user2,TEST
+	`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var file *os.File
 		var err error
@@ -317,16 +341,20 @@ var guestAddExternalCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
+		data, err := ioutil.ReadAll(file)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 		var guests []rest.ExternalGuest
-		if viper.GetBool("csv") {
-			if err := gocsv.UnmarshalFile(file, &guests); err != nil {
+		if viper.GetString("format") == "csv" {
+			if err := gocsv.UnmarshalBytes(data, &guests); err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 		} else {
-			data, _ := ioutil.ReadAll(file)
 			if err := unmarshal(data, &guests); err != nil {
-				fmt.Println(err)
+				fmt.Println(formatString("Error: Failed to parse input file"))
 				os.Exit(1)
 			}
 		}
@@ -337,7 +365,7 @@ var guestAddExternalCmd = &cobra.Command{
 				os.Exit(1)
 			}
 		}
-		fmt.Println(formatString("Guests Added"))
+		fmt.Println("Guests Added")
 	},
 }
 
@@ -371,5 +399,4 @@ func init() {
 	guestMigrateCmd.Flags().String("hostid", "", "The host the guest will be migrated to")
 
 	guestCmd.AddCommand(guestAddExternalCmd)
-	guestAddExternalCmd.Flags().Bool("csv", false, "read guests from a csv file")
 }
