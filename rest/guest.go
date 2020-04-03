@@ -239,10 +239,10 @@ func (guest Guest) WaitForGuest(client *Client, timeout time.Duration) error {
 
 //ExternalGuest is used to add external guest records to the system
 type ExternalGuest struct {
-	GuestName string `json:"guestName"`
-	Address   string `json:"address"`
-	Username  string `json:"username"`
-	Realm     string `json:"realm"`
+	GuestName string `json:"guestName,omitempty"`
+	Address   string `json:"address,omitempty"`
+	Username  string `json:"username,omitempty"`
+	Realm     string `json:"realm,omitempty"`
 	OS        string `json:"os,omitempty"`
 }
 
