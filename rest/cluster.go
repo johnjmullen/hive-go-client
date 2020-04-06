@@ -60,9 +60,9 @@ type Cluster struct {
 	} `json:"hiveSense"`
 	ID      string `json:"id"`
 	License *struct {
-		Expiration        time.Time `json:"expiration"`
-		Type              string    `json:"type"`
-		LicenseExpiration time.Time `json:"license.expiration"`
+		Expiration time.Time `json:"expiration"`
+		Type       string    `json:"type"`
+		MaxGuests  int       `json:"maxGuests,omitempty"`
 	} `json:"license"`
 	Name          string `json:"name"`
 	SharedStorage *struct {
