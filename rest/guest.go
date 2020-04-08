@@ -41,21 +41,21 @@ type Guest struct {
 		Network    string `json:"network,omitempty"`
 		Vlan       int    `json:"vlan,omitempty"`
 	} `json:"interfaces,omitempty"`
-	Memory             int      `json:"memory,omitempty"`
-	Name               string   `json:"name,omitempty"`
-	Os                 string   `json:"os,omitempty"`
-	Persistent         bool     `json:"persistent,omitempty"`
-	PoolID             string   `json:"poolId,omitempty"`
-	PreviousGuestState string   `json:"previousGuestState,omitempty"`
-	ProfileID          string   `json:"profileId,omitempty"`
-	PublishedIP        string   `json:"publishedIp,omitempty"`
-	RdpUserInjected    bool     `json:"rdpUserInjected,omitempty"`
-	Realm              string   `json:"realm,omitempty"`
-	Stamp              float64  `json:"stamp,omitempty"`
-	Standalone         bool     `json:"standalone,omitempty"`
-	Tags               []string `json:"tags,omitempty"`
-	TargetState        []string `json:"targetState,omitempty"`
-	TemplateName       string   `json:"templateName,omitempty"`
+	Memory             int         `json:"memory,omitempty"`
+	Name               string      `json:"name,omitempty"`
+	Os                 string      `json:"os,omitempty"`
+	Persistent         bool        `json:"persistent,omitempty"`
+	PoolID             string      `json:"poolId,omitempty"`
+	PreviousGuestState string      `json:"previousGuestState,omitempty"`
+	ProfileID          string      `json:"profileId,omitempty"`
+	PublishedIP        string      `json:"publishedIp,omitempty"`
+	RdpUserInjected    bool        `json:"rdpUserInjected,omitempty"`
+	Realm              string      `json:"realm,omitempty"`
+	Stamp              interface{} `json:"stamp,omitempty"`
+	Standalone         bool        `json:"standalone,omitempty"`
+	Tags               []string    `json:"tags,omitempty"`
+	TargetState        []string    `json:"targetState,omitempty"`
+	TemplateName       string      `json:"templateName,omitempty"`
 	UserVolume         *struct {
 		State         string `json:"state,omitempty"`
 		RunningBackup bool   `json:"runningBackup,omitempty"`
