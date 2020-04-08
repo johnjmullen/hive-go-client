@@ -157,6 +157,10 @@ func (guest *Guest) Delete(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
+	if guest.External == true {
+		_, err := client.request("DELETE", "guest/"+guest.Name, nil)
+		return err
+	}
 	_, err := client.request("POST", "guest/"+guest.Name+"/delete", nil)
 	return err
 }
