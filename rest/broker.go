@@ -62,8 +62,9 @@ func (client *Client) BrokerAssign(poolID string) (interface{}, error) {
 }
 
 // BrokerConnectRDP request the rdp file to connect to a guest.
-func (client *Client) BrokerConnectRDP(guest string, remote bool) ([]byte, error) {
-	jsonData := map[string]interface{}{"guest": guest, "remote": remote, "outputType": "rdp"}
+// outputType can be rdp, json, or hio
+func (client *Client) BrokerConnect(guest string, remote bool, outputType string) ([]byte, error) {
+	jsonData := map[string]interface{}{"guest": guest, "remote": remote, "outputType": outputType}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
 		return nil, err
