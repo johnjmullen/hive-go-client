@@ -26,6 +26,11 @@ type Client struct {
 	token         string
 }
 
+//SetToken sets the token directly instead of calling auth
+func (client Client) SetToken(token string) {
+	client.token = token
+}
+
 func (client *Client) getTaskFromResponse(body []byte, err error) (*Task, error) {
 	if err != nil {
 		return nil, err
