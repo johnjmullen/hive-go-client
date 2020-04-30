@@ -210,3 +210,13 @@ func (client *Client) ResetBroker(clusterID string) error {
 	_, err := client.request("POST", "cluster/"+clusterID+"/broker/reset", nil)
 	return err
 }
+
+// UpdateSoftware applies a software package across the cluster
+func (cluster *Cluster) UpdateSoftware(client *Client, packageName string) (*Task, error) {
+	jsonData := map[string]string{"packageName": packageName}
+	jsonValue, err := json.Marshal(jsonData)
+	if err != nil {
+		return nil, err
+	}
+	return client.getTaskFromResponse(client.request("POST", "cluster/"+cluster.ID+"/updatePackage", jsonValue))
+}

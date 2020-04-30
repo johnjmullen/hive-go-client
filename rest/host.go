@@ -3,6 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 // Host describes a host record from the rest api
@@ -259,5 +260,68 @@ func (host *Host) GetState(client *Client) (string, error) {
 // UnjoinCluster removes a host from the cluster
 func (host *Host) UnjoinCluster(client *Client) error {
 	_, err := client.request("POST", "host/"+host.Hostid+"/cluster/unjoin", nil)
+	return err
+}
+
+//HostPackageInfo contains information about software and firmware packages
+type HostPackageInfo struct {
+	Packages []string `json:"packages"`
+	Current  string   `json:"current"`
+}
+
+//ListSoftware returns the current software version and available packages
+func (host *Host) ListSoftware(client *Client) (HostPackageInfo, error) {
+	var info HostPackageInfo
+	body, err := client.request("GET", "host/"+host.Hostid+"/firmware/software/packages", nil)
+	if err != nil {
+		return info, err
+	}
+	err = json.Unmarshal(body, &info)
+	return info, err
+}
+
+//DeploySoftware deploys a software package on a host
+func (host *Host) DeploySoftware(client *Client, pkg string) (*Task, error) {
+	return client.getTaskFromResponse(client.request("POST", "host/"+host.Hostid+"/firmware/software/"+pkg+"/deploy", nil))
+}
+
+//DeleteSoftware deletes a software package from a host
+func (host *Host) DeleteSoftware(client *Client, pkg string) error {
+	_, err := client.request("DELETE", "host/"+host.Hostid+"/firmware/software/"+pkg, nil)
+	return err
+}
+
+//ListFirmware returns the current firmware and available images
+func (host *Host) ListFirmware(client *Client) (HostPackageInfo, error) {
+	var info HostPackageInfo
+	body, err := client.request("GET", "host/"+host.Hostid+"/firmware/appliance/images", nil)
+	if err != nil {
+		return info, err
+	}
+	err = json.Unmarshal(body, &info)
+	return info, err
+}
+
+//StageFirmware stages a firmware image to be applied on a reboot
+func (host *Host) StageFirmware(client *Client, image string) error {
+	_, err := client.request("POST", "host/"+host.Hostid+"/firmware/appliance/"+image+"/stage", nil)
+	return err
+}
+
+//DestageFirmware destages a firmware image so it will not be applied on a reboot
+func (host *Host) DestageFirmware(client *Client, image string) error {
+	_, err := client.request("POST", "host/"+host.Hostid+"/firmware/appliance/"+image+"/destage", nil)
+	return err
+}
+
+//UploadFirmware uploads a firmware pkg file to the host
+func (host *Host) UploadFirmware(client *Client, filename string) error {
+	_, err := client.postMultipart(fmt.Sprintf("host/%s/firmware/appliance/upload", host.Hostid), "data", filename, nil)
+	return err
+}
+
+//UploadSoftware uploads a firmware pkg file to the host
+func (host *Host) UploadSoftware(client *Client, filename string) error {
+	_, err := client.postMultipart(fmt.Sprintf("host/%s/firmware/software/upload", host.Hostid), "data", filename, nil)
 	return err
 }

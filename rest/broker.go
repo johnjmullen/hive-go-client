@@ -61,7 +61,7 @@ func (client *Client) BrokerAssign(poolID string) (interface{}, error) {
 	return result, err
 }
 
-// BrokerConnectRDP request the rdp file to connect to a guest.
+// BrokerConnect request the rdp file to connect to a guest.
 // outputType can be rdp, json, or hio
 func (client *Client) BrokerConnect(guest string, remote bool, outputType string) ([]byte, error) {
 	jsonData := map[string]interface{}{"guest": guest, "remote": remote, "outputType": outputType}
@@ -73,7 +73,7 @@ func (client *Client) BrokerConnect(guest string, remote bool, outputType string
 	return body, err
 }
 
-// AssignGuest assign a user to aspecific guest
+// AssignGuest assign a user to a specific guest
 func (client *Client) AssignGuest(poolID, username, realm, guest string) (interface{}, error) {
 	var result interface{}
 	jsonData := map[string]string{"realm": realm, "username": username, "guest": guest}

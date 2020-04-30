@@ -5,9 +5,12 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -60,6 +63,45 @@ func checkResponse(res *http.Response, err error) ([]byte, error) {
 }
 
 func (client *Client) request(method, path string, data []byte) ([]byte, error) {
+	headers := map[string]string{"Content-type": "application/json"}
+	return client.requestWithHeaders(method, path, bytes.NewBuffer(data), headers)
+}
+
+func (client *Client) postMultipart(path, filenameField, filepath string, params map[string]string) ([]byte, error) {
+	f, err := os.Open(filepath)
+	defer f.Close()
+	if err != nil {
+		return nil, err
+	}
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+
+	//Add file and params to the form
+	body := bytes.NewBufferString("")
+	writer := multipart.NewWriter(body)
+	_, err = writer.CreateFormFile(filenameField, info.Name())
+	if err != nil {
+		return nil, err
+	}
+	for key, val := range params {
+		err = writer.WriteField(key, val)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	boundary := bytes.NewBufferString(fmt.Sprintf("\r\n--%s--\r\n", writer.Boundary()))
+	mreader := io.MultiReader(body, f, boundary)
+	headers := map[string]string{
+		"Content-Type": fmt.Sprintf("multipart/form-data; boundary=%s", writer.Boundary()),
+	}
+	return client.requestWithHeaders("POST", path, mreader, headers)
+	//req.ContentLength = fi.Size()+int64(body_buf.Len())+int64(close_buf.Len())
+}
+
+func (client *Client) requestWithHeaders(method, path string, body io.Reader, headers map[string]string) ([]byte, error) {
 	protocol := "https"
 	if client.Port == 3000 {
 		protocol = "http"
@@ -78,11 +120,14 @@ func (client *Client) request(method, path string, data []byte) ([]byte, error) 
 		client.httpClient = &http.Client{Transport: tr, Timeout: time.Second * 30}
 	}
 
-	req, err := http.NewRequest(method, u.String(), bytes.NewBuffer(data))
+	req, err := http.NewRequest(method, u.String(), body)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Content-type", "application/json")
+
+	for key, val := range headers {
+		req.Header.Add(key, val)
+	}
 	if client.token != "" {
 		req.Header.Add("Authorization", "Bearer "+client.token)
 	}

@@ -180,6 +180,10 @@ func handleTask(task *rest.Task, err error) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	if task == nil {
+		fmt.Println("Error reading task")
+		os.Exit(1)
+	}
 	if viper.GetBool("wait") {
 		if viper.GetBool("raw-progress") {
 			taskProgressNum(task)

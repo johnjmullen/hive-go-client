@@ -253,6 +253,29 @@ var clusterResetBrokerCommand = &cobra.Command{
 	},
 }
 
+var clusterUpdateSoftwareCmd = &cobra.Command{
+	Use:   "update-software",
+	Short: "Deploy a software package across the cluster",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("package", cmd.Flags().Lookup("package"))
+		cmd.MarkFlagRequired("package")
+		bindTaskFlags(cmd)
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		cluster, err := restClient.GetCluster(clusterID)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		handleTask(cluster.UpdateSoftware(restClient, viper.GetString("package")))
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(clusterCmd)
 	clusterCmd.AddCommand(addHostCmd)
@@ -281,4 +304,8 @@ func init() {
 	clusterCmd.AddCommand(clusterGetBrokerCmd)
 	clusterCmd.AddCommand(clusterSetBrokerCommand)
 	clusterCmd.AddCommand(clusterResetBrokerCommand)
+
+	clusterCmd.AddCommand(clusterUpdateSoftwareCmd)
+	addTaskFlags(clusterUpdateSoftwareCmd)
+	clusterUpdateSoftwareCmd.Flags().String("package", "", "package to deploy")
 }
