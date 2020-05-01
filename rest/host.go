@@ -233,6 +233,18 @@ func (host *Host) RestartServices(client *Client) error {
 	return err
 }
 
+// Reboot calls reboot on a host
+func (host *Host) Reboot(client *Client) error {
+	_, err := client.request("POST", "host/"+host.Hostid+"/system/reboot", nil)
+	return err
+}
+
+// Shutdown calls shutdown on a host
+func (host *Host) Shutdown(client *Client) error {
+	_, err := client.request("POST", "host/"+host.Hostid+"/system/shutdown", nil)
+	return err
+}
+
 // Version is a structure containing version information returned by HostVersion
 type Version struct {
 	Major   uint   `json:"major"`
