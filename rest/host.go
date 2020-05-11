@@ -303,35 +303,6 @@ func (host *Host) DeleteSoftware(client *Client, pkg string) error {
 	return err
 }
 
-//ListFirmware returns the current firmware and available images
-func (host *Host) ListFirmware(client *Client) (HostPackageInfo, error) {
-	var info HostPackageInfo
-	body, err := client.request("GET", "host/"+host.Hostid+"/firmware/appliance/images", nil)
-	if err != nil {
-		return info, err
-	}
-	err = json.Unmarshal(body, &info)
-	return info, err
-}
-
-//StageFirmware stages a firmware image to be applied on a reboot
-func (host *Host) StageFirmware(client *Client, image string) error {
-	_, err := client.request("POST", "host/"+host.Hostid+"/firmware/appliance/"+image+"/stage", nil)
-	return err
-}
-
-//DestageFirmware destages a firmware image so it will not be applied on a reboot
-func (host *Host) DestageFirmware(client *Client, image string) error {
-	_, err := client.request("POST", "host/"+host.Hostid+"/firmware/appliance/"+image+"/destage", nil)
-	return err
-}
-
-//UploadFirmware uploads a firmware pkg file to the host
-func (host *Host) UploadFirmware(client *Client, filename string) error {
-	_, err := client.postMultipart(fmt.Sprintf("host/%s/firmware/appliance/upload", host.Hostid), "data", filename, nil)
-	return err
-}
-
 //UploadSoftware uploads a firmware pkg file to the host
 func (host *Host) UploadSoftware(client *Client, filename string) error {
 	_, err := client.postMultipart(fmt.Sprintf("host/%s/firmware/software/upload", host.Hostid), "data", filename, nil)

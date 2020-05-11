@@ -306,96 +306,6 @@ var hostDeleteSoftware = &cobra.Command{
 	},
 }
 
-var hostListFirmwareCmd = &cobra.Command{
-	Use:   "list-firmware [hostid]",
-	Short: "list available firmware images on a host",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		firmware, err := host.ListFirmware(restClient)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		fmt.Println(formatString(firmware))
-	},
-}
-
-var hostUploadFirmware = &cobra.Command{
-	Use:   "upload-firmware [file]",
-	Args:  cobra.ExactArgs(1),
-	Short: "upload a firmware pkg file",
-	Run: func(cmd *cobra.Command, args []string) {
-		hostid, err := restClient.HostID()
-		if err != nil {
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
-		host, err := restClient.GetHost(hostid)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		err = host.UploadFirmware(restClient, args[0])
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-	},
-}
-
-var hostStageFirmware = &cobra.Command{
-	Use:   "stage-firmware [hostid]",
-	Short: "stage a firmware image for the next boot",
-	Args:  cobra.ExactArgs(1),
-	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("package", cmd.Flags().Lookup("package"))
-		cmd.MarkFlagRequired("package")
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		name := viper.GetString("package")
-		err = host.StageFirmware(restClient, name)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-	},
-}
-
-var hostDestageFirmware = &cobra.Command{
-	Use:   "destage-firmware [hostid]",
-	Short: "destage a firmware package for the next boot",
-	Args:  cobra.ExactArgs(1),
-	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("package", cmd.Flags().Lookup("package"))
-		cmd.MarkFlagRequired("package")
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		name := viper.GetString("package")
-		err = host.DestageFirmware(restClient, name)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-	},
-}
-
 func init() {
 	RootCmd.AddCommand(hostCmd)
 	hostCmd.AddCommand(hostGetCmd)
@@ -423,12 +333,4 @@ func init() {
 	hostDeploySoftware.Flags().String("package", "", "package to deploy")
 	hostCmd.AddCommand(hostDeleteSoftware)
 	hostDeleteSoftware.Flags().String("package", "", "package to delete")
-
-	hostCmd.AddCommand(hostListFirmwareCmd)
-	hostCmd.AddCommand(hostUploadFirmware)
-	hostCmd.AddCommand(hostStageFirmware)
-	addTaskFlags(hostStageFirmware)
-	hostStageFirmware.Flags().String("package", "", "package to stage")
-	hostCmd.AddCommand(hostDestageFirmware)
-	hostDestageFirmware.Flags().String("package", "", "package to destage")
 }
