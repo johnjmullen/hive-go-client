@@ -263,26 +263,6 @@ var hostUploadSoftware = &cobra.Command{
 	},
 }
 
-var hostDeploySoftware = &cobra.Command{
-	Use:   "deploy-software [hostid]",
-	Short: "deploy a software package",
-	Args:  cobra.ExactArgs(1),
-	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("package", cmd.Flags().Lookup("package"))
-		cmd.MarkFlagRequired("package")
-		bindTaskFlags(cmd)
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		name := viper.GetString("package")
-		handleTask(host.DeploySoftware(restClient, name))
-	},
-}
-
 var hostDeleteSoftware = &cobra.Command{
 	Use:   "delete-software [hostid]",
 	Short: "delete a software package",
@@ -328,9 +308,6 @@ func init() {
 
 	hostCmd.AddCommand(hostListSoftwareCmd)
 	hostCmd.AddCommand(hostUploadSoftware)
-	hostCmd.AddCommand(hostDeploySoftware)
-	addTaskFlags(hostDeploySoftware)
-	hostDeploySoftware.Flags().String("package", "", "package to deploy")
 	hostCmd.AddCommand(hostDeleteSoftware)
 	hostDeleteSoftware.Flags().String("package", "", "package to delete")
 }

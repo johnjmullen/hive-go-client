@@ -292,11 +292,6 @@ func (host *Host) ListSoftware(client *Client) (HostPackageInfo, error) {
 	return info, err
 }
 
-//DeploySoftware deploys a software package on a host
-func (host *Host) DeploySoftware(client *Client, pkg string) (*Task, error) {
-	return client.getTaskFromResponse(client.request("POST", "host/"+host.Hostid+"/firmware/software/"+pkg+"/deploy", nil))
-}
-
 //DeleteSoftware deletes a software package from a host
 func (host *Host) DeleteSoftware(client *Client, pkg string) error {
 	_, err := client.request("DELETE", "host/"+host.Hostid+"/firmware/software/"+pkg, nil)
