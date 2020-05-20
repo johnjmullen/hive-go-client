@@ -65,6 +65,7 @@ type Profile struct {
 	UserVolumes   *ProfileUserVolumes   `json:"userVolumes,omitempty"`
 	Vlan          int                   `json:"vlan,omitempty"`
 	Backup        *ProfileBackup        `json:"backup,omitempty"`
+	EnableHTML5   bool                  `json:"enableHtml5,omitempty"`
 }
 
 func (profile Profile) String() string {
