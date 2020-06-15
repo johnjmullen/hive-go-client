@@ -1,11 +1,15 @@
 package rest
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
 	"time"
+
+	"github.com/mitchellh/go-vnc"
+	"golang.org/x/net/websocket"
 )
 
 // Guest describes a guest record from the rest api
@@ -376,6 +380,39 @@ func (guest *Guest) ResetRecord(client *Client) error {
 	}
 	_, err := client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/resetRecord", nil)
 	return err
+}
+
+// GetConsole opens a connection to the vnc console
+// wss://hive1:8443/console/192.168.3.202?token=UBUNTU20001
+func (guest *Guest) GetConsole(client *Client) (*vnc.ClientConn, error) {
+	if guest.Name == "" {
+		return nil, errors.New("name cannot be empty")
+	}
+	u, _ := url.Parse("wss://hive1:8443/console/192.168.3.202?token=UBUNTU20001")
+	origin, _ := url.Parse("wss://hive1:8443/")
+	config := websocket.Config{
+		Location:  u,
+		Protocol:  []string{"binary"},
+		Origin:    origin,
+		Version:   13,
+		TlsConfig: &tls.Config{InsecureSkipVerify: client.AllowInsecure},
+	}
+	ws, err := websocket.DialConfig(&config)
+	if err != nil {
+		return nil, err
+	}
+	/*if vncPassword != nil && len(vncPassword.(string)) > 0 {
+		auth = []vnc.ClientAuth{&vnc.PasswordAuth{Password: vncPassword.(string)}}
+	} else {
+		auth = []vnc.ClientAuth{new(vnc.ClientAuthNone)}
+	}*/
+
+	auth := []vnc.ClientAuth{new(vnc.ClientAuthNone)}
+	c, err := vnc.Client(ws, &vnc.ClientConfig{Auth: auth, Exclusive: false})
+	if err != nil {
+		return nil, err
+	}
+	return c, err
 }
 
 //ExternalGuest is used to add external guest records to the system

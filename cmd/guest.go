@@ -118,6 +118,29 @@ var guestGetCmd = &cobra.Command{
 	},
 }
 
+var guestTestVncCmd = &cobra.Command{
+	Use:   "testVnc [Name]",
+	Short: "testVnc guest details",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		guest, err := restClient.GetGuest(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		c, err := guest.GetConsole(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = c.KeyEvent(0x0041, true)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 var guestListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list guests",
@@ -433,6 +456,7 @@ func init() {
 	guestCmd.AddCommand(guestDeleteCmd)
 	guestCmd.AddCommand(guestDiffCmd)
 	guestCmd.AddCommand(guestGetCmd)
+	guestCmd.AddCommand(guestTestVncCmd)
 
 	guestCmd.AddCommand(guestListCmd)
 	addListFlags(guestListCmd)
