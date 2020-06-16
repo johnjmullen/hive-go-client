@@ -52,22 +52,7 @@ var storageBrowseCmd = &cobra.Command{
 		viper.BindPFlag("recursive", cmd.Flags().Lookup("recursive"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var pool *rest.StoragePool
-		var err error
-		switch {
-		case cmd.Flags().Changed("id"):
-			pool, err = restClient.GetStoragePool(viper.GetString("id"))
-		case cmd.Flags().Changed("name"):
-			pool, err = restClient.GetStoragePoolByName(viper.GetString("name"))
-		default:
-			cmd.Usage()
-			os.Exit(1)
-		}
-
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		pool := getStoragePool(cmd)
 		files, err := pool.Browse(restClient, viper.GetString("path"), viper.GetBool("recursive"))
 		if err != nil {
 			fmt.Println(err)
@@ -153,21 +138,7 @@ var storageCopyURLCmd = &cobra.Command{
 		bindTaskFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var pool *rest.StoragePool
-		var err error
-		switch {
-		case cmd.Flags().Changed("id"):
-			pool, err = restClient.GetStoragePool(viper.GetString("id"))
-		case cmd.Flags().Changed("name"):
-			pool, err = restClient.GetStoragePoolByName(viper.GetString("name"))
-		default:
-			cmd.Usage()
-			os.Exit(1)
-		}
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		pool := getStoragePool(cmd)
 		if viper.GetBool("wait") && viper.GetBool("progress-bar") {
 			fmt.Println("\nDownloading " + viper.GetString("url"))
 		}
@@ -188,21 +159,7 @@ var storageCreateDiskCmd = &cobra.Command{
 		bindTaskFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var pool *rest.StoragePool
-		var err error
-		switch {
-		case cmd.Flags().Changed("id"):
-			pool, err = restClient.GetStoragePool(viper.GetString("id"))
-		case cmd.Flags().Changed("name"):
-			pool, err = restClient.GetStoragePoolByName(viper.GetString("name"))
-		default:
-			cmd.Usage()
-			os.Exit(1)
-		}
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		pool := getStoragePool(cmd)
 		if viper.GetBool("wait") && viper.GetBool("progress-bar") {
 			fmt.Println("\nConverting Disk " + viper.GetString("filename"))
 		}
@@ -254,23 +211,8 @@ var storageDeleteFileCmd = &cobra.Command{
 		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var pool *rest.StoragePool
-		var err error
-		switch {
-		case cmd.Flags().Changed("id"):
-			pool, err = restClient.GetStoragePool(viper.GetString("id"))
-		case cmd.Flags().Changed("name"):
-			pool, err = restClient.GetStoragePoolByName(viper.GetString("name"))
-		default:
-			cmd.Usage()
-			os.Exit(1)
-		}
-
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		err = pool.DeleteFile(restClient, args[0])
+		pool := getStoragePool(cmd)
+		err := pool.DeleteFile(restClient, args[0])
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -328,22 +270,7 @@ var storageDiskInfoCmd = &cobra.Command{
 		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var pool *rest.StoragePool
-		var err error
-		switch {
-		case cmd.Flags().Changed("id"):
-			pool, err = restClient.GetStoragePool(viper.GetString("id"))
-		case cmd.Flags().Changed("name"):
-			pool, err = restClient.GetStoragePoolByName(viper.GetString("name"))
-		default:
-			cmd.Usage()
-			os.Exit(1)
-		}
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
+		pool := getStoragePool(cmd)
 		info, err := pool.DiskInfo(restClient, args[0])
 		if err != nil {
 			fmt.Println(err)
@@ -375,22 +302,7 @@ var storageGetCmd = &cobra.Command{
 		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var pool *rest.StoragePool
-		var err error
-		switch {
-		case cmd.Flags().Changed("id"):
-			pool, err = restClient.GetStoragePool(viper.GetString("id"))
-		case cmd.Flags().Changed("name"):
-			pool, err = restClient.GetStoragePoolByName(viper.GetString("name"))
-		default:
-			cmd.Usage()
-			os.Exit(1)
-		}
-
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		pool := getStoragePool(cmd)
 		fmt.Println(formatString(pool))
 	},
 }
@@ -407,21 +319,7 @@ var storageGrowDiskCmd = &cobra.Command{
 		bindTaskFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var pool *rest.StoragePool
-		var err error
-		switch {
-		case cmd.Flags().Changed("id"):
-			pool, err = restClient.GetStoragePool(viper.GetString("id"))
-		case cmd.Flags().Changed("name"):
-			pool, err = restClient.GetStoragePoolByName(viper.GetString("name"))
-		default:
-			cmd.Usage()
-			os.Exit(1)
-		}
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		pool := getStoragePool(cmd)
 		handleTask(pool.GrowDisk(restClient, viper.GetString("filename"), uint(viper.GetInt("disk-size"))))
 	},
 }
@@ -482,28 +380,14 @@ var storageUploadCmd = &cobra.Command{
 		viper.BindPFlag("dest-filename", cmd.Flags().Lookup("dest-filename"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var pool *rest.StoragePool
-		var err error
-		switch {
-		case cmd.Flags().Changed("id"):
-			pool, err = restClient.GetStoragePool(viper.GetString("id"))
-		case cmd.Flags().Changed("name"):
-			pool, err = restClient.GetStoragePoolByName(viper.GetString("name"))
-		default:
-			cmd.Usage()
-			os.Exit(1)
-		}
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		pool := getStoragePool(cmd)
 		var filename string
 		if cmd.Flags().Changed("dest-filename") {
 			filename = viper.GetString("dest-filename")
 		} else {
 			filename = path.Base(args[0])
 		}
-		err = pool.Upload(restClient, args[0], filename)
+		err := pool.Upload(restClient, args[0], filename)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
