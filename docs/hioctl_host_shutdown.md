@@ -1,20 +1,19 @@
-## hioctl host log-level
+## hioctl host shutdown
 
-get or set host log level
+shutdown a host
 
 ### Synopsis
 
-get or set host log level
+shutdown a host
 
 ```
-hioctl host log-level [hostid] [flags]
+hioctl host shutdown [hostid] [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help         help for log-level
-  -s, --set string   set log level (error/warn/info/debug)
+  -h, --help   help for shutdown
 ```
 
 ### Options inherited from parent commands

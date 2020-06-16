@@ -1,20 +1,20 @@
-## hioctl host log-level
+## hioctl host delete-software
 
-get or set host log level
+delete a software package
 
 ### Synopsis
 
-get or set host log level
+delete a software package
 
 ```
-hioctl host log-level [hostid] [flags]
+hioctl host delete-software [hostid] [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help         help for log-level
-  -s, --set string   set log level (error/warn/info/debug)
+  -h, --help             help for delete-software
+      --package string   package to delete
 ```
 
 ### Options inherited from parent commands

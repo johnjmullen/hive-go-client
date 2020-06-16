@@ -1,20 +1,19 @@
-## hioctl host log-level
+## hioctl host list-software
 
-get or set host log level
+list available software packages on a host
 
 ### Synopsis
 
-get or set host log level
+list available software packages on a host
 
 ```
-hioctl host log-level [hostid] [flags]
+hioctl host list-software [hostid] [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help         help for log-level
-  -s, --set string   set log level (error/warn/info/debug)
+  -h, --help   help for list-software
 ```
 
 ### Options inherited from parent commands

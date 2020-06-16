@@ -1,20 +1,19 @@
-## hioctl host log-level
+## hioctl host reboot
 
-get or set host log level
+reboot a host
 
 ### Synopsis
 
-get or set host log level
+reboot a host
 
 ```
-hioctl host log-level [hostid] [flags]
+hioctl host reboot [hostid] [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help         help for log-level
-  -s, --set string   set log level (error/warn/info/debug)
+  -h, --help   help for reboot
 ```
 
 ### Options inherited from parent commands

@@ -1,20 +1,19 @@
-## hioctl host log-level
+## hioctl host upload-software
 
-get or set host log level
+upload a software pkg file to a host
 
 ### Synopsis
 
-get or set host log level
+upload a software pkg file to a host
 
 ```
-hioctl host log-level [hostid] [flags]
+hioctl host upload-software [file] [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help         help for log-level
-  -s, --set string   set log level (error/warn/info/debug)
+  -h, --help   help for upload-software
 ```
 
 ### Options inherited from parent commands
