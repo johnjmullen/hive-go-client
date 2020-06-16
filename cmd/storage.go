@@ -11,6 +11,27 @@ import (
 	"github.com/spf13/viper"
 )
 
+func getStoragePool(cmd *cobra.Command) *rest.StoragePool {
+	var pool *rest.StoragePool
+	var err error
+	switch {
+	case cmd.Flags().Changed("id"):
+		id, _ := cmd.Flags().GetString("id")
+		pool, err = restClient.GetStoragePool(id)
+	case cmd.Flags().Changed("name"):
+		name, _ := cmd.Flags().GetString("name")
+		pool, err = restClient.GetStoragePoolByName(name)
+	default:
+		cmd.Usage()
+		os.Exit(1)
+	}
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	return pool
+}
+
 var storageCmd = &cobra.Command{
 	Use:   "storage",
 	Short: `storage operations`,
@@ -262,24 +283,34 @@ var storageDeleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "delete storage pool",
 	Run: func(cmd *cobra.Command, args []string) {
-		var pool *rest.StoragePool
-		var err error
-		switch {
-		case cmd.Flags().Changed("id"):
-			id, _ := cmd.Flags().GetString("id")
-			pool, err = restClient.GetStoragePool(id)
-		case cmd.Flags().Changed("name"):
-			name, _ := cmd.Flags().GetString("name")
-			pool, err = restClient.GetStoragePoolByName(name)
-		default:
-			cmd.Usage()
-			os.Exit(1)
-		}
+		pool := getStoragePool(cmd)
+		err := pool.Delete(restClient)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		err = pool.Delete(restClient)
+	},
+}
+
+var storageStopCmd = &cobra.Command{
+	Use:   "stop",
+	Short: "disable a storage pool",
+	Run: func(cmd *cobra.Command, args []string) {
+		pool := getStoragePool(cmd)
+		err := pool.Stop(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var storageStartCmd = &cobra.Command{
+	Use:   "start",
+	Short: "re-enable a storage pool",
+	Run: func(cmd *cobra.Command, args []string) {
+		pool := getStoragePool(cmd)
+		err := pool.Start(restClient)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -493,6 +524,11 @@ func init() {
 
 	storageCmd.AddCommand(storageListCmd)
 	addListFlags(storageListCmd)
+
+	storageCmd.AddCommand(storageStopCmd)
+	initIDFlags(storageStopCmd)
+	storageCmd.AddCommand(storageStartCmd)
+	initIDFlags(storageStartCmd)
 
 	storageCmd.AddCommand(storageBrowseCmd)
 	initIDFlags(storageBrowseCmd)

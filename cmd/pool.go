@@ -57,7 +57,7 @@ var poolCreateCmd = &cobra.Command{
 
 var poolDeleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "delete pool pool",
+	Short: "delete a pool",
 	Run: func(cmd *cobra.Command, args []string) {
 		var pool *rest.Pool
 		var err error

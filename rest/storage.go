@@ -110,6 +110,24 @@ func (pool *StoragePool) Delete(client *Client) error {
 	return err
 }
 
+//Stop disables a storage pool
+func (pool *StoragePool) Stop(client *Client) error {
+	if pool.ID == "" {
+		return errors.New("Invalid Storage Pool")
+	}
+	_, err := client.request("POST", "storage/pool/"+pool.ID+"/stop", nil)
+	return err
+}
+
+//Start re-enables a stopped storage pool
+func (pool *StoragePool) Start(client *Client) error {
+	if pool.ID == "" {
+		return errors.New("Invalid Storage Pool")
+	}
+	_, err := client.request("POST", "storage/pool/"+pool.ID+"/start", nil)
+	return err
+}
+
 //CreateDisk creates a new disk in the storage pool
 func (pool *StoragePool) CreateDisk(client *Client, filename, format string, size uint) (*Task, error) {
 	if pool.ID == "" {
