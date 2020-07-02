@@ -24,6 +24,7 @@ type Host struct {
 		MaxCloneDensity int    `json:"maxCloneDensity"`
 		Ntp             string `json:"ntp"`
 		Timezone        string `json:"timezone"`
+		Role            string `json:"role"`
 	} `json:"appliance"`
 	Capabilities struct {
 		StorageTypes []string `json:"storageTypes"`
