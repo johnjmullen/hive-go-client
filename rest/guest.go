@@ -10,11 +10,11 @@ import (
 // Guest describes a guest record from the rest api
 type Guest struct {
 	SessionInfo *struct {
-		SessionID     int    `json:"SessionID"`
-		SourceIP      string `json:"SourceIP"`
-		SourceName    string `json:"SourceName"`
-		SessionState  int    `json:"sessionState"`
-		SessionStatus string `json:"sessionStatus"`
+		SessionID     int         `json:"SessionID"`
+		SourceIP      string      `json:"SourceIP"`
+		SourceName    string      `json:"SourceName"`
+		SessionState  interface{} `json:"sessionState"`
+		SessionStatus string      `json:"sessionStatus"`
 	} `json:"SessionInfo,omitempty"`
 	Address        string `json:"address,omitempty"`
 	AgentInstalled bool   `json:"agentInstalled"`
@@ -24,6 +24,7 @@ type Guest struct {
 		Backing    string `json:"backing,omitempty"`
 		Dev        string `json:"dev,omitempty"`
 		DiskDriver string `json:"diskDriver,omitempty"`
+		Filename   string `json:"filename,omitempty"`
 		Format     string `json:"format,omitempty"`
 		Path       string `json:"path,omitempty"`
 		Size       int64  `json:"size,omitempty"`
@@ -31,6 +32,7 @@ type Guest struct {
 		Type       string `json:"type,omitempty"`
 	} `json:"disks,omitempty"`
 	External   bool   `json:"external"`
+	Gateway    string `json:"gateway,omitempty"`
 	GuestState string `json:"guestState,omitempty"`
 	Hostid     string `json:"hostid,omitempty"`
 	Hostname   string `json:"hostname,omitempty"`
@@ -41,28 +43,35 @@ type Guest struct {
 		Network    string `json:"network,omitempty"`
 		Vlan       int    `json:"vlan,omitempty"`
 	} `json:"interfaces,omitempty"`
-	Memory             int         `json:"memory,omitempty"`
-	Name               string      `json:"name,omitempty"`
-	Os                 string      `json:"os,omitempty"`
-	Persistent         bool        `json:"persistent,omitempty"`
-	PoolID             string      `json:"poolId,omitempty"`
-	PreviousGuestState string      `json:"previousGuestState,omitempty"`
-	ProfileID          string      `json:"profileId,omitempty"`
-	PublishedIP        string      `json:"publishedIp,omitempty"`
-	RdpUserInjected    bool        `json:"rdpUserInjected,omitempty"`
-	Realm              string      `json:"realm,omitempty"`
-	Stamp              interface{} `json:"stamp,omitempty"`
-	Standalone         bool        `json:"standalone,omitempty"`
-	Tags               []string    `json:"tags,omitempty"`
-	TargetState        []string    `json:"targetState,omitempty"`
-	TemplateName       string      `json:"templateName,omitempty"`
-	UserVolume         *struct {
-		State         string `json:"state,omitempty"`
-		RunningBackup bool   `json:"runningBackup,omitempty"`
+	Memory              int         `json:"memory,omitempty"`
+	MigrationProcessing bool        `json:"migrationProcessing"`
+	Name                string      `json:"name,omitempty"`
+	Os                  string      `json:"os,omitempty"`
+	Persistent          bool        `json:"persistent,omitempty"`
+	PoolID              string      `json:"poolId,omitempty"`
+	PreviousGuestState  string      `json:"previousGuestState,omitempty"`
+	ProfileID           string      `json:"profileId,omitempty"`
+	PublishedIP         string      `json:"publishedIp,omitempty"`
+	RdpUserInjected     bool        `json:"rdpUserInjected,omitempty"`
+	Realm               string      `json:"realm,omitempty"`
+	Stamp               interface{} `json:"stamp,omitempty"`
+	Standalone          bool        `json:"standalone,omitempty"`
+	Tags                []string    `json:"tags,omitempty"`
+	TargetState         []string    `json:"targetState,omitempty"`
+	TemplateName        string      `json:"templateName,omitempty"`
+	UserVolume          *struct {
+		BackupSchedule  interface{} `json:",omitempty"`
+		LastReplication interface{} `json:",omitempty"`
+		Source          string      `json:"source,omitempty"`
+		State           string      `json:"state,omitempty"`
+		StateMessage    interface{} `json:"stateMessage,omitempty"`
+		Target          string      `json:"Target,omitempty"`
+		RunningBackup   bool        `json:"runningBackup,omitempty"`
 	} `json:"userVolume,omitempty"`
-	Username string `json:"username,omitempty"`
-	UUID     string `json:"uuid,omitempty"`
-	Backup   *struct {
+	Username         string `json:"username,omitempty"`
+	UserSessionState string `json:"userSessionState,omitempty"`
+	UUID             string `json:"uuid,omitempty"`
+	Backup           *struct {
 		State           string      `json:"state,omitempty"`
 		Frequency       string      `json:"frequency"`
 		TargetStorageID string      `json:"targetStorageId"`
