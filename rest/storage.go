@@ -33,6 +33,7 @@ type StoragePool struct {
 //DiskInfo contains information about a disk from a storage pool
 type DiskInfo struct {
 	Filename            string   `json:"filename,omitempty"`
+	Format              string   `json:"format,omitempty"`
 	VirtualSize         uint     `json:"virtual-size,omitempty"`
 	ActualSize          uint     `json:"actual-size,omitempty"`
 	DirtyFlag           bool     `json:"dirty-flag,omitempty"`
