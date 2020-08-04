@@ -281,8 +281,7 @@ func init() {
 	templateCmd.AddCommand(templateGetCmd)
 
 	templateCmd.AddCommand(templateListCmd)
-	templateListCmd.Flags().Bool("details", false, "show details")
-	templateListCmd.Flags().String("filter", "", "filter query string")
+	addListFlags(templateListCmd)
 
 	templateCmd.AddCommand(templateLoadCmd)
 	templateLoadCmd.Flags().StringP("storage", "s", "disk", "Location to load the template (disk or ram)")
