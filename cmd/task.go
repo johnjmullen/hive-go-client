@@ -191,7 +191,7 @@ func handleTask(task *rest.Task, err error) {
 			taskProgressBar(task)
 		} else {
 			taskVal := task.WaitForTask(restClient, false)
-			if taskVal.State == "Complete" {
+			if taskVal.State == "complete" {
 				fmt.Println(formatString("Task Complete"))
 				os.Exit(1)
 			}

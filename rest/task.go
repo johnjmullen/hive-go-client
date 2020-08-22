@@ -133,7 +133,7 @@ func (task Task) WatchTask(client *Client, taskData chan Task, done chan struct{
 //WaitForTask blocks until a task is complete and returns the task
 func (task Task) WaitForTask(client *Client, printProgress bool) *Task {
 	var progress int
-	var newVal Task
+	newVal := task
 	done := make(chan struct{})
 	taskData := make(chan Task)
 	go task.WatchTask(client, taskData, done)
