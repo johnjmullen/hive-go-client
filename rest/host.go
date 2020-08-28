@@ -311,7 +311,6 @@ func (host *Host) UploadSoftware(client *Client, filename string) error {
 		_, err := client.postMultipart(fmt.Sprintf("host/%s/firmware/software/upload", host.Hostid), "data", filename, nil)
 		return err
 	}
-	fmt.Println("new")
 	sp := StoragePool{ID: "softwarePackage"}
 	return sp.Upload(client, filename, path.Base(filename))
 }
