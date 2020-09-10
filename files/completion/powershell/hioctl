@@ -75,6 +75,7 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('reset-broker', 'reset-broker', [CompletionResultType]::ParameterValue, 'reset broker settings to the defaults')
             [CompletionResult]::new('set-broker', 'set-broker', [CompletionResultType]::ParameterValue, 'set broker settings')
             [CompletionResult]::new('set-license', 'set-license', [CompletionResultType]::ParameterValue, 'add a license for the cluster')
+            [CompletionResult]::new('update-software', 'update-software', [CompletionResultType]::ParameterValue, 'Deploy a software package across the cluster')
             break
         }
         'hioctl;cluster;add-host' {
@@ -130,6 +131,13 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
         'hioctl;cluster;set-license' {
             break
         }
+        'hioctl;cluster;update-software' {
+            [CompletionResult]::new('--package', 'package', [CompletionResultType]::ParameterName, 'package to deploy')
+            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
+            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
+            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
+            break
+        }
         'hioctl;export' {
             break
         }
@@ -143,6 +151,7 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list guests')
             [CompletionResult]::new('migrate', 'migrate', [CompletionResultType]::ParameterValue, 'migrate a guest')
             [CompletionResult]::new('poweroff', 'poweroff', [CompletionResultType]::ParameterValue, 'force power off guest')
+            [CompletionResult]::new('poweron', 'poweron', [CompletionResultType]::ParameterValue, 'power on guest')
             [CompletionResult]::new('reboot', 'reboot', [CompletionResultType]::ParameterValue, 'reboot guest')
             [CompletionResult]::new('release', 'release', [CompletionResultType]::ParameterValue, 'release guest assignment')
             [CompletionResult]::new('reset', 'reset', [CompletionResultType]::ParameterValue, 'force reset guest')
@@ -188,6 +197,9 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
         'hioctl;guest;poweroff' {
             break
         }
+        'hioctl;guest;poweron' {
+            break
+        }
         'hioctl;guest;reboot' {
             break
         }
@@ -213,13 +225,22 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             break
         }
         'hioctl;host' {
+            [CompletionResult]::new('delete-software', 'delete-software', [CompletionResultType]::ParameterValue, 'delete a software package')
             [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get host details')
             [CompletionResult]::new('info', 'info', [CompletionResultType]::ParameterValue, 'hostid and version')
             [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list hosts')
+            [CompletionResult]::new('list-software', 'list-software', [CompletionResultType]::ParameterValue, 'list available software packages on a host')
             [CompletionResult]::new('log-level', 'log-level', [CompletionResultType]::ParameterValue, 'get or set host log level')
+            [CompletionResult]::new('reboot', 'reboot', [CompletionResultType]::ParameterValue, 'reboot a host')
             [CompletionResult]::new('restart-services', 'restart-services', [CompletionResultType]::ParameterValue, 'restart hive servies')
+            [CompletionResult]::new('shutdown', 'shutdown', [CompletionResultType]::ParameterValue, 'shutdown a host')
             [CompletionResult]::new('state', 'state', [CompletionResultType]::ParameterValue, 'get or set host state')
             [CompletionResult]::new('unjoin', 'unjoin', [CompletionResultType]::ParameterValue, 'remove host from cluster')
+            [CompletionResult]::new('upload-software', 'upload-software', [CompletionResultType]::ParameterValue, 'upload a software pkg file to a host')
+            break
+        }
+        'hioctl;host;delete-software' {
+            [CompletionResult]::new('--package', 'package', [CompletionResultType]::ParameterName, 'package to delete')
             break
         }
         'hioctl;host;get' {
@@ -235,12 +256,21 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
             break
         }
+        'hioctl;host;list-software' {
+            break
+        }
         'hioctl;host;log-level' {
             [CompletionResult]::new('-s', 's', [CompletionResultType]::ParameterName, 'set log level (error/warn/info/debug)')
             [CompletionResult]::new('--set', 'set', [CompletionResultType]::ParameterName, 'set log level (error/warn/info/debug)')
             break
         }
+        'hioctl;host;reboot' {
+            break
+        }
         'hioctl;host;restart-services' {
+            break
+        }
+        'hioctl;host;shutdown' {
             break
         }
         'hioctl;host;state' {
@@ -254,9 +284,12 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
         'hioctl;host;unjoin' {
             break
         }
+        'hioctl;host;upload-software' {
+            break
+        }
         'hioctl;pool' {
             [CompletionResult]::new('create', 'create', [CompletionResultType]::ParameterValue, 'Add a new guest pool')
-            [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete pool pool')
+            [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete a pool')
             [CompletionResult]::new('diff', 'diff', [CompletionResultType]::ParameterValue, 'compare 2 pools')
             [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get pool details')
             [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list pools')
@@ -425,6 +458,8 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('grow-disk', 'grow-disk', [CompletionResultType]::ParameterValue, 'grow a disk in the storage pool')
             [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list storage pools')
             [CompletionResult]::new('move-file', 'move-file', [CompletionResultType]::ParameterValue, 'move a storage pool file')
+            [CompletionResult]::new('start', 'start', [CompletionResultType]::ParameterValue, 're-enable a storage pool')
+            [CompletionResult]::new('stop', 'stop', [CompletionResultType]::ParameterValue, 'disable a storage pool')
             [CompletionResult]::new('upload', 'upload', [CompletionResultType]::ParameterValue, 'upload a file to a storage pool')
             break
         }
@@ -550,6 +585,20 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
             break
         }
+        'hioctl;storage;start' {
+            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
+            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
+            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
+            break
+        }
+        'hioctl;storage;stop' {
+            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
+            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
+            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
+            break
+        }
         'hioctl;storage;upload' {
             [CompletionResult]::new('--dest-filename', 'dest-filename', [CompletionResultType]::ParameterName, 'path to the file in the destination storage pool')
             [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
@@ -641,8 +690,10 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             break
         }
         'hioctl;template;list' {
+            [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
             [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
-            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter query string')
+            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
+            [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
             break
         }
         'hioctl;template;load' {

@@ -186,6 +186,7 @@ function _hioctl_cluster {
       "reset-broker:reset broker settings to the defaults"
       "set-broker:set broker settings"
       "set-license:add a license for the cluster"
+      "update-software:Deploy a software package across the cluster"
     )
     _describe "command" commands
     ;;
@@ -224,6 +225,9 @@ function _hioctl_cluster {
     ;;
   set-license)
     _hioctl_cluster_set-license
+    ;;
+  update-software)
+    _hioctl_cluster_update-software
     ;;
   esac
 }
@@ -379,6 +383,22 @@ function _hioctl_cluster_set-license {
     '(-u --user)'{-u,--user}'[Admin username]:'
 }
 
+function _hioctl_cluster_update-software {
+  _arguments \
+    '--package[package to deploy]:' \
+    '--progress-bar[show a progress bar with --wait]' \
+    '--raw-progress[print progress as a number with --wait]' \
+    '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
 function _hioctl_export {
   _arguments \
     '--config[config file]:' \
@@ -419,6 +439,7 @@ function _hioctl_guest {
       "list:list guests"
       "migrate:migrate a guest"
       "poweroff:force power off guest"
+      "poweron:power on guest"
       "reboot:reboot guest"
       "release:release guest assignment"
       "reset:force reset guest"
@@ -457,6 +478,9 @@ function _hioctl_guest {
     ;;
   poweroff)
     _hioctl_guest_poweroff
+    ;;
+  poweron)
+    _hioctl_guest_poweron
     ;;
   reboot)
     _hioctl_guest_reboot
@@ -597,6 +621,18 @@ function _hioctl_guest_poweroff {
     '(-u --user)'{-u,--user}'[Admin username]:'
 }
 
+function _hioctl_guest_poweron {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
 function _hioctl_guest_reboot {
   _arguments \
     '--config[config file]:' \
@@ -703,19 +739,27 @@ function _hioctl_host {
   case $state in
   cmnds)
     commands=(
+      "delete-software:delete a software package"
       "get:get host details"
       "info:hostid and version"
       "list:list hosts"
+      "list-software:list available software packages on a host"
       "log-level:get or set host log level"
+      "reboot:reboot a host"
       "restart-services:restart hive servies"
+      "shutdown:shutdown a host"
       "state:get or set host state"
       "unjoin:remove host from cluster"
+      "upload-software:upload a software pkg file to a host"
     )
     _describe "command" commands
     ;;
   esac
 
   case "$words[1]" in
+  delete-software)
+    _hioctl_host_delete-software
+    ;;
   get)
     _hioctl_host_get
     ;;
@@ -725,11 +769,20 @@ function _hioctl_host {
   list)
     _hioctl_host_list
     ;;
+  list-software)
+    _hioctl_host_list-software
+    ;;
   log-level)
     _hioctl_host_log-level
     ;;
+  reboot)
+    _hioctl_host_reboot
+    ;;
   restart-services)
     _hioctl_host_restart-services
+    ;;
+  shutdown)
+    _hioctl_host_shutdown
     ;;
   state)
     _hioctl_host_state
@@ -737,7 +790,23 @@ function _hioctl_host {
   unjoin)
     _hioctl_host_unjoin
     ;;
+  upload-software)
+    _hioctl_host_upload-software
+    ;;
   esac
+}
+
+function _hioctl_host_delete-software {
+  _arguments \
+    '--package[package to delete]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
 }
 
 function _hioctl_host_get {
@@ -780,6 +849,18 @@ function _hioctl_host_list {
     '(-u --user)'{-u,--user}'[Admin username]:'
 }
 
+function _hioctl_host_list-software {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
 function _hioctl_host_log-level {
   _arguments \
     '(-s --set)'{-s,--set}'[set log level (error/warn/info/debug)]:' \
@@ -793,7 +874,31 @@ function _hioctl_host_log-level {
     '(-u --user)'{-u,--user}'[Admin username]:'
 }
 
+function _hioctl_host_reboot {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
 function _hioctl_host_restart-services {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_host_shutdown {
   _arguments \
     '--config[config file]:' \
     '--format[format (json/yaml)]:' \
@@ -833,6 +938,18 @@ function _hioctl_host_unjoin {
     '(-u --user)'{-u,--user}'[Admin username]:'
 }
 
+function _hioctl_host_upload-software {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
 
 function _hioctl_pool {
   local -a commands
@@ -853,7 +970,7 @@ function _hioctl_pool {
   cmnds)
     commands=(
       "create:Add a new guest pool"
-      "delete:delete pool pool"
+      "delete:delete a pool"
       "diff:compare 2 pools"
       "get:get pool details"
       "list:list pools"
@@ -1262,6 +1379,8 @@ function _hioctl_storage {
       "grow-disk:grow a disk in the storage pool"
       "list:list storage pools"
       "move-file:move a storage pool file"
+      "start:re-enable a storage pool"
+      "stop:disable a storage pool"
       "upload:upload a file to a storage pool"
     )
     _describe "command" commands
@@ -1310,6 +1429,12 @@ function _hioctl_storage {
     ;;
   move-file)
     _hioctl_storage_move-file
+    ;;
+  start)
+    _hioctl_storage_start
+    ;;
+  stop)
+    _hioctl_storage_stop
     ;;
   upload)
     _hioctl_storage_upload
@@ -1539,6 +1664,34 @@ function _hioctl_storage_move-file {
     '--src-filename[path to the file in the source storage pool]:' \
     '--src-storage[Source storage pool id]:' \
     '--wait[wait for task to complete]' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_start {
+  _arguments \
+    '(-i --id)'{-i,--id}'[Storage Pool Id]:' \
+    '(-n --name)'{-n,--name}'[Storage Pool Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_stop {
+  _arguments \
+    '(-i --id)'{-i,--id}'[Storage Pool Id]:' \
+    '(-n --name)'{-n,--name}'[Storage Pool Name]:' \
     '--config[config file]:' \
     '--format[format (json/yaml)]:' \
     '--host[Hostname or ip address]:' \
@@ -1834,8 +1987,10 @@ function _hioctl_template_get {
 
 function _hioctl_template_list {
   _arguments \
+    '--count[number of results to show]:' \
     '--details[show details]' \
-    '--filter[filter query string]:' \
+    '--filter[filter results based on a field.]:' \
+    '--offset[first result to show]:' \
     '--config[config file]:' \
     '--format[format (json/yaml)]:' \
     '--host[Hostname or ip address]:' \
