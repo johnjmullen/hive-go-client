@@ -305,7 +305,7 @@ func (host *Host) DeleteSoftware(client *Client, pkg string) error {
 
 //UploadSoftware uploads a firmware pkg file to the host
 func (host *Host) UploadSoftware(client *Client, filename string) error {
-	minVersion, _ := version.NewVersion("8.3.0-1032")
+	minVersion, _ := version.NewVersion("8.2.6-1110")
 	v, err := version.NewVersion(strings.TrimPrefix(host.Appliance.Firmware.Software, "hiveio-fabric-v"))
 	if err != nil || v.LessThan(minVersion) {
 		_, err := client.postMultipart(fmt.Sprintf("host/%s/firmware/software/upload", host.Hostid), "data", filename, nil)
@@ -313,4 +313,10 @@ func (host *Host) UploadSoftware(client *Client, filename string) error {
 	}
 	sp := StoragePool{ID: "softwarePackage"}
 	return sp.Upload(client, filename, path.Base(filename))
+}
+
+// RestartNetworking calls restarts networking on the host
+func (host *Host) RestartNetworking(client *Client) error {
+	_, err := client.request("POST", "host/"+host.Hostid+"/networking/networking/restart", nil)
+	return err
 }

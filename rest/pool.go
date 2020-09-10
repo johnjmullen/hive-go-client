@@ -54,11 +54,11 @@ type PoolHostDevice struct {
 
 // PoolInterface network interface settings for a pool
 type PoolInterface struct {
-	BootOrder  int    `json:"bootOrder,omitempty"`
-	Emulation  string `json:"emulation,omitempty"`
-	Network    string `json:"network,omitempty"`
-	Vlan       int    `json:"vlan,omitempty"`
-	MacAddress string `json:"macAddress,omitempty"`
+	Emulation  string      `json:"emulation,omitempty"`
+	Network    string      `json:"network,omitempty"`
+	Vlan       interface{} `json:"vlan,omitempty"`
+	IPAddress  string `json:"ipAddress"`
+	MacAddress string      `json:"macAddress,omitempty"`
 }
 
 // PoolBackup data protection settings from a pool record
