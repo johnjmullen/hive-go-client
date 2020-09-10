@@ -155,6 +155,24 @@ var guestUpdateCmd = &cobra.Command{
 	},
 }
 
+var guestPoweronCmd = &cobra.Command{
+	Use:   "poweron [Name]",
+	Short: "power on guest",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		guest, err := restClient.GetGuest(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		guest.Poweron(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 var guestPoweroffCmd = &cobra.Command{
 	Use:   "poweroff [Name]",
 	Short: "force power off guest",
@@ -383,6 +401,7 @@ func init() {
 	guestCmd.AddCommand(guestListCmd)
 	addListFlags(guestListCmd)
 
+	guestCmd.AddCommand(guestPoweronCmd)
 	guestCmd.AddCommand(guestPoweroffCmd)
 	guestCmd.AddCommand(guestRebootCmd)
 	guestCmd.AddCommand(guestReleaseCmd)

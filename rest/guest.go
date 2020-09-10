@@ -132,6 +132,15 @@ func (guest *Guest) Reboot(client *Client) error {
 	return err
 }
 
+// Poweron starts a powered off guest
+func (guest *Guest) Poweron(client *Client) error {
+	if guest.Name == "" {
+		return errors.New("name cannot be empty")
+	}
+	_, err := client.request("POST", "guest/"+guest.Name+"/poweron", nil)
+	return err
+}
+
 // Poweroff forces a guest to powers off
 func (guest *Guest) Poweroff(client *Client) error {
 	if guest.Name == "" {
