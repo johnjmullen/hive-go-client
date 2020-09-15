@@ -18,6 +18,7 @@ type Guest struct {
 	} `json:"SessionInfo,omitempty"`
 	Address        string `json:"address,omitempty"`
 	AgentInstalled bool   `json:"agentInstalled"`
+	AgentVersion   string `json:"agentVersion,omitempty"`
 	Cpus           int    `json:"cpus,omitempty"`
 	Currentmem     int    `json:"currentmem,omitempty"`
 	Disks          []struct {
