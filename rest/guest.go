@@ -56,7 +56,7 @@ type Guest struct {
 	RdpUserInjected     bool        `json:"rdpUserInjected,omitempty"`
 	Realm               string      `json:"realm,omitempty"`
 	Stamp               interface{} `json:"stamp,omitempty"`
-	Standalone          bool        `json:"standalone,omitempty"`
+	Standalone          bool        `json:"standalone"`
 	Tags                []string    `json:"tags,omitempty"`
 	TargetState         []string    `json:"targetState,omitempty"`
 	TemplateName        string      `json:"templateName,omitempty"`
@@ -69,7 +69,7 @@ type Guest struct {
 		Target          string      `json:"Target,omitempty"`
 		RunningBackup   bool        `json:"runningBackup,omitempty"`
 	} `json:"userVolume,omitempty"`
-	Username         string `json:"username,omitempty"`
+	Username         string `json:"username"`
 	UserSessionState string `json:"userSessionState,omitempty"`
 	UUID             string `json:"uuid,omitempty"`
 	Backup           *struct {

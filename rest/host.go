@@ -102,9 +102,10 @@ type Host struct {
 			Vlan      int    `json:"vlan"`
 		} `json:"storage"`
 	} `json:"networking"`
-	RdbID   string `json:"rdbId"`
-	State   string `json:"state"`
-	Storage struct {
+	RdbID    string      `json:"rdbId"`
+	Software interface{} `json:"software"`
+	State    string      `json:"state"`
+	Storage  struct {
 		Blockdevices []struct {
 			MajMin     string `json:"maj:min"`
 			Mountpoint string `json:"mountpoint"`

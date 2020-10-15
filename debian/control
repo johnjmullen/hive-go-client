@@ -11,8 +11,8 @@ Build-Depends: debhelper (>= 10),
                golang-github-spf13-viper-dev
 Standards-Version: 4.1.1
 Homepage: https://github.com/hive-io/hive-go-client
-Vcs-Browser: https://anonscm.debian.org/cgit/pkg-go/packages/hive-go-client.git
-Vcs-Git: https://anonscm.debian.org/git/pkg-go/packages/hive-go-client.git
+Vcs-Browser: https://github.com/hive-io/hive-go-client
+Vcs-Git: https://github.com/hive-io/hive-go-client
 XS-Go-Import-Path: github.com/hive-io/hive-go-client
 Testsuite: autopkgtest-pkg-go
 
