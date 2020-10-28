@@ -224,7 +224,7 @@ func taskProgressBar(task *rest.Task) {
 	for {
 		select {
 		case newVal = <-taskData:
-			bar.Set(newVal.Progress)
+			bar.Set(int(newVal.Progress))
 		case <-done:
 			if newVal.State == "completed" {
 				bar.Set(100)

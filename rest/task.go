@@ -16,7 +16,7 @@ type Task struct {
 	LastUpdatedTime time.Time `json:"lastUpdatedTime"`
 	Message         string    `json:"message"`
 	Name            string    `json:"name"`
-	Progress        int       `json:"progress"`
+	Progress        float32   `json:"progress"`
 	QueueTime       int       `json:"queueTime"`
 	Ref             struct {
 		Cluster string `json:"cluster"`
@@ -132,7 +132,7 @@ func (task Task) WatchTask(client *Client, taskData chan Task, done chan struct{
 
 //WaitForTask blocks until a task is complete and returns the task
 func (task Task) WaitForTask(client *Client, printProgress bool) *Task {
-	var progress int
+	var progress float32
 	newVal := task
 	done := make(chan struct{})
 	taskData := make(chan Task)
