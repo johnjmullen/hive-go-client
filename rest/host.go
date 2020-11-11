@@ -17,6 +17,7 @@ type Host struct {
 		ClusterID   string `json:"clusterId"`
 		Cma         string `json:"cma"`
 		CPUGovernor string `json:"cpuGovernor"`
+		CRS         bool   `json:"crs"`
 		DbName      string `json:"dbName"`
 		Firmware    struct {
 			Active      string `json:"active"`
@@ -172,7 +173,6 @@ type Host struct {
 		} `json:"ram"`
 	} `json:"storage"`
 	Tags []string `json:"tags"`
-	CRS  bool     `json:"CRS"`
 }
 
 func (host Host) String() string {
@@ -319,5 +319,17 @@ func (host *Host) UploadSoftware(client *Client, filename string) error {
 // RestartNetworking calls restarts networking on the host
 func (host *Host) RestartNetworking(client *Client) error {
 	_, err := client.request("POST", "host/"+host.Hostid+"/networking/networking/restart", nil)
+	return err
+}
+
+// EnableCRS enables crs on the host
+func (host *Host) EnableCRS(client *Client) error {
+	_, err := client.request("POST", "host/"+host.Hostid+"/enableCRS", nil)
+	return err
+}
+
+// DisableCRS disables crs on the host
+func (host *Host) DisableCRS(client *Client) error {
+	_, err := client.request("POST", "host/"+host.Hostid+"/disableCRS", nil)
 	return err
 }

@@ -286,6 +286,44 @@ var hostDeleteSoftware = &cobra.Command{
 	},
 }
 
+var hostEnableCRSCmd = &cobra.Command{
+	Use:   "enable-crs [hostid]",
+	Short: "enable crs on a host",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		host, err := restClient.GetHost(args[0])
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = host.EnableCRS(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var hostDisableCRSCmd = &cobra.Command{
+	Use:   "disable-crs [hostid]",
+	Short: "disable crs on a host",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		host, err := restClient.GetHost(args[0])
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = host.DisableCRS(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(hostCmd)
 	hostCmd.AddCommand(hostGetCmd)
@@ -310,4 +348,6 @@ func init() {
 	hostCmd.AddCommand(hostUploadSoftware)
 	hostCmd.AddCommand(hostDeleteSoftware)
 	hostDeleteSoftware.Flags().String("package", "", "package to delete")
+	hostCmd.AddCommand(hostEnableCRSCmd)
+	hostCmd.AddCommand(hostDisableCRSCmd)
 }
