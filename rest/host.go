@@ -209,6 +209,34 @@ func (client *Client) GetHost(hostid string) (Host, error) {
 	return host, err
 }
 
+// GetHostByName requests a host by hostname
+func (client *Client) GetHostByName(name string) (*Host, error) {
+	var hosts, err = client.ListHosts("hostname=" + name)
+	if err != nil {
+		return nil, err
+	}
+	for _, host := range hosts {
+		if host.Hostname == name {
+			return &host, nil
+		}
+	}
+	return nil, errors.New("Host not found")
+}
+
+// GetHostByIP requests a host by hostname
+func (client *Client) GetHostByIP(ip string) (*Host, error) {
+	var hosts, err = client.ListHosts("ip=" + ip)
+	if err != nil {
+		return nil, err
+	}
+	for _, host := range hosts {
+		if host.IP == ip {
+			return &host, nil
+		}
+	}
+	return nil, errors.New("Host not found")
+}
+
 //UpdateAppliance updates settings from Host.appliance
 func (host *Host) UpdateAppliance(client *Client) (string, error) {
 	var result string
