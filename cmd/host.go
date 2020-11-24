@@ -83,6 +83,20 @@ var hostListCmd = &cobra.Command{
 	},
 }
 
+var hostGetIDCmd = &cobra.Command{
+	Use:   "get-id [name]",
+	Short: "get hostid from hostname",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		host, err := restClient.GetHostByName(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(host.Hostid)
+	},
+}
+
 var hostLogLevelCmd = &cobra.Command{
 	Use:   "log-level [hostid]",
 	Short: "get or set host log level",
@@ -328,6 +342,7 @@ func init() {
 	RootCmd.AddCommand(hostCmd)
 	hostCmd.AddCommand(hostGetCmd)
 	hostCmd.AddCommand(hostInfoCmd)
+	hostCmd.AddCommand(hostGetIDCmd)
 
 	hostCmd.AddCommand(hostListCmd)
 	addListFlags(hostListCmd)
