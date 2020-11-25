@@ -226,7 +226,10 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
         }
         'hioctl;host' {
             [CompletionResult]::new('delete-software', 'delete-software', [CompletionResultType]::ParameterValue, 'delete a software package')
+            [CompletionResult]::new('disable-crs', 'disable-crs', [CompletionResultType]::ParameterValue, 'disable crs on a host')
+            [CompletionResult]::new('enable-crs', 'enable-crs', [CompletionResultType]::ParameterValue, 'enable crs on a host')
             [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get host details')
+            [CompletionResult]::new('get-id', 'get-id', [CompletionResultType]::ParameterValue, 'get hostid from hostname')
             [CompletionResult]::new('info', 'info', [CompletionResultType]::ParameterValue, 'hostid and version')
             [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list hosts')
             [CompletionResult]::new('list-software', 'list-software', [CompletionResultType]::ParameterValue, 'list available software packages on a host')
@@ -243,7 +246,16 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('--package', 'package', [CompletionResultType]::ParameterName, 'package to delete')
             break
         }
+        'hioctl;host;disable-crs' {
+            break
+        }
+        'hioctl;host;enable-crs' {
+            break
+        }
         'hioctl;host;get' {
+            break
+        }
+        'hioctl;host;get-id' {
             break
         }
         'hioctl;host;info' {
