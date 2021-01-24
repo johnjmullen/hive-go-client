@@ -57,7 +57,7 @@ type PoolInterface struct {
 	Emulation  string      `json:"emulation,omitempty"`
 	Network    string      `json:"network,omitempty"`
 	Vlan       interface{} `json:"vlan,omitempty"`
-	IPAddress  string `json:"ipAddress"`
+	IPAddress  string      `json:"ipAddress"`
 	MacAddress string      `json:"macAddress,omitempty"`
 }
 
@@ -70,7 +70,7 @@ type PoolBackup struct {
 
 //PoolAffinity host affinity settings for the pool
 type PoolAffinity struct {
-	CustomCPUFeatures  string   `json:"customCPUFeatures,omitempty"`
+	CustomCPUFeatures  string   `json:"customCpuFeatures,omitempty"`
 	UseHostPassthrough bool     `json:"useHostPassthrough"`
 	AllowedHostIDs     []string `json:"allowedHostIds,omitempty"`
 }
