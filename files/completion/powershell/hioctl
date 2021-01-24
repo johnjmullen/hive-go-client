@@ -41,6 +41,7 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('storage', 'storage', [CompletionResultType]::ParameterValue, 'storage operations')
             [CompletionResult]::new('task', 'task', [CompletionResultType]::ParameterValue, 'task operations')
             [CompletionResult]::new('template', 'template', [CompletionResultType]::ParameterValue, 'template operations')
+            [CompletionResult]::new('user', 'user', [CompletionResultType]::ParameterValue, 'user operations')
             [CompletionResult]::new('util', 'util', [CompletionResultType]::ParameterValue, 'hioctl utilities')
             break
         }
@@ -717,6 +718,37 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             break
         }
         'hioctl;template;update' {
+            break
+        }
+        'hioctl;user' {
+            [CompletionResult]::new('create', 'create', [CompletionResultType]::ParameterValue, 'Add a new user')
+            [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete a user')
+            [CompletionResult]::new('diff', 'diff', [CompletionResultType]::ParameterValue, 'compare 2 users')
+            [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get user details')
+            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list users')
+            [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'update a user')
+            break
+        }
+        'hioctl;user;create' {
+            break
+        }
+        'hioctl;user;delete' {
+            break
+        }
+        'hioctl;user;diff' {
+            break
+        }
+        'hioctl;user;get' {
+            break
+        }
+        'hioctl;user;list' {
+            [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
+            [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
+            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
+            [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
+            break
+        }
+        'hioctl;user;update' {
             break
         }
         'hioctl;util' {

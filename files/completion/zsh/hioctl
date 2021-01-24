@@ -31,6 +31,7 @@ function _hioctl {
       "storage:storage operations"
       "task:task operations"
       "template:template operations"
+      "user:user operations"
     )
     _describe "command" commands
     ;;
@@ -72,6 +73,9 @@ function _hioctl {
     ;;
   template)
     _hioctl_template
+    ;;
+  user)
+    _hioctl_user
     ;;
   esac
 }
@@ -2075,6 +2079,134 @@ function _hioctl_template_unload {
 }
 
 function _hioctl_template_update {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+
+function _hioctl_user {
+  local -a commands
+
+  _arguments -C \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "create:Add a new user"
+      "delete:delete a user"
+      "diff:compare 2 users"
+      "get:get user details"
+      "list:list users"
+      "update:update a user"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  create)
+    _hioctl_user_create
+    ;;
+  delete)
+    _hioctl_user_delete
+    ;;
+  diff)
+    _hioctl_user_diff
+    ;;
+  get)
+    _hioctl_user_get
+    ;;
+  list)
+    _hioctl_user_list
+    ;;
+  update)
+    _hioctl_user_update
+    ;;
+  esac
+}
+
+function _hioctl_user_create {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_user_delete {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_user_diff {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_user_get {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_user_list {
+  _arguments \
+    '--count[number of results to show]:' \
+    '--details[show details]' \
+    '--filter[filter results based on a field.]:' \
+    '--offset[first result to show]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_user_update {
   _arguments \
     '--config[config file]:' \
     '--format[format (json/yaml)]:' \
