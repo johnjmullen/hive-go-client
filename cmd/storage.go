@@ -175,7 +175,6 @@ var storageCreateCmd = &cobra.Command{
 		var file *os.File
 		var err error
 		if args[0] == "-" {
-			fmt.Println("reading stdin")
 			file = os.Stdin
 		} else {
 			file, err = os.Open(args[0])
