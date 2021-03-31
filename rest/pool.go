@@ -255,3 +255,21 @@ func (pool *Pool) DeleteAssignment(client *Client) error {
 	_, err := client.request("DELETE", "pool/"+pool.ID+"/assignment", nil)
 	return err
 }
+
+//FreezeAllGuests freezes all disks for a pool's running guests
+func (pool *Pool) FreezeAllGuests(client *Client) error {
+	if pool.ID == "" || client == nil {
+		return errors.New("Invalid pool")
+	}
+	_, err := client.request("POST", "pool/"+pool.ID+"/freezeAllGuests", nil)
+	return err
+}
+
+//ThawAllGuests thaws all disks for a pool's running guests
+func (pool *Pool) ThawAllGuests(client *Client) error {
+	if pool.ID == "" || client == nil {
+		return errors.New("Invalid pool")
+	}
+	_, err := client.request("POST", "pool/"+pool.ID+"/thawAllGuests", nil)
+	return err
+}

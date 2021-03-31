@@ -221,7 +221,6 @@ var poolAssignCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-
 		err = pool.Assign(restClient, viper.GetString("assign-realm"), viper.GetString("assign-user"), viper.GetString("assign-group"))
 		if err != nil {
 			fmt.Println(err)
@@ -259,6 +258,64 @@ var poolDeleteAssignmentCmd = &cobra.Command{
 	},
 }
 
+var poolFreezeGuestsCmd = &cobra.Command{
+	Use:   "freeze-guests",
+	Short: "freezes all disks for a pool's running guests",
+	Run: func(cmd *cobra.Command, args []string) {
+		var pool *rest.Pool
+		var err error
+		switch {
+		case cmd.Flags().Changed("id"):
+			id, _ := cmd.Flags().GetString("id")
+			pool, err = restClient.GetPool(id)
+		case cmd.Flags().Changed("name"):
+			name, _ := cmd.Flags().GetString("name")
+			pool, err = restClient.GetPoolByName(name)
+		default:
+			cmd.Usage()
+			os.Exit(1)
+		}
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = pool.FreezeAllGuests(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var poolThawGuestsCmd = &cobra.Command{
+	Use:   "thaw-guests",
+	Short: "thaws all disks for a pool's running guests",
+	Run: func(cmd *cobra.Command, args []string) {
+		var pool *rest.Pool
+		var err error
+		switch {
+		case cmd.Flags().Changed("id"):
+			id, _ := cmd.Flags().GetString("id")
+			pool, err = restClient.GetPool(id)
+		case cmd.Flags().Changed("name"):
+			name, _ := cmd.Flags().GetString("name")
+			pool, err = restClient.GetPoolByName(name)
+		default:
+			cmd.Usage()
+			os.Exit(1)
+		}
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = pool.ThawAllGuests(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(poolCmd)
 	poolCmd.AddCommand(poolCreateCmd)
@@ -288,4 +345,12 @@ func init() {
 	poolCmd.AddCommand(poolDeleteAssignmentCmd)
 	poolDeleteAssignmentCmd.Flags().StringP("id", "i", "", "pool Id")
 	poolDeleteAssignmentCmd.Flags().StringP("name", "n", "", "pool Name")
+
+	poolCmd.AddCommand(poolFreezeGuestsCmd)
+	poolFreezeGuestsCmd.Flags().StringP("id", "i", "", "pool pool Id")
+	poolFreezeGuestsCmd.Flags().StringP("name", "n", "", "pool pool Name")
+
+	poolCmd.AddCommand(poolThawGuestsCmd)
+	poolThawGuestsCmd.Flags().StringP("id", "i", "", "pool pool Id")
+	poolThawGuestsCmd.Flags().StringP("name", "n", "", "pool pool Name")
 }
