@@ -75,6 +75,12 @@ type PoolAffinity struct {
 	AllowedHostIDs     []string `json:"allowedHostIds,omitempty"`
 }
 
+type PoolAssignment struct {
+	Realm     string `json:"realm,omitempty"`
+	Username  string `json:"username,omitempty"`
+	UserGroup string `json:"userGroup,omitempty"`
+}
+
 // Pool describes a guest pool record from the rest api
 type Pool struct {
 	ID                        string            `json:"id,omitempty"`
@@ -94,6 +100,7 @@ type Pool struct {
 	UserSessionLoginThreshold int               `json:"userSessionLoginThreshold,omitempty"`
 	Backup                    *PoolBackup       `json:"backup,omitempty"`
 	PoolAffinity              *PoolAffinity     `json:"poolAffinity,omitempty"`
+	Assignment                *PoolAssignment   `json:"assignment,omitempty"`
 }
 
 func (pool Pool) String() string {
@@ -219,4 +226,32 @@ func (pool Pool) WaitForPool(client *Client, targetState string, timeout time.Du
 			}
 		}
 	}
+}
+
+//Assign adds a user or group assignment for a standalone pool
+func (pool *Pool) Assign(client *Client, realm, username, group string) error {
+	if pool.ID == "" || client == nil {
+		return errors.New("Invalid pool")
+	}
+	assignment := PoolAssignment{
+		Realm:     realm,
+		Username:  username,
+		UserGroup: group,
+	}
+	jsonValue, err := json.Marshal(assignment)
+	if err != nil {
+		return err
+	}
+	_, err = client.request("POST", "pool/"+pool.ID+"/assignment", jsonValue)
+	return err
+}
+
+//DeleteAssignment removes the assignment for a standalone pool
+func (pool *Pool) DeleteAssignment(client *Client) error {
+	if pool.ID == "" || client == nil {
+		return errors.New("Invalid pool")
+	}
+
+	_, err := client.request("DELETE", "pool/"+pool.ID+"/assignment", nil)
+	return err
 }

@@ -189,13 +189,83 @@ var poolUpdateCmd = &cobra.Command{
 	},
 }
 
+var poolAssignCmd = &cobra.Command{
+	Use:   "assign",
+	Short: "assign user or group to a stndalone pool",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("id", cmd.Flags().Lookup("id"))
+		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
+		viper.BindPFlag("assign-realm", cmd.Flags().Lookup("assign-realm"))
+		viper.BindPFlag("assign-user", cmd.Flags().Lookup("assign-user"))
+		viper.BindPFlag("assign-group", cmd.Flags().Lookup("assign-group"))
+		cmd.MarkFlagRequired("assign-realm")
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		var pool *rest.Pool
+		var err error
+		if !cmd.Flags().Changed("assign-user") && !cmd.Flags().Changed("assign-group") {
+			cmd.Usage()
+			os.Exit(1)
+		}
+
+		switch {
+		case cmd.Flags().Changed("id"):
+			pool, err = restClient.GetPool(viper.GetString("id"))
+		case cmd.Flags().Changed("name"):
+			pool, err = restClient.GetPoolByName(viper.GetString("name"))
+		default:
+			cmd.Usage()
+			os.Exit(1)
+		}
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		err = pool.Assign(restClient, viper.GetString("assign-realm"), viper.GetString("assign-user"), viper.GetString("assign-group"))
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var poolDeleteAssignmentCmd = &cobra.Command{
+	Use:   "delete-assignment",
+	Short: "delete the assignment for a standalone pool",
+	Run: func(cmd *cobra.Command, args []string) {
+		var pool *rest.Pool
+		var err error
+		switch {
+		case cmd.Flags().Changed("id"):
+			id, _ := cmd.Flags().GetString("id")
+			pool, err = restClient.GetPool(id)
+		case cmd.Flags().Changed("name"):
+			name, _ := cmd.Flags().GetString("name")
+			pool, err = restClient.GetPoolByName(name)
+		default:
+			cmd.Usage()
+			os.Exit(1)
+		}
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = pool.DeleteAssignment(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(poolCmd)
 	poolCmd.AddCommand(poolCreateCmd)
 
 	poolCmd.AddCommand(poolDeleteCmd)
-	poolDeleteCmd.Flags().StringP("id", "i", "", "pool pool Id")
-	poolDeleteCmd.Flags().StringP("name", "n", "", "pool pool Name")
+	poolDeleteCmd.Flags().StringP("id", "i", "", "pool Id")
+	poolDeleteCmd.Flags().StringP("name", "n", "", "pool Name")
 
 	poolCmd.AddCommand(poolDiffCmd)
 
@@ -207,4 +277,15 @@ func init() {
 	addListFlags(poolListCmd)
 
 	poolCmd.AddCommand(poolUpdateCmd)
+
+	poolCmd.AddCommand(poolAssignCmd)
+	poolAssignCmd.Flags().StringP("id", "i", "", "pool Id")
+	poolAssignCmd.Flags().StringP("name", "n", "", "pool Name")
+	poolAssignCmd.Flags().String("assign-realm", "", "realm to assign")
+	poolAssignCmd.Flags().String("assign-user", "", "user to assign")
+	poolAssignCmd.Flags().String("assign-group", "", "group to assign")
+
+	poolCmd.AddCommand(poolDeleteAssignmentCmd)
+	poolDeleteAssignmentCmd.Flags().StringP("id", "i", "", "pool Id")
+	poolDeleteAssignmentCmd.Flags().StringP("name", "n", "", "pool Name")
 }
