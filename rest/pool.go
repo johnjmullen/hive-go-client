@@ -256,20 +256,20 @@ func (pool *Pool) DeleteAssignment(client *Client) error {
 	return err
 }
 
-//FreezeAllGuests freezes all disks for a pool's running guests
-func (pool *Pool) FreezeAllGuests(client *Client) error {
+//Snapshot stores pool state and creates disk snapshots for running guests
+func (pool *Pool) Snapshot(client *Client) error {
 	if pool.ID == "" || client == nil {
-		return errors.New("Invalid pool")
+		return errors.New("invalid pool")
 	}
-	_, err := client.request("POST", "pool/"+pool.ID+"/freezeAllGuests", nil)
+	_, err := client.request("POST", "pool/"+pool.ID+"/snapshot", nil)
 	return err
 }
 
-//ThawAllGuests thaws all disks for a pool's running guests
-func (pool *Pool) ThawAllGuests(client *Client) error {
+//Merge commits the guest snapshots back into their disk
+func (pool *Pool) Merge(client *Client) error {
 	if pool.ID == "" || client == nil {
-		return errors.New("Invalid pool")
+		return errors.New("invalid pool")
 	}
-	_, err := client.request("POST", "pool/"+pool.ID+"/thawAllGuests", nil)
+	_, err := client.request("POST", "pool/"+pool.ID+"/merge", nil)
 	return err
 }

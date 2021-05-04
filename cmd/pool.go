@@ -258,9 +258,9 @@ var poolDeleteAssignmentCmd = &cobra.Command{
 	},
 }
 
-var poolFreezeGuestsCmd = &cobra.Command{
-	Use:   "freeze-guests",
-	Short: "freezes all disks for a pool's running guests",
+var poolSnapshotCmd = &cobra.Command{
+	Use:   "snapshot",
+	Short: "snapshot creates disk snapshots for running guests and backs up pool state",
 	Run: func(cmd *cobra.Command, args []string) {
 		var pool *rest.Pool
 		var err error
@@ -279,7 +279,7 @@ var poolFreezeGuestsCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		err = pool.FreezeAllGuests(restClient)
+		err = pool.Snapshot(restClient)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -287,9 +287,9 @@ var poolFreezeGuestsCmd = &cobra.Command{
 	},
 }
 
-var poolThawGuestsCmd = &cobra.Command{
-	Use:   "thaw-guests",
-	Short: "thaws all disks for a pool's running guests",
+var poolMergeCmd = &cobra.Command{
+	Use:   "merge",
+	Short: "merges snapshots back into the main disk files",
 	Run: func(cmd *cobra.Command, args []string) {
 		var pool *rest.Pool
 		var err error
@@ -308,7 +308,7 @@ var poolThawGuestsCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		err = pool.ThawAllGuests(restClient)
+		err = pool.Merge(restClient)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -346,11 +346,11 @@ func init() {
 	poolDeleteAssignmentCmd.Flags().StringP("id", "i", "", "pool Id")
 	poolDeleteAssignmentCmd.Flags().StringP("name", "n", "", "pool Name")
 
-	poolCmd.AddCommand(poolFreezeGuestsCmd)
-	poolFreezeGuestsCmd.Flags().StringP("id", "i", "", "pool pool Id")
-	poolFreezeGuestsCmd.Flags().StringP("name", "n", "", "pool pool Name")
+	poolCmd.AddCommand(poolSnapshotCmd)
+	poolSnapshotCmd.Flags().StringP("id", "i", "", "pool pool Id")
+	poolSnapshotCmd.Flags().StringP("name", "n", "", "pool pool Name")
 
-	poolCmd.AddCommand(poolThawGuestsCmd)
-	poolThawGuestsCmd.Flags().StringP("id", "i", "", "pool pool Id")
-	poolThawGuestsCmd.Flags().StringP("name", "n", "", "pool pool Name")
+	poolCmd.AddCommand(poolMergeCmd)
+	poolMergeCmd.Flags().StringP("id", "i", "", "pool pool Id")
+	poolMergeCmd.Flags().StringP("name", "n", "", "pool pool Name")
 }
