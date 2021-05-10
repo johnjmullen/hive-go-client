@@ -280,7 +280,7 @@ func init() {
 	RootCmd.AddCommand(clusterCmd)
 	clusterCmd.AddCommand(addHostCmd)
 	addHostCmd.Flags().StringVar(&rUser, "remote-username", "admin", "username for the remote host")
-	addHostCmd.Flags().StringVar(&rPass, "remote-password", "admin", "password for the remote host")
+	addHostCmd.Flags().StringVar(&rPass, "remote-password", "", "password for the remote host")
 	addTaskFlags(addHostCmd)
 
 	clusterCmd.AddCommand(clusterGetCmd)

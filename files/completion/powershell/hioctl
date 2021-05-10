@@ -301,22 +301,41 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             break
         }
         'hioctl;pool' {
+            [CompletionResult]::new('assign', 'assign', [CompletionResultType]::ParameterValue, 'assign user or group to a stndalone pool')
             [CompletionResult]::new('create', 'create', [CompletionResultType]::ParameterValue, 'Add a new guest pool')
             [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete a pool')
+            [CompletionResult]::new('delete-assignment', 'delete-assignment', [CompletionResultType]::ParameterValue, 'delete the assignment for a standalone pool')
             [CompletionResult]::new('diff', 'diff', [CompletionResultType]::ParameterValue, 'compare 2 pools')
             [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get pool details')
             [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list pools')
             [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'update a guest pool')
             break
         }
+        'hioctl;pool;assign' {
+            [CompletionResult]::new('--assign-group', 'assign-group', [CompletionResultType]::ParameterName, 'group to assign')
+            [CompletionResult]::new('--assign-realm', 'assign-realm', [CompletionResultType]::ParameterName, 'realm to assign')
+            [CompletionResult]::new('--assign-user', 'assign-user', [CompletionResultType]::ParameterName, 'user to assign')
+            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'pool Id')
+            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'pool Id')
+            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'pool Name')
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'pool Name')
+            break
+        }
         'hioctl;pool;create' {
             break
         }
         'hioctl;pool;delete' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'pool pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'pool pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'pool pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'pool pool Name')
+            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'pool Id')
+            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'pool Id')
+            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'pool Name')
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'pool Name')
+            break
+        }
+        'hioctl;pool;delete-assignment' {
+            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'pool Id')
+            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'pool Id')
+            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'pool Name')
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'pool Name')
             break
         }
         'hioctl;pool;diff' {

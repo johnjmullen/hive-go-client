@@ -6,7 +6,6 @@ hive-go-client/hioctl is a command line interface for the api
 install it with: `go get -u github.com/hive-io/hive-go-client/hioctl`
 
 ```
-hioctl
 hiveio cli
 
 Usage:
@@ -25,6 +24,7 @@ Available Commands:
   storage     storage operations
   task        task operations
   template    template operations
+  user        user operations
 
 Flags:
       --config string     config file
@@ -41,12 +41,12 @@ Use "hioctl [command] --help" for more information about a command.
 ```
 [hioctl Documentation](docs/hioctl.md)
 
-You can add save your default settings in a json or yaml config file in ~/.hiveio/ or /etc/hive
+Save connection settings in hioctl.yaml in ~/.hiveio/, /etc/hive, or the current directory
 ~/.hiveio/hioctl.yaml
 ```
-host: hive1
+host: hive-hostname
 user: admin
-password: admin
+password: password
 realm: local
 insecure: true
 ```

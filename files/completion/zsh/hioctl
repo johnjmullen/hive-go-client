@@ -1021,8 +1021,10 @@ function _hioctl_pool {
   case $state in
   cmnds)
     commands=(
+      "assign:assign user or group to a stndalone pool"
       "create:Add a new guest pool"
       "delete:delete a pool"
+      "delete-assignment:delete the assignment for a standalone pool"
       "diff:compare 2 pools"
       "get:get pool details"
       "list:list pools"
@@ -1033,11 +1035,17 @@ function _hioctl_pool {
   esac
 
   case "$words[1]" in
+  assign)
+    _hioctl_pool_assign
+    ;;
   create)
     _hioctl_pool_create
     ;;
   delete)
     _hioctl_pool_delete
+    ;;
+  delete-assignment)
+    _hioctl_pool_delete-assignment
     ;;
   diff)
     _hioctl_pool_diff
@@ -1054,6 +1062,23 @@ function _hioctl_pool {
   esac
 }
 
+function _hioctl_pool_assign {
+  _arguments \
+    '--assign-group[group to assign]:' \
+    '--assign-realm[realm to assign]:' \
+    '--assign-user[user to assign]:' \
+    '(-i --id)'{-i,--id}'[pool Id]:' \
+    '(-n --name)'{-n,--name}'[pool Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
 function _hioctl_pool_create {
   _arguments \
     '--config[config file]:' \
@@ -1068,8 +1093,22 @@ function _hioctl_pool_create {
 
 function _hioctl_pool_delete {
   _arguments \
-    '(-i --id)'{-i,--id}'[pool pool Id]:' \
-    '(-n --name)'{-n,--name}'[pool pool Name]:' \
+    '(-i --id)'{-i,--id}'[pool Id]:' \
+    '(-n --name)'{-n,--name}'[pool Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_pool_delete-assignment {
+  _arguments \
+    '(-i --id)'{-i,--id}'[pool Id]:' \
+    '(-n --name)'{-n,--name}'[pool Name]:' \
     '--config[config file]:' \
     '--format[format (json/yaml)]:' \
     '--host[Hostname or ip address]:' \
