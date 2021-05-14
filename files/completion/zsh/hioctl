@@ -1028,6 +1028,8 @@ function _hioctl_pool {
       "diff:compare 2 pools"
       "get:get pool details"
       "list:list pools"
+      "merge:merges snapshots back into the main disk files"
+      "snapshot:snapshot creates disk snapshots for running guests and backs up pool state"
       "update:update a guest pool"
     )
     _describe "command" commands
@@ -1055,6 +1057,12 @@ function _hioctl_pool {
     ;;
   list)
     _hioctl_pool_list
+    ;;
+  merge)
+    _hioctl_pool_merge
+    ;;
+  snapshot)
+    _hioctl_pool_snapshot
     ;;
   update)
     _hioctl_pool_update
@@ -1151,6 +1159,34 @@ function _hioctl_pool_list {
     '--details[show details]' \
     '--filter[filter results based on a field.]:' \
     '--offset[first result to show]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_pool_merge {
+  _arguments \
+    '(-i --id)'{-i,--id}'[pool pool Id]:' \
+    '(-n --name)'{-n,--name}'[pool pool Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_pool_snapshot {
+  _arguments \
+    '(-i --id)'{-i,--id}'[pool pool Id]:' \
+    '(-n --name)'{-n,--name}'[pool pool Name]:' \
     '--config[config file]:' \
     '--format[format (json/yaml)]:' \
     '--host[Hostname or ip address]:' \

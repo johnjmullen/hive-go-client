@@ -221,7 +221,6 @@ var poolAssignCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-
 		err = pool.Assign(restClient, viper.GetString("assign-realm"), viper.GetString("assign-user"), viper.GetString("assign-group"))
 		if err != nil {
 			fmt.Println(err)
@@ -259,6 +258,64 @@ var poolDeleteAssignmentCmd = &cobra.Command{
 	},
 }
 
+var poolSnapshotCmd = &cobra.Command{
+	Use:   "snapshot",
+	Short: "snapshot creates disk snapshots for running guests and backs up pool state",
+	Run: func(cmd *cobra.Command, args []string) {
+		var pool *rest.Pool
+		var err error
+		switch {
+		case cmd.Flags().Changed("id"):
+			id, _ := cmd.Flags().GetString("id")
+			pool, err = restClient.GetPool(id)
+		case cmd.Flags().Changed("name"):
+			name, _ := cmd.Flags().GetString("name")
+			pool, err = restClient.GetPoolByName(name)
+		default:
+			cmd.Usage()
+			os.Exit(1)
+		}
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = pool.Snapshot(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var poolMergeCmd = &cobra.Command{
+	Use:   "merge",
+	Short: "merges snapshots back into the main disk files",
+	Run: func(cmd *cobra.Command, args []string) {
+		var pool *rest.Pool
+		var err error
+		switch {
+		case cmd.Flags().Changed("id"):
+			id, _ := cmd.Flags().GetString("id")
+			pool, err = restClient.GetPool(id)
+		case cmd.Flags().Changed("name"):
+			name, _ := cmd.Flags().GetString("name")
+			pool, err = restClient.GetPoolByName(name)
+		default:
+			cmd.Usage()
+			os.Exit(1)
+		}
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = pool.Merge(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(poolCmd)
 	poolCmd.AddCommand(poolCreateCmd)
@@ -288,4 +345,12 @@ func init() {
 	poolCmd.AddCommand(poolDeleteAssignmentCmd)
 	poolDeleteAssignmentCmd.Flags().StringP("id", "i", "", "pool Id")
 	poolDeleteAssignmentCmd.Flags().StringP("name", "n", "", "pool Name")
+
+	poolCmd.AddCommand(poolSnapshotCmd)
+	poolSnapshotCmd.Flags().StringP("id", "i", "", "pool pool Id")
+	poolSnapshotCmd.Flags().StringP("name", "n", "", "pool pool Name")
+
+	poolCmd.AddCommand(poolMergeCmd)
+	poolMergeCmd.Flags().StringP("id", "i", "", "pool pool Id")
+	poolMergeCmd.Flags().StringP("name", "n", "", "pool pool Name")
 }

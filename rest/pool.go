@@ -255,3 +255,21 @@ func (pool *Pool) DeleteAssignment(client *Client) error {
 	_, err := client.request("DELETE", "pool/"+pool.ID+"/assignment", nil)
 	return err
 }
+
+//Snapshot stores pool state and creates disk snapshots for running guests
+func (pool *Pool) Snapshot(client *Client) error {
+	if pool.ID == "" || client == nil {
+		return errors.New("invalid pool")
+	}
+	_, err := client.request("POST", "pool/"+pool.ID+"/snapshot", nil)
+	return err
+}
+
+//Merge commits the guest snapshots back into their disk
+func (pool *Pool) Merge(client *Client) error {
+	if pool.ID == "" || client == nil {
+		return errors.New("invalid pool")
+	}
+	_, err := client.request("POST", "pool/"+pool.ID+"/merge", nil)
+	return err
+}
