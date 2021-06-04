@@ -58,6 +58,7 @@ func (client *Client) GetRealm(name string) (Realm, error) {
 // Create creates a new realm
 func (realm *Realm) Create(client *Client) (string, error) {
 	var result string
+	realm.Verified = true //force to true for new realms
 	jsonValue, _ := json.Marshal(realm)
 	body, err := client.request("POST", "realms", jsonValue)
 	if err == nil {
