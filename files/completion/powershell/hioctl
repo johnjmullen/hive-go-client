@@ -154,6 +154,7 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('poweroff', 'poweroff', [CompletionResultType]::ParameterValue, 'force power off guest')
             [CompletionResult]::new('poweron', 'poweron', [CompletionResultType]::ParameterValue, 'power on guest')
             [CompletionResult]::new('reboot', 'reboot', [CompletionResultType]::ParameterValue, 'reboot guest')
+            [CompletionResult]::new('refresh', 'refresh', [CompletionResultType]::ParameterValue, 'rebuild a guest with the latest pool settings')
             [CompletionResult]::new('release', 'release', [CompletionResultType]::ParameterValue, 'release guest assignment')
             [CompletionResult]::new('reset', 'reset', [CompletionResultType]::ParameterValue, 'force reset guest')
             [CompletionResult]::new('restore', 'restore', [CompletionResultType]::ParameterValue, 'restore guest from a backup')
@@ -202,6 +203,9 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             break
         }
         'hioctl;guest;reboot' {
+            break
+        }
+        'hioctl;guest;refresh' {
             break
         }
         'hioctl;guest;release' {

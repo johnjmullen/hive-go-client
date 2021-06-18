@@ -445,6 +445,7 @@ function _hioctl_guest {
       "poweroff:force power off guest"
       "poweron:power on guest"
       "reboot:reboot guest"
+      "refresh:rebuild a guest with the latest pool settings"
       "release:release guest assignment"
       "reset:force reset guest"
       "restore:restore guest from a backup"
@@ -488,6 +489,9 @@ function _hioctl_guest {
     ;;
   reboot)
     _hioctl_guest_reboot
+    ;;
+  refresh)
+    _hioctl_guest_refresh
     ;;
   release)
     _hioctl_guest_release
@@ -638,6 +642,18 @@ function _hioctl_guest_poweron {
 }
 
 function _hioctl_guest_reboot {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_guest_refresh {
   _arguments \
     '--config[config file]:' \
     '--format[format (json/yaml)]:' \

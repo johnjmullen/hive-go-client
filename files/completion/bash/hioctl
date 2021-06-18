@@ -1490,6 +1490,45 @@ _hioctl_guest_reboot()
     noun_aliases=()
 }
 
+_hioctl_guest_refresh()
+{
+    last_command="hioctl_guest_refresh"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--config=")
+    two_word_flags+=("--config")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    flags+=("--port=")
+    two_word_flags+=("--port")
+    flags+=("--realm=")
+    two_word_flags+=("--realm")
+    two_word_flags+=("-r")
+    flags+=("--user=")
+    two_word_flags+=("--user")
+    two_word_flags+=("-u")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _hioctl_guest_release()
 {
     last_command="hioctl_guest_release"
@@ -1709,6 +1748,7 @@ _hioctl_guest()
     commands+=("poweroff")
     commands+=("poweron")
     commands+=("reboot")
+    commands+=("refresh")
     commands+=("release")
     commands+=("reset")
     commands+=("restore")
