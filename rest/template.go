@@ -21,7 +21,7 @@ type TemplateDisk struct {
 	Size       int    `json:"size"`
 	StorageID  string `json:"storageId"`
 	Type       string `json:"type"`
-	OsVolume   string `json:"osvolume"`
+	OsVolume   int    `json:"osvolume"`
 }
 
 //Template a template record from the rest interface
