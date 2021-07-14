@@ -27,8 +27,9 @@ nfpms:
   - deb
   - rpm
   bindir: /usr/bin
-  files:
-    'files/completion/bash/hioctl': '/usr/share/bash-completion/completions/hioctl'
+  contents:
+   - src: files/completion/bash/hioctl
+     dst: /usr/share/bash-completion/completions/hioctl
 checksum:
   name_template: 'checksums.txt'
 snapshot:
@@ -37,5 +38,5 @@ changelog:
   sort: asc
   filters:
     exclude:
-    - '^docs:'
+    - '^docs'
     - '^chore'
