@@ -28,6 +28,8 @@ var guestAssignCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		cmd.MarkFlagRequired("guest-user")
 		cmd.MarkFlagRequired("guest-realm")
+		viper.BindPFlag("guest-user", cmd.Flags().Lookup("guest-user"))
+		viper.BindPFlag("guest-realm", cmd.Flags().Lookup("guest-realm"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		guest, err := restClient.GetGuest(args[0])

@@ -2,6 +2,8 @@ package rest
 
 import (
 	"encoding/json"
+
+	"github.com/hashicorp/go-version"
 )
 
 //BrokerPool describes a pool received from BrokerLogin
@@ -76,7 +78,19 @@ func (client *Client) BrokerConnect(guest string, remote bool, outputType string
 // AssignGuest assign a user to a specific guest
 func (client *Client) AssignGuest(poolID, username, realm, guest string) (interface{}, error) {
 	var result interface{}
-	jsonData := map[string]string{"realm": realm, "username": username, "guest": guest}
+	jsonData := map[string]string{"realm": realm, "username": username}
+	hostVersion, err := client.HostVersion()
+	if err != nil {
+		return nil, err
+	}
+	minVersion, _ := version.NewVersion("8.3.0")
+	v, err := version.NewVersion(hostVersion.Version)
+	if err != nil || v.LessThan(minVersion) {
+		jsonData["guest"] = guest
+	} else {
+		jsonData["guestName"] = guest
+	}
+
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
 		return result, err
