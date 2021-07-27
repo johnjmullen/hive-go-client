@@ -117,7 +117,7 @@ func (client *Client) requestWithHeaders(method, path string, body io.Reader, he
 			TLSClientConfig:    &tls.Config{InsecureSkipVerify: client.AllowInsecure},
 			DisableCompression: true,
 		}
-		client.httpClient = &http.Client{Transport: tr, Timeout: time.Second * 30}
+		client.httpClient = &http.Client{Transport: tr, Timeout: time.Second * 120}
 	}
 
 	req, err := http.NewRequest(method, u.String(), body)
