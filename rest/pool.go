@@ -76,9 +76,9 @@ type PoolAffinity struct {
 }
 
 type PoolAssignment struct {
-	Realm     string `json:"realm,omitempty"`
-	Username  string `json:"username,omitempty"`
-	UserGroup string `json:"userGroup,omitempty"`
+	Realm    string `json:"realm,omitempty"`
+	Username string `json:"username,omitempty"`
+	ADGroup  string `json:"ADGroup,omitempty"`
 }
 
 // Pool describes a guest pool record from the rest api
@@ -234,9 +234,9 @@ func (pool *Pool) Assign(client *Client, realm, username, group string) error {
 		return errors.New("Invalid pool")
 	}
 	assignment := PoolAssignment{
-		Realm:     realm,
-		Username:  username,
-		UserGroup: group,
+		Realm:    realm,
+		Username: username,
+		ADGroup:  group,
 	}
 	jsonValue, err := json.Marshal(assignment)
 	if err != nil {
