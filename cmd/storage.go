@@ -452,7 +452,6 @@ func init() {
 
 	storageCmd.AddCommand(storageDiskInfoCmd)
 	initIDFlags(storageDiskInfoCmd)
-	addTaskFlags(storageDiskInfoCmd)
 
 	storageCmd.AddCommand(storageGetIDCmd)
 
