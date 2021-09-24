@@ -85,7 +85,15 @@ var setLicenseCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		cluster, err := restClient.GetCluster(clusterID)
-		cluster.SetLicense(restClient, args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = cluster.SetLicense(restClient, args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	},
 }
 
