@@ -99,7 +99,7 @@ type Pool struct {
 	Type                      string            `json:"type"`
 	UserSessionLoginThreshold int               `json:"userSessionLoginThreshold,omitempty"`
 	Backup                    *PoolBackup       `json:"backup,omitempty"`
-	PoolAffinity              *PoolAffinity     `json:"poolAffinity,omitempty"`
+	PoolAffinity              *PoolAffinity     `json:"poolAffinity"`
 	Assignment                *PoolAssignment   `json:"assignment,omitempty"`
 }
 
