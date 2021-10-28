@@ -72,7 +72,7 @@ type PoolBackup struct {
 type PoolAffinity struct {
 	CustomCPUFeatures  string   `json:"customCpuFeatures,omitempty"`
 	UseHostPassthrough bool     `json:"useHostPassthrough"`
-	AllowedHostIDs     []string `json:"allowedHostIds,omitempty"`
+	AllowedHostIDs     []string `json:"allowedHostIds"`
 }
 
 type PoolAssignment struct {
