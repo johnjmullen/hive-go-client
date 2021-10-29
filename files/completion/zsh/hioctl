@@ -1517,6 +1517,7 @@ function _hioctl_storage {
       "delete:delete storage pool"
       "delete-file:delete a file from the storage pool"
       "disk-info:get information for a disk in a storage pool"
+      "download:download a file from a storage pool"
       "get:get storage pool details"
       "get-id:get storage pool id from name"
       "grow-disk:grow a disk in the storage pool"
@@ -1557,6 +1558,9 @@ function _hioctl_storage {
     ;;
   disk-info)
     _hioctl_storage_disk-info
+    ;;
+  download)
+    _hioctl_storage_download
     ;;
   get)
     _hioctl_storage_get
@@ -1724,9 +1728,22 @@ function _hioctl_storage_disk-info {
   _arguments \
     '(-i --id)'{-i,--id}'[Storage Pool Id]:' \
     '(-n --name)'{-n,--name}'[Storage Pool Name]:' \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_storage_download {
+  _arguments \
+    '(-i --id)'{-i,--id}'[Storage Pool Id]:' \
+    '(-n --name)'{-n,--name}'[Storage Pool Name]:' \
+    '(-o --output)'{-o,--output}'[output file]:' \
     '--progress-bar[show a progress bar with --wait]' \
-    '--raw-progress[print progress as a number with --wait]' \
-    '--wait[wait for task to complete]' \
     '--config[config file]:' \
     '--format[format (json/yaml)]:' \
     '--host[Hostname or ip address]:' \

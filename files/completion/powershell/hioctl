@@ -505,6 +505,7 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete storage pool')
             [CompletionResult]::new('delete-file', 'delete-file', [CompletionResultType]::ParameterValue, 'delete a file from the storage pool')
             [CompletionResult]::new('disk-info', 'disk-info', [CompletionResultType]::ParameterValue, 'get information for a disk in a storage pool')
+            [CompletionResult]::new('download', 'download', [CompletionResultType]::ParameterValue, 'download a file from a storage pool')
             [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get storage pool details')
             [CompletionResult]::new('get-id', 'get-id', [CompletionResultType]::ParameterValue, 'get storage pool id from name')
             [CompletionResult]::new('grow-disk', 'grow-disk', [CompletionResultType]::ParameterValue, 'grow a disk in the storage pool')
@@ -593,9 +594,16 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
             [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
             [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
+            break
+        }
+        'hioctl;storage;download' {
+            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
+            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
+            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
+            [CompletionResult]::new('-o', 'o', [CompletionResultType]::ParameterName, 'output file')
+            [CompletionResult]::new('--output', 'output', [CompletionResultType]::ParameterName, 'output file')
             [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
             break
         }
         'hioctl;storage;get' {
