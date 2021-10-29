@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/gosuri/uiprogress"
 	"github.com/hive-io/hive-go-client/rest"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -214,9 +214,8 @@ func taskProgressNum(task *rest.Task) {
 }
 
 func taskProgressBar(task *rest.Task) {
-	uiprogress.Start()
-	bar := uiprogress.AddBar(100)
-	bar.AppendCompleted()
+	//bar := progressbar.Default(100)
+	bar := progressbar.NewOptions(100, progressbar.OptionFullWidth(), progressbar.OptionSetPredictTime(false))
 	done := make(chan struct{})
 	taskData := make(chan rest.Task)
 	var newVal rest.Task
@@ -228,12 +227,13 @@ func taskProgressBar(task *rest.Task) {
 		case <-done:
 			if newVal.State == "completed" {
 				bar.Set(100)
-				uiprogress.Stop()
+				bar.Finish()
 				time.Sleep(time.Millisecond * 100)
 			} else if newVal.State == "failed" {
 				bar.Set(0)
 				fmt.Println(formatString("Task Failed: " + newVal.Message))
 			}
+			fmt.Println("")
 			return
 		}
 	}
