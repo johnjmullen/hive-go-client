@@ -27,7 +27,8 @@ type StoragePool struct {
 	S3AccessKeyID     string   `json:"s3AccessKeyId,omitempty"`
 	S3SecretAccessKey string   `json:"s3SecretAccessKey,omitempty"`
 	S3Region          string   `json:"s3Region,omitempty"`
-	Disabled          bool     `json:"disabled,omitempty"`
+	Disabled          bool     `json:"disabled"`
+	Replicated        bool     `json:"replicated,omitempty"`
 }
 
 //DiskInfo contains information about a disk from a storage pool
