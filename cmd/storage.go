@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -68,6 +69,49 @@ var storageBrowseCmd = &cobra.Command{
 			fmt.Println(formatString(paths))
 		} else {
 			fmt.Println(formatString(files))
+		}
+	},
+}
+
+var storageDownloadCmd = &cobra.Command{
+	Use:   "download [file]",
+	Short: "download a file from a storage pool",
+	Args:  cobra.ExactArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("id", cmd.Flags().Lookup("id"))
+		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
+		viper.BindPFlag("output", cmd.Flags().Lookup("output"))
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		pool := getStoragePool(cmd)
+		body, err := pool.Download(restClient, args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		defer body.Close()
+
+		// Create the file
+		var out *os.File
+		switch output := viper.GetString("output"); output {
+		case "-":
+			out = os.Stdout
+		case "":
+			out, err = os.Create(path.Base(args[0]))
+		default:
+			out, err = os.Create(output)
+		}
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		defer out.Close()
+
+		// Write the body to file
+		_, err = io.Copy(out, body)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
 	},
 }
@@ -418,6 +462,10 @@ func init() {
 	storageBrowseCmd.Flags().String("path", "", "path inside the storage pool to browse")
 	storageBrowseCmd.Flags().Bool("details", false, "detailed directory listing")
 	storageBrowseCmd.Flags().Bool("recursive", false, "recursively list files")
+
+	storageCmd.AddCommand(storageDownloadCmd)
+	storageDownloadCmd.Flags().StringP("output", "o", "", "output file")
+	initIDFlags(storageDownloadCmd)
 
 	storageCmd.AddCommand(storageConvertDiskCmd)
 	storageConvertDiskCmd.Flags().String("src-storage", "", "Source storage pool name")

@@ -1,10 +1,13 @@
 package rest
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/eventials/go-tus"
@@ -247,7 +250,7 @@ func (pool *StoragePool) Browse(client *Client, filePath string, recursive bool)
 	}
 	options := "details=true"
 	if len(filePath) > 0 {
-		options += "&filePath=" + filePath
+		options += "&filePath=" + url.QueryEscape(filePath)
 	}
 	if recursive == true {
 		options += "&recursive=true"
@@ -258,6 +261,16 @@ func (pool *StoragePool) Browse(client *Client, filePath string, recursive bool)
 	}
 	err = json.Unmarshal(body, &files)
 	return files, err
+}
+
+//Download downloads a file from a storage pool
+func (pool *StoragePool) Download(client *Client, filePath string) (io.ReadCloser, error) {
+	if pool.ID == "" {
+		return nil, errors.New("Invalid Storage Pool")
+	}
+	headers := map[string]string{"Content-type": "application/json"}
+	resp, err := client.requestWithHeaders("GET", fmt.Sprintf("storage/pool/%s/download?filePath=%s", pool.ID, url.QueryEscape(filePath)), bytes.NewBuffer(nil), headers, 0)
+	return resp.Body, err
 }
 
 //Upload uploads a local file into a storage pool

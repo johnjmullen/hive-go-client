@@ -64,7 +64,7 @@ func checkResponse(res *http.Response, err error) ([]byte, error) {
 
 func (client *Client) request(method, path string, data []byte) ([]byte, error) {
 	headers := map[string]string{"Content-type": "application/json"}
-	return client.requestWithHeaders(method, path, bytes.NewBuffer(data), headers)
+	return checkResponse(client.requestWithHeaders(method, path, bytes.NewBuffer(data), headers, time.Second*120))
 }
 
 func (client *Client) postMultipart(path, filenameField, filepath string, params map[string]string) ([]byte, error) {
@@ -97,11 +97,11 @@ func (client *Client) postMultipart(path, filenameField, filepath string, params
 	headers := map[string]string{
 		"Content-Type": fmt.Sprintf("multipart/form-data; boundary=%s", writer.Boundary()),
 	}
-	return client.requestWithHeaders("POST", path, mreader, headers)
+	return checkResponse(client.requestWithHeaders("POST", path, mreader, headers, time.Second*30))
 	//req.ContentLength = fi.Size()+int64(body_buf.Len())+int64(close_buf.Len())
 }
 
-func (client *Client) requestWithHeaders(method, path string, body io.Reader, headers map[string]string) ([]byte, error) {
+func (client *Client) requestWithHeaders(method, path string, body io.Reader, headers map[string]string, timeout time.Duration) (*http.Response, error) {
 	protocol := "https"
 	if client.Port == 3000 {
 		protocol = "http"
@@ -117,8 +117,9 @@ func (client *Client) requestWithHeaders(method, path string, body io.Reader, he
 			TLSClientConfig:    &tls.Config{InsecureSkipVerify: client.AllowInsecure},
 			DisableCompression: true,
 		}
-		client.httpClient = &http.Client{Transport: tr, Timeout: time.Second * 120}
+		client.httpClient = &http.Client{Transport: tr}
 	}
+	client.httpClient.Timeout = timeout
 
 	req, err := http.NewRequest(method, u.String(), body)
 	if err != nil {
@@ -131,7 +132,7 @@ func (client *Client) requestWithHeaders(method, path string, body io.Reader, he
 	if client.token != "" {
 		req.Header.Add("Authorization", "Bearer "+client.token)
 	}
-	return checkResponse(client.httpClient.Do(req))
+	return client.httpClient.Do(req)
 }
 
 // Login attempts to connect to the server specified in Client with the provided username, password, and realm
