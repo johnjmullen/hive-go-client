@@ -8,6 +8,7 @@ import (
 	"path"
 
 	"github.com/hive-io/hive-go-client/rest"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -81,15 +82,16 @@ var storageDownloadCmd = &cobra.Command{
 		viper.BindPFlag("id", cmd.Flags().Lookup("id"))
 		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
 		viper.BindPFlag("output", cmd.Flags().Lookup("output"))
+		viper.BindPFlag("progress-bar", cmd.Flags().Lookup("progress-bar"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		pool := getStoragePool(cmd)
-		body, err := pool.Download(restClient, args[0])
+		resp, err := pool.Download(restClient, args[0])
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		defer body.Close()
+		defer resp.Body.Close()
 
 		// Create the file
 		var out *os.File
@@ -108,7 +110,16 @@ var storageDownloadCmd = &cobra.Command{
 		defer out.Close()
 
 		// Write the body to file
-		_, err = io.Copy(out, body)
+		if viper.GetBool("progress-bar") && viper.GetString("output") != "-" {
+			bar := progressbar.DefaultBytes(
+				resp.ContentLength,
+				"downloading",
+			)
+			io.Copy(io.MultiWriter(out, bar), resp.Body)
+			fmt.Println("")
+		} else {
+			_, err = io.Copy(out, resp.Body)
+		}
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -465,6 +476,7 @@ func init() {
 
 	storageCmd.AddCommand(storageDownloadCmd)
 	storageDownloadCmd.Flags().StringP("output", "o", "", "output file")
+	storageDownloadCmd.Flags().Bool("progress-bar", false, "show a progress bar with --wait")
 	initIDFlags(storageDownloadCmd)
 
 	storageCmd.AddCommand(storageConvertDiskCmd)

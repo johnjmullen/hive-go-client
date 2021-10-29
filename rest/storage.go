@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -264,13 +263,13 @@ func (pool *StoragePool) Browse(client *Client, filePath string, recursive bool)
 }
 
 //Download downloads a file from a storage pool
-func (pool *StoragePool) Download(client *Client, filePath string) (io.ReadCloser, error) {
+func (pool *StoragePool) Download(client *Client, filePath string) (*http.Response, error) {
 	if pool.ID == "" {
 		return nil, errors.New("Invalid Storage Pool")
 	}
 	headers := map[string]string{"Content-type": "application/json"}
 	resp, err := client.requestWithHeaders("GET", fmt.Sprintf("storage/pool/%s/download?filePath=%s", pool.ID, url.QueryEscape(filePath)), bytes.NewBuffer(nil), headers, 0)
-	return resp.Body, err
+	return resp, err
 }
 
 //Upload uploads a local file into a storage pool
