@@ -13,13 +13,14 @@ import (
 // Host describes a host record from the rest api
 type Host struct {
 	Appliance struct {
-		Broker      bool   `json:"broker"`
-		ClusterID   string `json:"clusterId"`
-		Cma         string `json:"cma"`
-		CPUGovernor string `json:"cpuGovernor"`
-		CRS         bool   `json:"crs"`
-		DbName      string `json:"dbName"`
-		Firmware    struct {
+		Broker           bool   `json:"broker"`
+		ClusterID        string `json:"clusterId"`
+		Cma              string `json:"cma"`
+		CPUGovernor      string `json:"cpuGovernor"`
+		CRS              bool   `json:"crs"`
+		DbName           string `json:"dbName"`
+		DoNotParticipate bool   `json:"doNotParticipate"`
+		Firmware         struct {
 			Active      string `json:"active"`
 			Software    string `json:"software"`
 			PendingSwap bool   `json:"pendingSwap"`
