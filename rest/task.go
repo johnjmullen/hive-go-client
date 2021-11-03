@@ -87,16 +87,18 @@ func (task *Task) ForceComplete(client *Client) error {
 }
 
 // WatchTask monitors a task changefeed and sends updates to taskData
-func (task Task) WatchTask(client *Client, taskData chan Task, done chan struct{}) {
-	defer close(done)
+func (task Task) WatchTask(client *Client, taskData chan Task, errorChannel chan error) {
 	if task.State == "completed" || task.State == "failed" {
+		taskData <- task
 		return
 	}
 	newVal := Task{}
 	feed, err := client.GetChangeFeed("task", map[string]string{"id": task.ID})
 	if err != nil {
+		errorChannel <- err
 		return
 	}
+	defer feed.Close()
 	timer := time.NewTimer(time.Second)
 	for {
 		select {
@@ -105,24 +107,21 @@ func (task Task) WatchTask(client *Client, taskData chan Task, done chan struct{
 			t, _ := client.GetTask(task.ID)
 			if t.State == "completed" || t.State == "failed" {
 				taskData <- *t
-				feed.Close()
-				continue
+				return
 			}
 		case msg := <-feed.Data:
 			if msg.Error != nil {
-				fmt.Println(msg.Error)
-				feed.Close()
-				continue
+				errorChannel <- msg.Error
+				return
 			}
 			err = json.Unmarshal(msg.NewValue, &newVal)
 			if err != nil {
-				fmt.Println("Error with json unmarshal", err)
-				feed.Close()
+				errorChannel <- err
 				return
 			}
 			taskData <- newVal
 			if newVal.State == "completed" || newVal.State == "failed" {
-				feed.Close()
+				return
 			}
 		case <-feed.Done:
 			return
@@ -131,12 +130,12 @@ func (task Task) WatchTask(client *Client, taskData chan Task, done chan struct{
 }
 
 //WaitForTask blocks until a task is complete and returns the task
-func (task Task) WaitForTask(client *Client, printProgress bool) *Task {
+func (task Task) WaitForTask(client *Client, printProgress bool) (*Task, error) {
 	var progress float32
 	newVal := task
-	done := make(chan struct{})
+	errChannel := make(chan error)
 	taskData := make(chan Task)
-	go task.WatchTask(client, taskData, done)
+	go task.WatchTask(client, taskData, errChannel)
 	for {
 		select {
 		case newVal = <-taskData:
@@ -144,11 +143,11 @@ func (task Task) WaitForTask(client *Client, printProgress bool) *Task {
 				progress = newVal.Progress
 				fmt.Println(newVal.Progress)
 			}
-		case <-done:
-			if printProgress && newVal.Progress != progress {
-				fmt.Println(newVal.Progress)
+			if newVal.State == "completed" || newVal.State == "failed" {
+				return &newVal, nil
 			}
-			return &newVal
+		case err := <-errChannel:
+			return &newVal, err
 		}
 	}
 }

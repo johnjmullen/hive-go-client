@@ -176,20 +176,34 @@ func (feed *ChangeFeed) monitorChangeFeed() {
 	defer close(feed.Done)
 	defer feed.conn.Close()
 	for {
+		var msg ChangeFeedMessage
 		_, message, err := feed.conn.ReadMessage()
 		if err != nil {
+			msg.Error = err
+			feed.Data <- msg
 			return
 		}
-		if len(message) < 3 || string(message[:2]) != "42" {
+		if len(message) < 3 {
 			continue
 		}
-		var msg ChangeFeedMessage
+		if string(message[:2]) == "44" {
+			msg.Error = fmt.Errorf("%s", message[2:])
+			feed.Data <- msg
+		} else if string(message[:2]) != "42" {
+			continue
+		}
 
 		var jsonMsg []json.RawMessage
 		err = json.Unmarshal(message[2:], &jsonMsg)
-		if len(jsonMsg) < 3 {
+		if err != nil {
+			msg.Error = err
+			feed.Data <- msg
 			continue
-			//send error?
+		}
+		if len(jsonMsg) < 3 {
+			msg.Error = err
+			feed.Data <- msg
+			continue
 		}
 		err = json.Unmarshal(jsonMsg[2], &msg)
 		if err != nil {

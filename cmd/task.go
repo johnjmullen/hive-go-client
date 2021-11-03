@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/hive-io/hive-go-client/rest"
 	"github.com/schollz/progressbar/v3"
@@ -132,7 +131,11 @@ var taskWaitCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		newTask := task.WaitForTask(restClient, viper.GetBool("progress"))
+		newTask, err := task.WaitForTask(restClient, viper.GetBool("progress"))
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 		if newTask.State == "completed" {
 			fmt.Println(formatString("Task Complete"))
 		}
@@ -190,7 +193,11 @@ func handleTask(task *rest.Task, err error) {
 		} else if viper.GetBool("progress-bar") {
 			taskProgressBar(task)
 		} else {
-			taskVal := task.WaitForTask(restClient, false)
+			taskVal, err := task.WaitForTask(restClient, false)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 			if taskVal.State == "complete" {
 				fmt.Println(formatString("Task Complete"))
 				os.Exit(1)
@@ -206,7 +213,11 @@ func handleTask(task *rest.Task, err error) {
 }
 
 func taskProgressNum(task *rest.Task) {
-	taskVal := task.WaitForTask(restClient, true)
+	taskVal, err := task.WaitForTask(restClient, true)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 	if taskVal.State == "failed" {
 		fmt.Println(formatString("Task Failed: " + task.Message))
 		os.Exit(1)
@@ -214,26 +225,32 @@ func taskProgressNum(task *rest.Task) {
 }
 
 func taskProgressBar(task *rest.Task) {
-	//bar := progressbar.Default(100)
-	bar := progressbar.NewOptions(100, progressbar.OptionFullWidth(), progressbar.OptionSetPredictTime(false))
-	done := make(chan struct{})
+	//fmt.Printf(task.Description)
+	bar := progressbar.NewOptions(100,
+		progressbar.OptionFullWidth(),
+		progressbar.OptionSetPredictTime(false),
+		progressbar.OptionSetDescription(task.Description))
+	errChannel := make(chan error)
 	taskData := make(chan rest.Task)
 	var newVal rest.Task
-	go task.WatchTask(restClient, taskData, done)
+	bar.Set(int(task.Progress))
+	go task.WatchTask(restClient, taskData, errChannel)
 	for {
 		select {
 		case newVal = <-taskData:
 			bar.Set(int(newVal.Progress))
-		case <-done:
 			if newVal.State == "completed" {
 				bar.Set(100)
 				bar.Finish()
-				time.Sleep(time.Millisecond * 100)
+				fmt.Println("")
+				return
 			} else if newVal.State == "failed" {
 				bar.Set(0)
 				fmt.Println(formatString("Task Failed: " + newVal.Message))
+				return
 			}
-			fmt.Println("")
+		case err := <-errChannel:
+			fmt.Println(err)
 			return
 		}
 	}
