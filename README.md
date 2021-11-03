@@ -1,7 +1,13 @@
 # hive-go-client
 
+## rest
 hive-go-client/rest is a wrapper around the hiveio rest api
 
+[Documentation](https://pkg.go.dev/github.com/hive-io/hive-go-client/rest)
+
+
+---
+## hioctl
 hive-go-client/hioctl is a command line interface for the api
 install it with: `go get -u github.com/hive-io/hive-go-client/hioctl`
 
@@ -42,7 +48,7 @@ Use "hioctl [command] --help" for more information about a command.
 [hioctl Documentation](docs/hioctl.md)
 
 Save connection settings in hioctl.yaml in ~/.hiveio/, /etc/hive, or the current directory
-~/.hiveio/hioctl.yaml
+
 ```
 host: hive-hostname
 user: admin
@@ -50,4 +56,3 @@ password: password
 realm: local
 insecure: true
 ```
-
