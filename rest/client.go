@@ -137,7 +137,7 @@ func (client *Client) requestWithHeaders(method, path string, body io.Reader, he
 
 // Login attempts to connect to the server specified in Client with the provided username, password, and realm
 func (client *Client) Login(username, password, realm string) error {
-	if client.Host == "localhost" || client.Host == "::1" || client.Host == "127.0.0.1" {
+	if password == "" && (client.Host == "localhost" || client.Host == "::1" || client.Host == "127.0.0.1") {
 		return nil
 	}
 	jsonData := map[string]string{"username": username, "password": password, "realm": realm}
@@ -240,7 +240,8 @@ func (client *Client) GetChangeFeed(table string, filter map[string]string) (*Ch
 	var token string
 	if client.Port == 3000 {
 		protocol = "ws"
-	} else {
+	}
+	if client.token != "" {
 		token = "token=" + client.token + "&"
 	}
 	u := url.URL{Scheme: protocol, Host: fmt.Sprintf("%s:%d", client.Host, client.Port), Path: "/socket.io/", RawQuery: token + "transport=websocket"}
