@@ -3,6 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"errors"
+	"net/url"
 )
 
 //ProfileADConfig contains the active directory settings for a profile
@@ -138,7 +139,7 @@ func (client *Client) GetProfile(id string) (*Profile, error) {
 
 // GetProfileByName requests a profile by name
 func (client *Client) GetProfileByName(name string) (*Profile, error) {
-	var profiles, err = client.ListProfiles("name=" + name)
+	var profiles, err = client.ListProfiles("name=" + url.QueryEscape(name))
 	if err != nil {
 		return nil, err
 	}

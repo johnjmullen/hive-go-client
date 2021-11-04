@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -65,7 +66,7 @@ func (client *Client) GetTask(id string) (*Task, error) {
 
 // GetTaskByName request a task by name
 func (client *Client) GetTaskByName(name string) (*Task, error) {
-	var tasks, err = client.ListTasks("name=" + name)
+	var tasks, err = client.ListTasks("name=" + url.QueryEscape(name))
 	if err != nil {
 		return nil, err
 	}

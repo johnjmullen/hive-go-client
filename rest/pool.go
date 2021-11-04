@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -139,7 +140,7 @@ func (client *Client) GetPool(id string) (*Pool, error) {
 
 // GetPoolByName request a task by name
 func (client *Client) GetPoolByName(name string) (*Pool, error) {
-	var pools, err = client.ListGuestPools("name=" + name)
+	var pools, err = client.ListGuestPools("name=" + url.QueryEscape(name))
 	if err != nil {
 		return nil, err
 	}

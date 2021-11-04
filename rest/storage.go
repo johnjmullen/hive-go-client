@@ -69,7 +69,7 @@ func (client *Client) ListStoragePools(query string) ([]StoragePool, error) {
 
 // GetStoragePoolByName requests a storage pool by name
 func (client *Client) GetStoragePoolByName(name string) (*StoragePool, error) {
-	var pools, err = client.ListStoragePools("name=" + name)
+	var pools, err = client.ListStoragePools("name=" + url.QueryEscape(name))
 	if err != nil {
 		return nil, err
 	}

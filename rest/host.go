@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"path"
 	"strings"
 
@@ -212,7 +213,7 @@ func (client *Client) GetHost(hostid string) (Host, error) {
 
 // GetHostByName requests a host by hostname
 func (client *Client) GetHostByName(name string) (*Host, error) {
-	var hosts, err = client.ListHosts("hostname=" + name)
+	var hosts, err = client.ListHosts("hostname=" + url.QueryEscape(name))
 	if err != nil {
 		return nil, err
 	}

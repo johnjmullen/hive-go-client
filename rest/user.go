@@ -3,6 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"errors"
+	"net/url"
 )
 
 // UserPreferences
@@ -58,7 +59,7 @@ func (client *Client) GetUser(id string) (*User, error) {
 
 // GetUserByName request a task by name
 func (client *Client) GetUserByName(name string) (*User, error) {
-	var users, err = client.ListUsers("name=" + name)
+	var users, err = client.ListUsers("name=" + url.QueryEscape(name))
 	if err != nil {
 		return nil, err
 	}
