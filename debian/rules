@@ -1,8 +1,8 @@
 #!/usr/bin/make -f
-
+export DEB_VERSION := $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
+export COMMIT=$(shell git rev-parse HEAD)
 export GOCACHE=$(shell mktemp -d /tmp/gocache-XXXX)
 %:
-	dh $@ --buildsystem=golang --with=golang
-
-override_dh_auto_install:
-	dh_auto_install -- --no-source
+	mkdir -p bin
+	go build -o bin -ldflags "-X github.com/hive-io/hive-go-client/cmd.version=${DEB_VERSION} -X github.com/hive-io/hive-go-client/cmd.commit=${COMMIT}" ./hioctl
+	dh $@

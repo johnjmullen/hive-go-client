@@ -1,1 +1,2 @@
+bin/hioctl /usr/bin/
 files/completion/bash/hioctl /usr/share/bash-completion/completions/

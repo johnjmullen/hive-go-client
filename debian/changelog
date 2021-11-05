@@ -1,6 +1,9 @@
-hive-go-client (0.1~git20190917.ccae01c-1) UNRELEASED; urgency=medium
+hive-go-client (8.5-0-21110515) unstable; urgency=medium
 
   [ John Mullen ]
   * Initial release
 
- -- John Mullen <johnjmullen25@gmail.com>  Tue, 17 Sep 2019 14:27:12 -0400
+  [ HiveIO ]
+  * 8.5-0-21110515 release
+
+ -- HiveIO <package@hiveio.com>  Fri, 05 Nov 2021 15:06:41 -0400

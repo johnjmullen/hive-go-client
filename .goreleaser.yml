@@ -5,6 +5,7 @@ project_name: hioctl
 builds:
 - env:
   - CGO_ENABLED=0
+  ldflags: -s -w -X github.com/hive-io/hive-go-client/cmd.version={{.Version}} -X github.com/hive-io/hive-go-client/cmd.date={{.CommitDate}} -X github.com/hive-io/hive-go-client/cmd.commit={{ .Commit }}
   main: ./hioctl/main.go
   goos:
   - linux

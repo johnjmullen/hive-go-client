@@ -43,6 +43,7 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('template', 'template', [CompletionResultType]::ParameterValue, 'template operations')
             [CompletionResult]::new('user', 'user', [CompletionResultType]::ParameterValue, 'user operations')
             [CompletionResult]::new('util', 'util', [CompletionResultType]::ParameterValue, 'hioctl utilities')
+            [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'hioctl version information')
             break
         }
         'hioctl;alert' {
@@ -708,7 +709,7 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('analyze', 'analyze', [CompletionResultType]::ParameterValue, 'analyze template')
             [CompletionResult]::new('author', 'author', [CompletionResultType]::ParameterValue, 'author template')
             [CompletionResult]::new('create', 'create', [CompletionResultType]::ParameterValue, 'Add a new template')
-            [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete template pool')
+            [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete template')
             [CompletionResult]::new('diff', 'diff', [CompletionResultType]::ParameterValue, 'compare 2 templates')
             [CompletionResult]::new('duplicate', 'duplicate', [CompletionResultType]::ParameterValue, 'Make a copy of a template')
             [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get template details')
@@ -728,10 +729,6 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             break
         }
         'hioctl;template;delete' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'template Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'template Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'template Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'template Pool Name')
             break
         }
         'hioctl;template;diff' {
@@ -841,6 +838,9 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             break
         }
         'hioctl;util;zsh-completion' {
+            break
+        }
+        'hioctl;version' {
             break
         }
     })

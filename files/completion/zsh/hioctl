@@ -32,6 +32,7 @@ function _hioctl {
       "task:task operations"
       "template:template operations"
       "user:user operations"
+      "version:hioctl version information"
     )
     _describe "command" commands
     ;;
@@ -76,6 +77,9 @@ function _hioctl {
     ;;
   user)
     _hioctl_user
+    ;;
+  version)
+    _hioctl_version
     ;;
   esac
 }
@@ -2003,7 +2007,7 @@ function _hioctl_template {
       "analyze:analyze template"
       "author:author template"
       "create:Add a new template"
-      "delete:delete template pool"
+      "delete:delete template"
       "diff:compare 2 templates"
       "duplicate:Make a copy of a template"
       "get:get template details"
@@ -2091,8 +2095,6 @@ function _hioctl_template_create {
 
 function _hioctl_template_delete {
   _arguments \
-    '(-i --id)'{-i,--id}'[template Pool Id]:' \
-    '(-n --name)'{-n,--name}'[template Pool Name]:' \
     '--config[config file]:' \
     '--format[format (json/yaml)]:' \
     '--host[Hostname or ip address]:' \
@@ -2315,6 +2317,18 @@ function _hioctl_user_list {
 }
 
 function _hioctl_user_update {
+  _arguments \
+    '--config[config file]:' \
+    '--format[format (json/yaml)]:' \
+    '--host[Hostname or ip address]:' \
+    '(-k --insecure)'{-k,--insecure}'[ignore certificate errors]' \
+    '(-p --password)'{-p,--password}'[Admin user password]:' \
+    '--port[port]:' \
+    '(-r --realm)'{-r,--realm}'[Admin user realm]:' \
+    '(-u --user)'{-u,--user}'[Admin username]:'
+}
+
+function _hioctl_version {
   _arguments \
     '--config[config file]:' \
     '--format[format (json/yaml)]:' \

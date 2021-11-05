@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"runtime/debug"
 	"strconv"
 
 	"github.com/ghodss/yaml"
@@ -16,12 +17,37 @@ import (
 var cfgFile string
 var restClient *rest.Client
 
+var (
+	version = "dev"
+	commit  = ""
+	date    = ""
+)
+
 //RootCmd root command for hioctl
 var RootCmd = &cobra.Command{
 	Use:              "hioctl",
-	Short:            "hiveio cli",
+	Short:            "hive fabric rest api client",
+	Version:          fmt.Sprintf("%s ", version),
 	PersistentPreRun: connectRest,
 	TraverseChildren: true,
+}
+
+var VersionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "hioctl version information",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("version: %s\n", version)
+		if commit != "" {
+			fmt.Printf("commit: %s\n", commit)
+		}
+		if date != "" {
+			fmt.Printf("commit date: %s\n", date)
+		}
+		if info, ok := debug.ReadBuildInfo(); ok && info.Main.Sum != "" {
+			fmt.Printf("module version: %s, checksum: %s\n", info.Main.Version, info.Main.Sum)
+		}
+		fmt.Printf("https://github.com/hive-io/hive-go-client\n")
+	},
 }
 
 //Execute run root command
@@ -50,6 +76,8 @@ func init() {
 	viper.BindPFlag("password", RootCmd.PersistentFlags().Lookup("password"))
 	viper.BindPFlag("realm", RootCmd.PersistentFlags().Lookup("realm"))
 	viper.BindPFlag("format", RootCmd.PersistentFlags().Lookup("format"))
+
+	RootCmd.AddCommand(VersionCmd)
 }
 
 func initConfig() {
