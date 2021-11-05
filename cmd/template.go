@@ -92,7 +92,8 @@ var templateCreateCmd = &cobra.Command{
 
 var templateDeleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "delete template pool",
+	Short: "delete template",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		template, err := restClient.GetTemplate(args[0])
@@ -272,8 +273,6 @@ func init() {
 	templateCmd.AddCommand(templateCreateCmd)
 
 	templateCmd.AddCommand(templateDeleteCmd)
-	templateDeleteCmd.Flags().StringP("id", "i", "", "template Pool Id")
-	templateDeleteCmd.Flags().StringP("name", "n", "", "template Pool Name")
 
 	templateCmd.AddCommand(templateDiffCmd)
 	templateCmd.AddCommand(templateGetCmd)
