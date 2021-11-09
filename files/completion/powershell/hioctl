@@ -158,6 +158,7 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             [CompletionResult]::new('refresh', 'refresh', [CompletionResultType]::ParameterValue, 'rebuild a guest with the latest pool settings')
             [CompletionResult]::new('release', 'release', [CompletionResultType]::ParameterValue, 'release guest assignment')
             [CompletionResult]::new('reset', 'reset', [CompletionResultType]::ParameterValue, 'force reset guest')
+            [CompletionResult]::new('resetRecord', 'resetRecord', [CompletionResultType]::ParameterValue, 'Resets a guest record')
             [CompletionResult]::new('restore', 'restore', [CompletionResultType]::ParameterValue, 'restore guest from a backup')
             [CompletionResult]::new('shutdown', 'shutdown', [CompletionResultType]::ParameterValue, 'shutdown guest')
             [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'update a guest')
@@ -213,6 +214,9 @@ Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
             break
         }
         'hioctl;guest;reset' {
+            break
+        }
+        'hioctl;guest;resetRecord' {
             break
         }
         'hioctl;guest;restore' {
