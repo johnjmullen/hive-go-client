@@ -392,7 +392,7 @@ func (guest *ExternalGuest) Create(client *Client) (string, error) {
 	return result, err
 }
 
-// ResetRecord forces a guest record to be reset so it be rebuilt
+// ResetRecord forces a guest record to be reset so it can be rebuilt
 func (guest *Guest) ResetRecord(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
