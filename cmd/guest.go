@@ -408,6 +408,20 @@ test2,10.0.0.2,user2,TEST
 	},
 }
 
+var guestResetRecordCmd = &cobra.Command{
+	Use:   "resetRecord [Name]",
+	Short: "Resets a guest record",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		guest, err := restClient.GetGuest(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		guest.ResetRecord(restClient)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(guestCmd)
 
@@ -440,4 +454,5 @@ func init() {
 	guestMigrateCmd.Flags().String("hostid", "", "The host the guest will be migrated to")
 
 	guestCmd.AddCommand(guestAddExternalCmd)
+	guestCmd.AddCommand(guestResetRecordCmd)
 }
