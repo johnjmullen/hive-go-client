@@ -26,6 +26,7 @@ var addHostCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		bindTaskFlags(cmd)
+		cmd.MarkFlagRequired("remote-password")
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if viper.GetBool("wait") && viper.GetBool("progress-bar") {
