@@ -351,7 +351,7 @@ json:
     "address": "10.10.0.1",
     "username": "user1",
     "realm": "TEST",
-		"os": "win10"
+	"os": "win10"
   },
 ]
 

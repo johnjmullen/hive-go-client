@@ -10,6 +10,7 @@ import (
 // Guest describes a guest record from the rest api
 type Guest struct {
 	Address        string              `json:"address,omitempty"`
+	ADGroup        string              `json:"ADGroup,omitempty"`
 	AgentInstalled bool                `json:"agentInstalled"`
 	AgentMetadata  *GuestAgentMetadata `json:"agentMetadata"`
 	AgentVersion   string              `json:"agentVersion,omitempty"`
@@ -377,6 +378,7 @@ type ExternalGuest struct {
 	GuestName string `json:"guestName,omitempty"`
 	Address   string `json:"address,omitempty"`
 	Username  string `json:"username,omitempty"`
+	ADGroup   string `json:"ADGroup,omitempty"`
 	Realm     string `json:"realm,omitempty"`
 	OS        string `json:"os,omitempty"`
 }
