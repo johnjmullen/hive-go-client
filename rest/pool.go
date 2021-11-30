@@ -76,10 +76,15 @@ type PoolAffinity struct {
 	AllowedHostIDs     []string `json:"allowedHostIds,omitempty"`
 }
 
+type PoolAssignmentAutoClear struct {
+	Enabled bool `json:"enabled,omitempty"`
+	MaxTime int  `json:"maxTime,omitempty"`
+}
 type PoolAssignment struct {
-	Realm    string `json:"realm,omitempty"`
-	Username string `json:"username,omitempty"`
-	ADGroup  string `json:"ADGroup,omitempty"`
+	Realm     string                   `json:"realm,omitempty"`
+	Username  string                   `json:"username,omitempty"`
+	ADGroup   string                   `json:"ADGroup,omitempty"`
+	AutoClear *PoolAssignmentAutoClear `json:"autoClear,omitempty"`
 }
 
 // Pool describes a guest pool record from the rest api
