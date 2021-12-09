@@ -217,7 +217,7 @@ func (pool *StoragePool) DeleteFile(client *Client, filename string) error {
 	if pool.ID == "" {
 		return errors.New("Invalid Storage Pool")
 	}
-	body, err := client.request("DELETE", fmt.Sprintf("storage/pool/%s/%s", pool.ID, filename), nil)
+	body, err := client.request("DELETE", fmt.Sprintf("storage/pool/%s/%s", pool.ID, url.QueryEscape(filename)), nil)
 	if err != nil {
 		return err
 	}
