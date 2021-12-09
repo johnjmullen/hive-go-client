@@ -69,7 +69,7 @@ func (client *Client) ListStoragePools(query string) ([]StoragePool, error) {
 
 // GetStoragePoolByName requests a storage pool by name
 func (client *Client) GetStoragePoolByName(name string) (*StoragePool, error) {
-	var pools, err = client.ListStoragePools("name=" + url.QueryEscape(name))
+	var pools, err = client.ListStoragePools("name=" + url.PathEscape(name))
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +217,7 @@ func (pool *StoragePool) DeleteFile(client *Client, filename string) error {
 	if pool.ID == "" {
 		return errors.New("Invalid Storage Pool")
 	}
-	body, err := client.request("DELETE", fmt.Sprintf("storage/pool/%s/%s", pool.ID, url.QueryEscape(filename)), nil)
+	body, err := client.request("DELETE", fmt.Sprintf("storage/pool/%s/%s", pool.ID, url.PathEscape(filename)), nil)
 	if err != nil {
 		return err
 	}
@@ -251,7 +251,7 @@ func (pool *StoragePool) Browse(client *Client, filePath string, recursive bool)
 	if len(filePath) > 0 {
 		options += "&filePath=" + url.QueryEscape(filePath)
 	}
-	if recursive == true {
+	if recursive {
 		options += "&recursive=true"
 	}
 	body, err := client.request("GET", fmt.Sprintf("storage/pool/%s/browse?%s", pool.ID, options), nil)

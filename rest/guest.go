@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -208,7 +209,7 @@ func (client *Client) GetGuest(name string) (*Guest, error) {
 	if name == "" {
 		return nil, errors.New("name cannot be empty")
 	}
-	body, err := client.request("GET", "guest/"+name, nil)
+	body, err := client.request("GET", "guest/"+url.PathEscape(name), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +222,7 @@ func (guest *Guest) Shutdown(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.request("POST", "guest/"+guest.Name+"/shutdown", nil)
+	_, err := client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/shutdown", nil)
 	return err
 }
 
@@ -230,7 +231,7 @@ func (guest *Guest) Reboot(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.request("POST", "guest/"+guest.Name+"/reboot", nil)
+	_, err := client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/reboot", nil)
 	return err
 }
 
@@ -242,7 +243,7 @@ func (guest *Guest) Refresh(client *Client) error {
 	if guest.Standalone {
 		return guest.Delete(client)
 	}
-	_, err := client.request("POST", "guest/"+guest.Name+"/refresh", nil)
+	_, err := client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/refresh", nil)
 	return err
 }
 
@@ -251,7 +252,7 @@ func (guest *Guest) Poweron(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.request("POST", "guest/"+guest.Name+"/poweron", nil)
+	_, err := client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/poweron", nil)
 	return err
 }
 
@@ -260,7 +261,7 @@ func (guest *Guest) Poweroff(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.request("POST", "guest/"+guest.Name+"/poweroff", nil)
+	_, err := client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/poweroff", nil)
 	return err
 }
 
@@ -269,7 +270,7 @@ func (guest *Guest) Reset(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	_, err := client.request("POST", "guest/"+guest.Name+"/reset", nil)
+	_, err := client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/reset", nil)
 	return err
 }
 
@@ -277,7 +278,7 @@ func (guest *Guest) Reset(client *Client) error {
 func (guest *Guest) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(guest)
-	body, err := client.request("PUT", "guest/"+guest.Name, jsonValue)
+	body, err := client.request("PUT", "guest/"+url.PathEscape(guest.Name), jsonValue)
 	if err == nil {
 		result = string(body)
 	}
@@ -290,10 +291,10 @@ func (guest *Guest) Delete(client *Client) error {
 		return errors.New("name cannot be empty")
 	}
 	if guest.External == true {
-		_, err := client.request("DELETE", "guest/"+guest.Name, nil)
+		_, err := client.request("DELETE", "guest/"+url.PathEscape(guest.Name), nil)
 		return err
 	}
-	_, err := client.request("POST", "guest/"+guest.Name+"/delete", nil)
+	_, err := client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/delete", nil)
 	return err
 }
 
@@ -302,7 +303,7 @@ func (guest *Guest) StartBackup(client *Client) (*Task, error) {
 	if guest.Name == "" {
 		return nil, errors.New("name cannot be empty")
 	}
-	return client.getTaskFromResponse(client.request("POST", "guest/"+guest.Name+"/backup", nil))
+	return client.getTaskFromResponse(client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/backup", nil))
 }
 
 //Restore restores a guest from a backup
@@ -310,7 +311,7 @@ func (guest *Guest) Restore(client *Client) (*Task, error) {
 	if guest.Name == "" {
 		return nil, errors.New("name cannot be empty")
 	}
-	return client.getTaskFromResponse(client.request("POST", "guest/"+guest.Name+"/restore", nil))
+	return client.getTaskFromResponse(client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/restore", nil))
 }
 
 //Migrate migrate a guest to a different host
@@ -323,7 +324,7 @@ func (guest *Guest) Migrate(client *Client, destinationHostid string) error {
 	if err != nil {
 		return err
 	}
-	_, err = client.request("POST", "guest/"+guest.Name+"/migrate", jsonValue)
+	_, err = client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/migrate", jsonValue)
 	return err
 }
 
@@ -373,6 +374,15 @@ func (guest Guest) WaitForGuest(client *Client, timeout time.Duration) error {
 	}
 }
 
+// ResetRecord forces a guest record to be reset so it can be rebuilt
+func (guest *Guest) ResetRecord(client *Client) error {
+	if guest.Name == "" {
+		return errors.New("name cannot be empty")
+	}
+	_, err := client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/resetRecord", nil)
+	return err
+}
+
 //ExternalGuest is used to add external guest records to the system
 type ExternalGuest struct {
 	GuestName string `json:"guestName,omitempty"`
@@ -392,13 +402,4 @@ func (guest *ExternalGuest) Create(client *Client) (string, error) {
 		result = string(body)
 	}
 	return result, err
-}
-
-// ResetRecord forces a guest record to be reset so it can be rebuilt
-func (guest *Guest) ResetRecord(client *Client) error {
-	if guest.Name == "" {
-		return errors.New("name cannot be empty")
-	}
-	_, err := client.request("POST", "guest/"+guest.Name+"/resetRecord", nil)
-	return err
 }
