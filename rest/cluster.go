@@ -104,7 +104,7 @@ func (client *Client) ListClusters(query string) ([]Cluster, error) {
 func (client *Client) GetCluster(id string) (Cluster, error) {
 	var cluster Cluster
 	if id == "" {
-		return cluster, errors.New("Id cannot be empty")
+		return cluster, errors.New("id cannot be empty")
 	}
 	body, err := client.request("GET", "cluster/"+id, nil)
 	if err != nil {

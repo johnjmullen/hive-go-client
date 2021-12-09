@@ -45,7 +45,7 @@ func (client *Client) ListRealms(query string) ([]Realm, error) {
 func (client *Client) GetRealm(name string) (Realm, error) {
 	var realm Realm
 	if name == "" {
-		return realm, errors.New("Name cannot be empty")
+		return realm, errors.New("name cannot be empty")
 	}
 	body, err := client.request("GET", "realm/"+name, nil)
 	if err != nil {
@@ -81,7 +81,7 @@ func (realm *Realm) Update(client *Client) (string, error) {
 //Delete deletes a realm
 func (realm *Realm) Delete(client *Client) error {
 	if realm.Name == "" {
-		return errors.New("Name cannot be empty")
+		return errors.New("name cannot be empty")
 	}
 	_, err := client.request("DELETE", "realm/"+realm.Name, nil)
 	if err != nil {

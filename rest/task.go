@@ -54,7 +54,7 @@ func (client *Client) ListTasks(query string) ([]Task, error) {
 func (client *Client) GetTask(id string) (*Task, error) {
 	var task Task
 	if id == "" {
-		return &task, errors.New("Id cannot be empty")
+		return &task, errors.New("id cannot be empty")
 	}
 	body, err := client.request("GET", "task/"+id, nil)
 	if err != nil {
@@ -81,7 +81,7 @@ func (client *Client) GetTaskByName(name string) (*Task, error) {
 // ForceComplete marks a task as completed in the database
 func (task *Task) ForceComplete(client *Client) error {
 	if task.ID == "" {
-		return errors.New("Id cannot be empty")
+		return errors.New("id cannot be empty")
 	}
 	_, err := client.request("PUT", "task/"+task.ID+"/forcecomplete", nil)
 	return err

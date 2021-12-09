@@ -46,7 +46,7 @@ func (client *Client) ListAlerts(query string) ([]Alert, error) {
 func (client *Client) GetAlert(id string) (Alert, error) {
 	var alert Alert
 	if id == "" {
-		return alert, errors.New("Name cannot be empty")
+		return alert, errors.New("name cannot be empty")
 	}
 	body, err := client.request("GET", "alert/"+id, nil)
 	if err != nil {
@@ -59,7 +59,7 @@ func (client *Client) GetAlert(id string) (Alert, error) {
 // Acknowledge marks an alert as acknowledged
 func (alert *Alert) Acknowledge(client *Client) error {
 	if alert.ID == "" {
-		return errors.New("Id cannot be empty")
+		return errors.New("id cannot be empty")
 	}
 	_, err := client.request("POST", "alert/"+alert.ID+"/acknowledge", nil)
 	return err

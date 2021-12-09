@@ -254,7 +254,7 @@ func (host *Host) UpdateAppliance(client *Client) (string, error) {
 // Delete removes a host from the database
 func (host *Host) Delete(client *Client) error {
 	if host.Hostid == "" {
-		return errors.New("Id cannot be empty")
+		return errors.New("id cannot be empty")
 	}
 	_, err := client.request("DELETE", "host/"+host.Hostid, nil)
 	if err != nil {

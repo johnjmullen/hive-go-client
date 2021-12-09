@@ -99,7 +99,7 @@ func (profile *Profile) Update(client *Client) (string, error) {
 //Delete deletes a profile
 func (profile *Profile) Delete(client *Client) error {
 	if profile.ID == "" {
-		return errors.New("Id cannot be empty")
+		return errors.New("id cannot be empty")
 	}
 	_, err := client.request("DELETE", "profile/"+profile.ID, nil)
 	if err != nil {
@@ -127,7 +127,7 @@ func (client *Client) ListProfiles(query string) ([]Profile, error) {
 func (client *Client) GetProfile(id string) (*Profile, error) {
 	var profile *Profile
 	if id == "" {
-		return profile, errors.New("Id cannot be empty")
+		return profile, errors.New("id cannot be empty")
 	}
 	body, err := client.request("GET", "profile/"+id, nil)
 	if err != nil {

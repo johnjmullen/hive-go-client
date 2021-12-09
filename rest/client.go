@@ -30,7 +30,7 @@ type Client struct {
 }
 
 //SetToken sets the token directly instead of calling auth
-func (client Client) SetToken(token string) {
+func (client *Client) SetToken(token string) {
 	client.token = token
 }
 
@@ -42,7 +42,7 @@ func (client *Client) getTaskFromResponse(body []byte, err error) (*Task, error)
 	err = json.Unmarshal(body, &objMap)
 	taskID, ok := objMap["taskId"]
 	if err != nil || !ok || taskID == "" {
-		return nil, fmt.Errorf("Error parsing data. taskId not found")
+		return nil, fmt.Errorf("error parsing data. taskId not found")
 	}
 	return client.GetTask(taskID)
 }
@@ -69,10 +69,10 @@ func (client *Client) request(method, path string, data []byte) ([]byte, error) 
 
 func (client *Client) postMultipart(path, filenameField, filepath string, params map[string]string) ([]byte, error) {
 	f, err := os.Open(filepath)
-	defer f.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 	info, err := f.Stat()
 	if err != nil {
 		return nil, err

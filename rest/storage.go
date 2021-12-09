@@ -78,7 +78,7 @@ func (client *Client) GetStoragePoolByName(name string) (*StoragePool, error) {
 			return &pool, nil
 		}
 	}
-	return nil, errors.New("Storage Pool not found")
+	return nil, errors.New("storage Pool not found")
 }
 
 // GetStoragePool requests a storage pool by id
@@ -109,7 +109,7 @@ func (pool *StoragePool) Create(client *Client) (string, error) {
 //Delete deletes a storage pool
 func (pool *StoragePool) Delete(client *Client) error {
 	if pool.ID == "" {
-		return errors.New("Invalid Storage Pool")
+		return errors.New("invalid Storage Pool")
 	}
 	_, err := client.request("DELETE", "storage/pool/"+pool.ID, nil)
 	return err
@@ -118,7 +118,7 @@ func (pool *StoragePool) Delete(client *Client) error {
 //Stop disables a storage pool
 func (pool *StoragePool) Stop(client *Client) error {
 	if pool.ID == "" {
-		return errors.New("Invalid Storage Pool")
+		return errors.New("invalid Storage Pool")
 	}
 	_, err := client.request("POST", "storage/pool/"+pool.ID+"/stop", nil)
 	return err
@@ -127,7 +127,7 @@ func (pool *StoragePool) Stop(client *Client) error {
 //Start re-enables a stopped storage pool
 func (pool *StoragePool) Start(client *Client) error {
 	if pool.ID == "" {
-		return errors.New("Invalid Storage Pool")
+		return errors.New("invalid Storage Pool")
 	}
 	_, err := client.request("POST", "storage/pool/"+pool.ID+"/start", nil)
 	return err
@@ -136,7 +136,7 @@ func (pool *StoragePool) Start(client *Client) error {
 //CreateDisk creates a new disk in the storage pool
 func (pool *StoragePool) CreateDisk(client *Client, filename, format string, size uint) (*Task, error) {
 	if pool.ID == "" {
-		return nil, errors.New("Invalid Storage Pool")
+		return nil, errors.New("invalid Storage Pool")
 	}
 	jsonData := map[string]interface{}{"filename": filename, "size": size, "format": format}
 	jsonValue, err := json.Marshal(jsonData)
@@ -149,7 +149,7 @@ func (pool *StoragePool) CreateDisk(client *Client, filename, format string, siz
 //ConvertDisk converts or copies a disk to a new file
 func (pool *StoragePool) ConvertDisk(client *Client, srcFilename, dstStorageID, dstFilename, dstFormat string) (*Task, error) {
 	if pool.ID == "" {
-		return nil, errors.New("Invalid Storage Pool")
+		return nil, errors.New("invalid Storage Pool")
 	}
 	jsonData := map[string]interface{}{
 		"srcStorage":  pool.ID,
@@ -168,7 +168,7 @@ func (pool *StoragePool) ConvertDisk(client *Client, srcFilename, dstStorageID, 
 //CopyURL downloads a file from a http url into a storage pool
 func (pool *StoragePool) CopyURL(client *Client, url, filePath string) (*Task, error) {
 	if pool.ID == "" {
-		return nil, errors.New("Invalid Storage Pool")
+		return nil, errors.New("invalid Storage Pool")
 	}
 	jsonData := map[string]interface{}{
 		"url":      url,
@@ -184,7 +184,7 @@ func (pool *StoragePool) CopyURL(client *Client, url, filePath string) (*Task, e
 func (pool *StoragePool) DiskInfo(client *Client, filePath string) (DiskInfo, error) {
 	var disk DiskInfo
 	if pool.ID == "" {
-		return disk, errors.New("Invalid Storage Pool")
+		return disk, errors.New("invalid Storage Pool")
 	}
 	jsonData := map[string]interface{}{"filePath": filePath}
 	jsonValue, err := json.Marshal(jsonData)
@@ -202,7 +202,7 @@ func (pool *StoragePool) DiskInfo(client *Client, filePath string) (DiskInfo, er
 //GrowDisk increases the size of a disk in a storage pool by size GB
 func (pool *StoragePool) GrowDisk(client *Client, filePath string, size uint) (*Task, error) {
 	if pool.ID == "" {
-		return nil, errors.New("Invalid Storage Pool")
+		return nil, errors.New("invalid Storage Pool")
 	}
 	jsonData := map[string]interface{}{"filePath": filePath, "size": size}
 	jsonValue, err := json.Marshal(jsonData)
@@ -215,7 +215,7 @@ func (pool *StoragePool) GrowDisk(client *Client, filePath string, size uint) (*
 //DeleteFile deletes a file from a storage pool
 func (pool *StoragePool) DeleteFile(client *Client, filename string) error {
 	if pool.ID == "" {
-		return errors.New("Invalid Storage Pool")
+		return errors.New("invalid Storage Pool")
 	}
 	body, err := client.request("DELETE", fmt.Sprintf("storage/pool/%s/%s", pool.ID, url.PathEscape(filename)), nil)
 	if err != nil {
@@ -226,7 +226,7 @@ func (pool *StoragePool) DeleteFile(client *Client, filename string) error {
 	}
 	err = json.Unmarshal(body, &res)
 	if err == nil && !res.Deleted {
-		err = (fmt.Errorf("Error: Unable to delete %s from %s", filename, pool.Name))
+		err = (fmt.Errorf("error: Unable to delete %s from %s", filename, pool.Name))
 	}
 	return err
 }
@@ -245,7 +245,7 @@ type StoragePoolFileInfo struct {
 func (pool *StoragePool) Browse(client *Client, filePath string, recursive bool) ([]StoragePoolFileInfo, error) {
 	var files []StoragePoolFileInfo
 	if pool.ID == "" {
-		return files, errors.New("Invalid Storage Pool")
+		return files, errors.New("invalid Storage Pool")
 	}
 	options := "details=true"
 	if len(filePath) > 0 {
@@ -265,7 +265,7 @@ func (pool *StoragePool) Browse(client *Client, filePath string, recursive bool)
 //Download downloads a file from a storage pool
 func (pool *StoragePool) Download(client *Client, filePath string) (*http.Response, error) {
 	if pool.ID == "" {
-		return nil, errors.New("Invalid Storage Pool")
+		return nil, errors.New("invalid Storage Pool")
 	}
 	headers := map[string]string{"Content-type": "application/json"}
 	resp, err := client.requestWithHeaders("GET", fmt.Sprintf("storage/pool/%s/download?filePath=%s", pool.ID, url.QueryEscape(filePath)), bytes.NewBuffer(nil), headers, 0)
@@ -275,7 +275,7 @@ func (pool *StoragePool) Download(client *Client, filePath string) (*http.Respon
 //Upload uploads a local file into a storage pool
 func (pool *StoragePool) Upload(client *Client, filename, targetFilename string) error {
 	if pool.ID == "" {
-		return errors.New("Invalid Storage Pool")
+		return errors.New("invalid Storage Pool")
 	}
 	f, err := os.Open(filename)
 	if err != nil {

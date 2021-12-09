@@ -157,7 +157,7 @@ func (template *Template) Duplicate(client *Client, dstName, dstStorage, dstFile
 		return nil, errors.New("name cannot be empty")
 	}
 	if len(template.Disks) < 1 {
-		return nil, errors.New("No disks found")
+		return nil, errors.New("no disks found")
 	}
 	jsonData := map[string]string{"srcStorage": template.Disks[0].StorageID, "srcFilename": template.Disks[0].Filename, "dstName": dstName, "dstStorage": dstStorage, "dstFilename": dstFilename}
 	jsonValue, _ := json.Marshal(jsonData)

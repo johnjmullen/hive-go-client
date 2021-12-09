@@ -133,7 +133,7 @@ func (client *Client) ListGuestPools(query string) ([]Pool, error) {
 func (client *Client) GetPool(id string) (*Pool, error) {
 	var pool *Pool
 	if id == "" {
-		return pool, errors.New("Id cannot be empty")
+		return pool, errors.New("id cannot be empty")
 	}
 	body, err := client.request("GET", "pool/"+id, nil)
 	if err != nil {
@@ -182,7 +182,7 @@ func (pool *Pool) Update(client *Client) (string, error) {
 //Delete removes a pool record
 func (pool *Pool) Delete(client *Client) error {
 	if pool.ID == "" || client == nil {
-		return errors.New("Invalid pool")
+		return errors.New("invalid pool")
 	}
 	_, err := client.request("DELETE", "pool/"+pool.ID, nil)
 	return err
@@ -191,7 +191,7 @@ func (pool *Pool) Delete(client *Client) error {
 //Refresh refreshes a pool to ensure the definition is applied
 func (pool *Pool) Refresh(client *Client) error {
 	if pool.ID == "" || client == nil {
-		return errors.New("Invalid pool")
+		return errors.New("invalid pool")
 	}
 	_, err := client.request("POST", "pool/"+pool.ID+"/refresh", nil)
 	return err
@@ -214,7 +214,7 @@ func (pool Pool) WaitForPool(client *Client, targetState string, timeout time.Du
 	for {
 		select {
 		case <-timer.C:
-			return fmt.Errorf("Timed out")
+			return fmt.Errorf("timed out")
 		case msg := <-feed.Data:
 			if msg.Error != nil {
 				feed.Close()
@@ -222,7 +222,7 @@ func (pool Pool) WaitForPool(client *Client, targetState string, timeout time.Du
 			}
 			err = json.Unmarshal(msg.NewValue, &newVal)
 			if err != nil {
-				err = fmt.Errorf("Error with json unmarshal: %v", err)
+				err = fmt.Errorf("error with json unmarshal: %v", err)
 				feed.Close()
 				return err
 			}
@@ -237,7 +237,7 @@ func (pool Pool) WaitForPool(client *Client, targetState string, timeout time.Du
 //Assign adds a user or group assignment for a standalone pool
 func (pool *Pool) Assign(client *Client, realm, username, group string) error {
 	if pool.ID == "" || client == nil {
-		return errors.New("Invalid pool")
+		return errors.New("invalid pool")
 	}
 	assignment := PoolAssignment{
 		Realm:    realm,
@@ -255,7 +255,7 @@ func (pool *Pool) Assign(client *Client, realm, username, group string) error {
 //DeleteAssignment removes the assignment for a standalone pool
 func (pool *Pool) DeleteAssignment(client *Client) error {
 	if pool.ID == "" || client == nil {
-		return errors.New("Invalid pool")
+		return errors.New("invalid pool")
 	}
 
 	_, err := client.request("DELETE", "pool/"+pool.ID+"/assignment", nil)

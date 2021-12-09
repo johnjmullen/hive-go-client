@@ -47,7 +47,7 @@ func (client *Client) ListUsers(query string) ([]User, error) {
 func (client *Client) GetUser(id string) (*User, error) {
 	var user *User
 	if id == "" {
-		return user, errors.New("Id cannot be empty")
+		return user, errors.New("id cannot be empty")
 	}
 	body, err := client.request("GET", "user/"+id, nil)
 	if err != nil {

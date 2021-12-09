@@ -290,7 +290,7 @@ func (guest *Guest) Delete(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
 	}
-	if guest.External == true {
+	if guest.External {
 		_, err := client.request("DELETE", "guest/"+url.PathEscape(guest.Name), nil)
 		return err
 	}
@@ -354,7 +354,7 @@ func (guest Guest) WaitForGuest(client *Client, timeout time.Duration) error {
 	for {
 		select {
 		case <-timer.C:
-			return fmt.Errorf("Timed out")
+			return fmt.Errorf("timed out")
 		case msg := <-feed.Data:
 			if msg.Error != nil {
 				feed.Close()
@@ -362,7 +362,7 @@ func (guest Guest) WaitForGuest(client *Client, timeout time.Duration) error {
 			}
 			err = json.Unmarshal(msg.NewValue, &newVal)
 			if err != nil {
-				err = fmt.Errorf("Error with json unmarshal: %v", err)
+				err = fmt.Errorf("error with json unmarshal: %v", err)
 				feed.Close()
 				return err
 			}
