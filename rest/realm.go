@@ -13,7 +13,9 @@ type RealmServiceAccount struct {
 
 // Realm describes a realm from the rest api
 type Realm struct {
+	Alias          string               `json:"alias,omitempty"`
 	Enabled        bool                 `json:"enabled"`
+	ForceTLS       bool                 `json:"forceTls"`
 	FQDN           string               `json:"fqdn"`
 	Name           string               `json:"name"`
 	Tags           []string             `json:"tags,omitempty"`
