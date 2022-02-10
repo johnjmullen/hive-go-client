@@ -48,7 +48,7 @@ type Guest struct {
 	PublishedIP         string                  `json:"publishedIp,omitempty"`
 	RdpUserInjected     bool                    `json:"rdpUserInjected,omitempty"`
 	Realm               string                  `json:"realm,omitempty"`
-	SessionInfo         *GuestSessionInfo       `json:"SessionInfo,omitempty"`
+	SessionInfo         *GuestSessionInfo       `json:"sessionInfo,omitempty"`
 	Stamp               interface{}             `json:"stamp,omitempty"`
 	Standalone          bool                    `json:"standalone"`
 	StateChronology     *StateChronology        `json:"stateChronology,omitempty"`
