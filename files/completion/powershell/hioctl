@@ -1,853 +1,225 @@
-using namespace System.Management.Automation
-using namespace System.Management.Automation.Language
-Register-ArgumentCompleter -Native -CommandName 'hioctl' -ScriptBlock {
-    param($wordToComplete, $commandAst, $cursorPosition)
-    $commandElements = $commandAst.CommandElements
-    $command = @(
-        'hioctl'
-        for ($i = 1; $i -lt $commandElements.Count; $i++) {
-            $element = $commandElements[$i]
-            if ($element -isnot [StringConstantExpressionAst] -or
-                $element.StringConstantType -ne [StringConstantType]::BareWord -or
-                $element.Value.StartsWith('-')) {
-                break
+# powershell completion for hioctl                               -*- shell-script -*-
+
+function __hioctl_debug {
+    if ($env:BASH_COMP_DEBUG_FILE) {
+        "$args" | Out-File -Append -FilePath "$env:BASH_COMP_DEBUG_FILE"
+    }
+}
+
+filter __hioctl_escapeStringWithSpecialChars {
+    $_ -replace '\s|#|@|\$|;|,|''|\{|\}|\(|\)|"|`|\||<|>|&','`$&'
+}
+
+Register-ArgumentCompleter -CommandName 'hioctl' -ScriptBlock {
+    param(
+            $WordToComplete,
+            $CommandAst,
+            $CursorPosition
+        )
+
+    # Get the current command line and convert into a string
+    $Command = $CommandAst.CommandElements
+    $Command = "$Command"
+
+    __hioctl_debug ""
+    __hioctl_debug "========= starting completion logic =========="
+    __hioctl_debug "WordToComplete: $WordToComplete Command: $Command CursorPosition: $CursorPosition"
+
+    # The user could have moved the cursor backwards on the command-line.
+    # We need to trigger completion from the $CursorPosition location, so we need
+    # to truncate the command-line ($Command) up to the $CursorPosition location.
+    # Make sure the $Command is longer then the $CursorPosition before we truncate.
+    # This happens because the $Command does not include the last space.
+    if ($Command.Length -gt $CursorPosition) {
+        $Command=$Command.Substring(0,$CursorPosition)
+    }
+    __hioctl_debug "Truncated command: $Command"
+
+    $ShellCompDirectiveError=1
+    $ShellCompDirectiveNoSpace=2
+    $ShellCompDirectiveNoFileComp=4
+    $ShellCompDirectiveFilterFileExt=8
+    $ShellCompDirectiveFilterDirs=16
+
+    # Prepare the command to request completions for the program.
+    # Split the command at the first space to separate the program and arguments.
+    $Program,$Arguments = $Command.Split(" ",2)
+    $RequestComp="$Program __completeNoDesc $Arguments"
+    __hioctl_debug "RequestComp: $RequestComp"
+
+    # we cannot use $WordToComplete because it
+    # has the wrong values if the cursor was moved
+    # so use the last argument
+    if ($WordToComplete -ne "" ) {
+        $WordToComplete = $Arguments.Split(" ")[-1]
+    }
+    __hioctl_debug "New WordToComplete: $WordToComplete"
+
+
+    # Check for flag with equal sign
+    $IsEqualFlag = ($WordToComplete -Like "--*=*" )
+    if ( $IsEqualFlag ) {
+        __hioctl_debug "Completing equal sign flag"
+        # Remove the flag part
+        $Flag,$WordToComplete = $WordToComplete.Split("=",2)
+    }
+
+    if ( $WordToComplete -eq "" -And ( -Not $IsEqualFlag )) {
+        # If the last parameter is complete (there is a space following it)
+        # We add an extra empty parameter so we can indicate this to the go method.
+        __hioctl_debug "Adding extra empty parameter"
+        # We need to use `"`" to pass an empty argument a "" or '' does not work!!!
+        $RequestComp="$RequestComp" + ' `"`"'
+    }
+
+    __hioctl_debug "Calling $RequestComp"
+    #call the command store the output in $out and redirect stderr and stdout to null
+    # $Out is an array contains each line per element
+    Invoke-Expression -OutVariable out "$RequestComp" 2>&1 | Out-Null
+
+
+    # get directive from last line
+    [int]$Directive = $Out[-1].TrimStart(':')
+    if ($Directive -eq "") {
+        # There is no directive specified
+        $Directive = 0
+    }
+    __hioctl_debug "The completion directive is: $Directive"
+
+    # remove directive (last element) from out
+    $Out = $Out | Where-Object { $_ -ne $Out[-1] }
+    __hioctl_debug "The completions are: $Out"
+
+    if (($Directive -band $ShellCompDirectiveError) -ne 0 ) {
+        # Error code.  No completion.
+        __hioctl_debug "Received error from custom completion go code"
+        return
+    }
+
+    $Longest = 0
+    $Values = $Out | ForEach-Object {
+        #Split the output in name and description
+        $Name, $Description = $_.Split("`t",2)
+        __hioctl_debug "Name: $Name Description: $Description"
+
+        # Look for the longest completion so that we can format things nicely
+        if ($Longest -lt $Name.Length) {
+            $Longest = $Name.Length
+        }
+
+        # Set the description to a one space string if there is none set.
+        # This is needed because the CompletionResult does not accept an empty string as argument
+        if (-Not $Description) {
+            $Description = " "
+        }
+        @{Name="$Name";Description="$Description"}
+    }
+
+
+    $Space = " "
+    if (($Directive -band $ShellCompDirectiveNoSpace) -ne 0 ) {
+        # remove the space here
+        __hioctl_debug "ShellCompDirectiveNoSpace is called"
+        $Space = ""
+    }
+
+    if ((($Directive -band $ShellCompDirectiveFilterFileExt) -ne 0 ) -or
+       (($Directive -band $ShellCompDirectiveFilterDirs) -ne 0 ))  {
+        __hioctl_debug "ShellCompDirectiveFilterFileExt ShellCompDirectiveFilterDirs are not supported"
+
+        # return here to prevent the completion of the extensions
+        return
+    }
+
+    $Values = $Values | Where-Object {
+        # filter the result
+        $_.Name -like "$WordToComplete*"
+
+        # Join the flag back if we have an equal sign flag
+        if ( $IsEqualFlag ) {
+            __hioctl_debug "Join the equal sign flag back to the completion value"
+            $_.Name = $Flag + "=" + $_.Name
+        }
+    }
+
+    if (($Directive -band $ShellCompDirectiveNoFileComp) -ne 0 ) {
+        __hioctl_debug "ShellCompDirectiveNoFileComp is called"
+
+        if ($Values.Length -eq 0) {
+            # Just print an empty string here so the
+            # shell does not start to complete paths.
+            # We cannot use CompletionResult here because
+            # it does not accept an empty string as argument.
+            ""
+            return
+        }
+    }
+
+    # Get the current mode
+    $Mode = (Get-PSReadLineKeyHandler | Where-Object {$_.Key -eq "Tab" }).Function
+    __hioctl_debug "Mode: $Mode"
+
+    $Values | ForEach-Object {
+
+        # store temporary because switch will overwrite $_
+        $comp = $_
+
+        # PowerShell supports three different completion modes
+        # - TabCompleteNext (default windows style - on each key press the next option is displayed)
+        # - Complete (works like bash)
+        # - MenuComplete (works like zsh)
+        # You set the mode with Set-PSReadLineKeyHandler -Key Tab -Function <mode>
+
+        # CompletionResult Arguments:
+        # 1) CompletionText text to be used as the auto completion result
+        # 2) ListItemText   text to be displayed in the suggestion list
+        # 3) ResultType     type of completion result
+        # 4) ToolTip        text for the tooltip with details about the object
+
+        switch ($Mode) {
+
+            # bash like
+            "Complete" {
+
+                if ($Values.Length -eq 1) {
+                    __hioctl_debug "Only one completion left"
+
+                    # insert space after value
+                    [System.Management.Automation.CompletionResult]::new($($comp.Name | __hioctl_escapeStringWithSpecialChars) + $Space, "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
+
+                } else {
+                    # Add the proper number of spaces to align the descriptions
+                    while($comp.Name.Length -lt $Longest) {
+                        $comp.Name = $comp.Name + " "
+                    }
+
+                    # Check for empty description and only add parentheses if needed
+                    if ($($comp.Description) -eq " " ) {
+                        $Description = ""
+                    } else {
+                        $Description = "  ($($comp.Description))"
+                    }
+
+                    [System.Management.Automation.CompletionResult]::new("$($comp.Name)$Description", "$($comp.Name)$Description", 'ParameterValue', "$($comp.Description)")
+                }
+             }
+
+            # zsh like
+            "MenuComplete" {
+                # insert space after value
+                # MenuComplete will automatically show the ToolTip of
+                # the highlighted value at the bottom of the suggestions.
+                [System.Management.Automation.CompletionResult]::new($($comp.Name | __hioctl_escapeStringWithSpecialChars) + $Space, "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
             }
-            $element.Value
-        }
-    ) -join ';'
-    $completions = @(switch ($command) {
-        'hioctl' {
-            [CompletionResult]::new('--config', 'config', [CompletionResultType]::ParameterName, 'config file')
-            [CompletionResult]::new('--format', 'format', [CompletionResultType]::ParameterName, 'format (json/yaml)')
-            [CompletionResult]::new('--host', 'host', [CompletionResultType]::ParameterName, 'Hostname or ip address')
-            [CompletionResult]::new('-k', 'k', [CompletionResultType]::ParameterName, 'ignore certificate errors')
-            [CompletionResult]::new('--insecure', 'insecure', [CompletionResultType]::ParameterName, 'ignore certificate errors')
-            [CompletionResult]::new('-p', 'p', [CompletionResultType]::ParameterName, 'Admin user password')
-            [CompletionResult]::new('--password', 'password', [CompletionResultType]::ParameterName, 'Admin user password')
-            [CompletionResult]::new('--port', 'port', [CompletionResultType]::ParameterName, 'port')
-            [CompletionResult]::new('-r', 'r', [CompletionResultType]::ParameterName, 'Admin user realm')
-            [CompletionResult]::new('--realm', 'realm', [CompletionResultType]::ParameterName, 'Admin user realm')
-            [CompletionResult]::new('-u', 'u', [CompletionResultType]::ParameterName, 'Admin username')
-            [CompletionResult]::new('--user', 'user', [CompletionResultType]::ParameterName, 'Admin username')
-            [CompletionResult]::new('alert', 'alert', [CompletionResultType]::ParameterValue, 'alert operations')
-            [CompletionResult]::new('cluster', 'cluster', [CompletionResultType]::ParameterValue, 'cluster operations')
-            [CompletionResult]::new('export', 'export', [CompletionResultType]::ParameterValue, 'export data')
-            [CompletionResult]::new('guest', 'guest', [CompletionResultType]::ParameterValue, 'guest operations')
-            [CompletionResult]::new('help', 'help', [CompletionResultType]::ParameterValue, 'Help about any command')
-            [CompletionResult]::new('host', 'host', [CompletionResultType]::ParameterValue, 'host operations')
-            [CompletionResult]::new('pool', 'pool', [CompletionResultType]::ParameterValue, 'pool operations')
-            [CompletionResult]::new('profile', 'profile', [CompletionResultType]::ParameterValue, 'profile operations')
-            [CompletionResult]::new('realm', 'realm', [CompletionResultType]::ParameterValue, 'realm operations')
-            [CompletionResult]::new('storage', 'storage', [CompletionResultType]::ParameterValue, 'storage operations')
-            [CompletionResult]::new('task', 'task', [CompletionResultType]::ParameterValue, 'task operations')
-            [CompletionResult]::new('template', 'template', [CompletionResultType]::ParameterValue, 'template operations')
-            [CompletionResult]::new('user', 'user', [CompletionResultType]::ParameterValue, 'user operations')
-            [CompletionResult]::new('util', 'util', [CompletionResultType]::ParameterValue, 'hioctl utilities')
-            [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'hioctl version information')
-            break
-        }
-        'hioctl;alert' {
-            [CompletionResult]::new('acknowledge', 'acknowledge', [CompletionResultType]::ParameterValue, 'Mark an alert as acknowledged')
-            [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get alert details')
-            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list alerts')
-            break
-        }
-        'hioctl;alert;acknowledge' {
-            break
-        }
-        'hioctl;alert;get' {
-            break
-        }
-        'hioctl;alert;list' {
-            [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
-            [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
-            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
-            [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
-            break
-        }
-        'hioctl;cluster' {
-            [CompletionResult]::new('add-host', 'add-host', [CompletionResultType]::ParameterValue, 'add a host to the cluster')
-            [CompletionResult]::new('disable-backup', 'disable-backup', [CompletionResultType]::ParameterValue, 'Disable Backup')
-            [CompletionResult]::new('disable-shared-storage', 'disable-shared-storage', [CompletionResultType]::ParameterValue, 'Disable Shared Storage')
-            [CompletionResult]::new('enable-backup', 'enable-backup', [CompletionResultType]::ParameterValue, 'Enable Backup')
-            [CompletionResult]::new('enable-shared-storage', 'enable-shared-storage', [CompletionResultType]::ParameterValue, 'Enable Shared Storage')
-            [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get cluster details')
-            [CompletionResult]::new('get-broker', 'get-broker', [CompletionResultType]::ParameterValue, 'get broker settings')
-            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list clusters')
-            [CompletionResult]::new('reset-broker', 'reset-broker', [CompletionResultType]::ParameterValue, 'reset broker settings to the defaults')
-            [CompletionResult]::new('set-broker', 'set-broker', [CompletionResultType]::ParameterValue, 'set broker settings')
-            [CompletionResult]::new('set-license', 'set-license', [CompletionResultType]::ParameterValue, 'add a license for the cluster')
-            [CompletionResult]::new('update-software', 'update-software', [CompletionResultType]::ParameterValue, 'Deploy a software package across the cluster')
-            break
-        }
-        'hioctl;cluster;add-host' {
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--remote-password', 'remote-password', [CompletionResultType]::ParameterName, 'password for the remote host')
-            [CompletionResult]::new('--remote-username', 'remote-username', [CompletionResultType]::ParameterName, 'username for the remote host')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;cluster;disable-backup' {
-            break
-        }
-        'hioctl;cluster;disable-shared-storage' {
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;cluster;enable-backup' {
-            [CompletionResult]::new('--end-window', 'end-window', [CompletionResultType]::ParameterName, 'Time to stop running backups')
-            [CompletionResult]::new('--start-window', 'start-window', [CompletionResultType]::ParameterName, 'Time to start running backups')
-            break
-        }
-        'hioctl;cluster;enable-shared-storage' {
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--set-size', 'set-size', [CompletionResultType]::ParameterName, 'minimum number of hosts to increase the shared storage by')
-            [CompletionResult]::new('-s', 's', [CompletionResultType]::ParameterName, 'Percentage of disk to allocate to shared storage')
-            [CompletionResult]::new('--storage-utilization', 'storage-utilization', [CompletionResultType]::ParameterName, 'Percentage of disk to allocate to shared storage')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;cluster;get' {
-            break
-        }
-        'hioctl;cluster;get-broker' {
-            break
-        }
-        'hioctl;cluster;list' {
-            [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
-            [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
-            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
-            [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
-            break
-        }
-        'hioctl;cluster;reset-broker' {
-            break
-        }
-        'hioctl;cluster;set-broker' {
-            break
-        }
-        'hioctl;cluster;set-license' {
-            break
-        }
-        'hioctl;cluster;update-software' {
-            [CompletionResult]::new('--package', 'package', [CompletionResultType]::ParameterName, 'package to deploy')
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;export' {
-            break
-        }
-        'hioctl;guest' {
-            [CompletionResult]::new('add-external', 'add-external', [CompletionResultType]::ParameterValue, 'add extrnal guests from a file')
-            [CompletionResult]::new('assign', 'assign', [CompletionResultType]::ParameterValue, 'assign guest to a user')
-            [CompletionResult]::new('backup', 'backup', [CompletionResultType]::ParameterValue, 'start guest backup')
-            [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete guest')
-            [CompletionResult]::new('diff', 'diff', [CompletionResultType]::ParameterValue, 'compare 2 guests')
-            [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get guest details')
-            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list guests')
-            [CompletionResult]::new('migrate', 'migrate', [CompletionResultType]::ParameterValue, 'migrate a guest')
-            [CompletionResult]::new('poweroff', 'poweroff', [CompletionResultType]::ParameterValue, 'force power off guest')
-            [CompletionResult]::new('poweron', 'poweron', [CompletionResultType]::ParameterValue, 'power on guest')
-            [CompletionResult]::new('reboot', 'reboot', [CompletionResultType]::ParameterValue, 'reboot guest')
-            [CompletionResult]::new('refresh', 'refresh', [CompletionResultType]::ParameterValue, 'rebuild a guest with the latest pool settings')
-            [CompletionResult]::new('release', 'release', [CompletionResultType]::ParameterValue, 'release guest assignment')
-            [CompletionResult]::new('reset', 'reset', [CompletionResultType]::ParameterValue, 'force reset guest')
-            [CompletionResult]::new('resetRecord', 'resetRecord', [CompletionResultType]::ParameterValue, 'Resets a guest record')
-            [CompletionResult]::new('restore', 'restore', [CompletionResultType]::ParameterValue, 'restore guest from a backup')
-            [CompletionResult]::new('shutdown', 'shutdown', [CompletionResultType]::ParameterValue, 'shutdown guest')
-            [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'update a guest')
-            break
-        }
-        'hioctl;guest;add-external' {
-            break
-        }
-        'hioctl;guest;assign' {
-            [CompletionResult]::new('--guest-realm', 'guest-realm', [CompletionResultType]::ParameterName, 'user''s realm')
-            [CompletionResult]::new('--guest-user', 'guest-user', [CompletionResultType]::ParameterName, 'user to assign to this guest')
-            break
-        }
-        'hioctl;guest;backup' {
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;guest;delete' {
-            break
-        }
-        'hioctl;guest;diff' {
-            break
-        }
-        'hioctl;guest;get' {
-            break
-        }
-        'hioctl;guest;list' {
-            [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
-            [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
-            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
-            [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
-            break
-        }
-        'hioctl;guest;migrate' {
-            [CompletionResult]::new('--hostid', 'hostid', [CompletionResultType]::ParameterName, 'The host the guest will be migrated to')
-            break
-        }
-        'hioctl;guest;poweroff' {
-            break
-        }
-        'hioctl;guest;poweron' {
-            break
-        }
-        'hioctl;guest;reboot' {
-            break
-        }
-        'hioctl;guest;refresh' {
-            break
-        }
-        'hioctl;guest;release' {
-            break
-        }
-        'hioctl;guest;reset' {
-            break
-        }
-        'hioctl;guest;resetRecord' {
-            break
-        }
-        'hioctl;guest;restore' {
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;guest;shutdown' {
-            break
-        }
-        'hioctl;guest;update' {
-            break
-        }
-        'hioctl;help' {
-            break
-        }
-        'hioctl;host' {
-            [CompletionResult]::new('delete-software', 'delete-software', [CompletionResultType]::ParameterValue, 'delete a software package')
-            [CompletionResult]::new('disable-crs', 'disable-crs', [CompletionResultType]::ParameterValue, 'disable crs on a host')
-            [CompletionResult]::new('enable-crs', 'enable-crs', [CompletionResultType]::ParameterValue, 'enable crs on a host')
-            [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get host details')
-            [CompletionResult]::new('get-id', 'get-id', [CompletionResultType]::ParameterValue, 'get hostid from hostname')
-            [CompletionResult]::new('info', 'info', [CompletionResultType]::ParameterValue, 'hostid and version')
-            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list hosts')
-            [CompletionResult]::new('list-software', 'list-software', [CompletionResultType]::ParameterValue, 'list available software packages on a host')
-            [CompletionResult]::new('log-level', 'log-level', [CompletionResultType]::ParameterValue, 'get or set host log level')
-            [CompletionResult]::new('reboot', 'reboot', [CompletionResultType]::ParameterValue, 'reboot a host')
-            [CompletionResult]::new('restart-services', 'restart-services', [CompletionResultType]::ParameterValue, 'restart hive servies')
-            [CompletionResult]::new('shutdown', 'shutdown', [CompletionResultType]::ParameterValue, 'shutdown a host')
-            [CompletionResult]::new('state', 'state', [CompletionResultType]::ParameterValue, 'get or set host state')
-            [CompletionResult]::new('unjoin', 'unjoin', [CompletionResultType]::ParameterValue, 'remove host from cluster')
-            [CompletionResult]::new('upload-software', 'upload-software', [CompletionResultType]::ParameterValue, 'upload a software pkg file to a host')
-            break
-        }
-        'hioctl;host;delete-software' {
-            [CompletionResult]::new('--package', 'package', [CompletionResultType]::ParameterName, 'package to delete')
-            break
-        }
-        'hioctl;host;disable-crs' {
-            break
-        }
-        'hioctl;host;enable-crs' {
-            break
-        }
-        'hioctl;host;get' {
-            break
-        }
-        'hioctl;host;get-id' {
-            break
-        }
-        'hioctl;host;info' {
-            break
-        }
-        'hioctl;host;list' {
-            [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
-            [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
-            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
-            [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
-            break
-        }
-        'hioctl;host;list-software' {
-            break
-        }
-        'hioctl;host;log-level' {
-            [CompletionResult]::new('-s', 's', [CompletionResultType]::ParameterName, 'set log level (error/warn/info/debug)')
-            [CompletionResult]::new('--set', 'set', [CompletionResultType]::ParameterName, 'set log level (error/warn/info/debug)')
-            break
-        }
-        'hioctl;host;reboot' {
-            break
-        }
-        'hioctl;host;restart-services' {
-            break
-        }
-        'hioctl;host;shutdown' {
-            break
-        }
-        'hioctl;host;state' {
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('-s', 's', [CompletionResultType]::ParameterName, 'set host state (available/maintenance)')
-            [CompletionResult]::new('--set', 'set', [CompletionResultType]::ParameterName, 'set host state (available/maintenance)')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;host;unjoin' {
-            break
-        }
-        'hioctl;host;upload-software' {
-            break
-        }
-        'hioctl;pool' {
-            [CompletionResult]::new('assign', 'assign', [CompletionResultType]::ParameterValue, 'assign user or group to a stndalone pool')
-            [CompletionResult]::new('create', 'create', [CompletionResultType]::ParameterValue, 'Add a new guest pool')
-            [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete a pool')
-            [CompletionResult]::new('delete-assignment', 'delete-assignment', [CompletionResultType]::ParameterValue, 'delete the assignment for a standalone pool')
-            [CompletionResult]::new('diff', 'diff', [CompletionResultType]::ParameterValue, 'compare 2 pools')
-            [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get pool details')
-            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list pools')
-            [CompletionResult]::new('merge', 'merge', [CompletionResultType]::ParameterValue, 'merges snapshots back into the main disk files')
-            [CompletionResult]::new('snapshot', 'snapshot', [CompletionResultType]::ParameterValue, 'snapshot creates disk snapshots for running guests and backs up pool state')
-            [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'update a guest pool')
-            break
-        }
-        'hioctl;pool;assign' {
-            [CompletionResult]::new('--assign-group', 'assign-group', [CompletionResultType]::ParameterName, 'group to assign')
-            [CompletionResult]::new('--assign-realm', 'assign-realm', [CompletionResultType]::ParameterName, 'realm to assign')
-            [CompletionResult]::new('--assign-user', 'assign-user', [CompletionResultType]::ParameterName, 'user to assign')
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'pool Name')
-            break
-        }
-        'hioctl;pool;create' {
-            break
-        }
-        'hioctl;pool;delete' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'pool Name')
-            break
-        }
-        'hioctl;pool;delete-assignment' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'pool Name')
-            break
-        }
-        'hioctl;pool;diff' {
-            break
-        }
-        'hioctl;pool;get' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'pool id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'pool id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'pool name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'pool name')
-            break
-        }
-        'hioctl;pool;list' {
-            [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
-            [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
-            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
-            [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
-            break
-        }
-        'hioctl;pool;merge' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'pool pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'pool pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'pool pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'pool pool Name')
-            break
-        }
-        'hioctl;pool;snapshot' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'pool pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'pool pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'pool pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'pool pool Name')
-            break
-        }
-        'hioctl;pool;update' {
-            break
-        }
-        'hioctl;profile' {
-            [CompletionResult]::new('create', 'create', [CompletionResultType]::ParameterValue, 'Add a new profile')
-            [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete profile profile')
-            [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get profile details')
-            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list profiles')
-            [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'update a profile')
-            break
-        }
-        'hioctl;profile;create' {
-            [CompletionResult]::new('--ad-domain', 'ad-domain', [CompletionResultType]::ParameterName, 'AD realm')
-            [CompletionResult]::new('--ad-password', 'ad-password', [CompletionResultType]::ParameterName, 'Password for the join user')
-            [CompletionResult]::new('--ad-user-group', 'ad-user-group', [CompletionResultType]::ParameterName, 'User group')
-            [CompletionResult]::new('--ad-username', 'ad-username', [CompletionResultType]::ParameterName, 'user to join guests to AD')
-            [CompletionResult]::new('--broker-allow-desktop-composition', 'broker-allow-desktop-composition', [CompletionResultType]::ParameterName, 'Allow Destop compositing')
-            [CompletionResult]::new('--broker-audio-capture', 'broker-audio-capture', [CompletionResultType]::ParameterName, 'audio capture')
-            [CompletionResult]::new('--broker-hide-certificate-warnings', 'broker-hide-certificate-warnings', [CompletionResultType]::ParameterName, 'Hide certificate warnings')
-            [CompletionResult]::new('--broker-redirect-clipboard', 'broker-redirect-clipboard', [CompletionResultType]::ParameterName, 'Clipboard redirection')
-            [CompletionResult]::new('--broker-redirect-cssp', 'broker-redirect-cssp', [CompletionResultType]::ParameterName, 'CredSSP redirection')
-            [CompletionResult]::new('--broker-redirect-pnp', 'broker-redirect-pnp', [CompletionResultType]::ParameterName, 'Plug-and-Play redirection')
-            [CompletionResult]::new('--broker-redirect-printer', 'broker-redirect-printer', [CompletionResultType]::ParameterName, 'Printer redirection')
-            [CompletionResult]::new('--broker-redirect-smartcard', 'broker-redirect-smartcard', [CompletionResultType]::ParameterName, 'Smartcard redirection')
-            [CompletionResult]::new('--broker-redirect-usb', 'broker-redirect-usb', [CompletionResultType]::ParameterName, 'USB redirection')
-            [CompletionResult]::new('--broker-smart-resize', 'broker-smart-resize', [CompletionResultType]::ParameterName, 'Smart screen resize')
-            [CompletionResult]::new('--enable-ad', 'enable-ad', [CompletionResultType]::ParameterName, 'enable active directory options')
-            [CompletionResult]::new('--enable-broker-options', 'enable-broker-options', [CompletionResultType]::ParameterName, 'enable broker options')
-            [CompletionResult]::new('--enable-uv', 'enable-uv', [CompletionResultType]::ParameterName, 'Enable user volumes')
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'profile id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'profile id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'profile name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'profile name')
-            [CompletionResult]::new('--timezone', 'timezone', [CompletionResultType]::ParameterName, 'timezone to inject')
-            [CompletionResult]::new('--uv-backup-schedule', 'uv-backup-schedule', [CompletionResultType]::ParameterName, 'User volume backup schedule (s)')
-            [CompletionResult]::new('--uv-repository', 'uv-repository', [CompletionResultType]::ParameterName, 'Storage pool for storing the user volume')
-            [CompletionResult]::new('--uv-size', 'uv-size', [CompletionResultType]::ParameterName, 'User volume size (GB)')
-            [CompletionResult]::new('--uv-target', 'uv-target', [CompletionResultType]::ParameterName, 'Local cache (disk/ram)')
-            break
-        }
-        'hioctl;profile;delete' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'profile profile Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'profile profile Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'profile profile Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'profile profile Name')
-            break
-        }
-        'hioctl;profile;get' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'profile id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'profile id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'profile name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'profile name')
-            break
-        }
-        'hioctl;profile;list' {
-            [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
-            [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
-            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
-            [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
-            break
-        }
-        'hioctl;profile;update' {
-            [CompletionResult]::new('--ad-domain', 'ad-domain', [CompletionResultType]::ParameterName, 'AD realm')
-            [CompletionResult]::new('--ad-password', 'ad-password', [CompletionResultType]::ParameterName, 'Password for the join user')
-            [CompletionResult]::new('--ad-user-group', 'ad-user-group', [CompletionResultType]::ParameterName, 'User group')
-            [CompletionResult]::new('--ad-username', 'ad-username', [CompletionResultType]::ParameterName, 'user to join guests to AD')
-            [CompletionResult]::new('--broker-allow-desktop-composition', 'broker-allow-desktop-composition', [CompletionResultType]::ParameterName, 'Allow Destop compositing')
-            [CompletionResult]::new('--broker-audio-capture', 'broker-audio-capture', [CompletionResultType]::ParameterName, 'audio capture')
-            [CompletionResult]::new('--broker-hide-certificate-warnings', 'broker-hide-certificate-warnings', [CompletionResultType]::ParameterName, 'Hide certificate warnings')
-            [CompletionResult]::new('--broker-redirect-clipboard', 'broker-redirect-clipboard', [CompletionResultType]::ParameterName, 'Clipboard redirection')
-            [CompletionResult]::new('--broker-redirect-cssp', 'broker-redirect-cssp', [CompletionResultType]::ParameterName, 'CredSSP redirection')
-            [CompletionResult]::new('--broker-redirect-pnp', 'broker-redirect-pnp', [CompletionResultType]::ParameterName, 'Plug-and-Play redirection')
-            [CompletionResult]::new('--broker-redirect-printer', 'broker-redirect-printer', [CompletionResultType]::ParameterName, 'Printer redirection')
-            [CompletionResult]::new('--broker-redirect-smartcard', 'broker-redirect-smartcard', [CompletionResultType]::ParameterName, 'Smartcard redirection')
-            [CompletionResult]::new('--broker-redirect-usb', 'broker-redirect-usb', [CompletionResultType]::ParameterName, 'USB redirection')
-            [CompletionResult]::new('--broker-smart-resize', 'broker-smart-resize', [CompletionResultType]::ParameterName, 'Smart screen resize')
-            [CompletionResult]::new('--enable-ad', 'enable-ad', [CompletionResultType]::ParameterName, 'enable active directory options')
-            [CompletionResult]::new('--enable-broker-options', 'enable-broker-options', [CompletionResultType]::ParameterName, 'enable broker options')
-            [CompletionResult]::new('--enable-uv', 'enable-uv', [CompletionResultType]::ParameterName, 'Enable user volumes')
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'profile id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'profile id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'profile name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'profile name')
-            [CompletionResult]::new('--timezone', 'timezone', [CompletionResultType]::ParameterName, 'timezone to inject')
-            [CompletionResult]::new('--uv-backup-schedule', 'uv-backup-schedule', [CompletionResultType]::ParameterName, 'User volume backup schedule (s)')
-            [CompletionResult]::new('--uv-repository', 'uv-repository', [CompletionResultType]::ParameterName, 'Storage pool for storing the user volume')
-            [CompletionResult]::new('--uv-size', 'uv-size', [CompletionResultType]::ParameterName, 'User volume size (GB)')
-            [CompletionResult]::new('--uv-target', 'uv-target', [CompletionResultType]::ParameterName, 'Local cache (disk/ram)')
-            break
-        }
-        'hioctl;realm' {
-            [CompletionResult]::new('create', 'create', [CompletionResultType]::ParameterValue, 'Add a new realm')
-            [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete realm pool')
-            [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get realm details')
-            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list realms')
-            break
-        }
-        'hioctl;realm;create' {
-            [CompletionResult]::new('--fqdn', 'fqdn', [CompletionResultType]::ParameterName, 'FQDN')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Netbios Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Netbios Name')
-            break
-        }
-        'hioctl;realm;delete' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'realm Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'realm Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'realm Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'realm Pool Name')
-            break
-        }
-        'hioctl;realm;get' {
-            break
-        }
-        'hioctl;realm;list' {
-            [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
-            [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
-            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
-            [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
-            break
-        }
-        'hioctl;storage' {
-            [CompletionResult]::new('browse', 'browse', [CompletionResultType]::ParameterValue, 'list storage pool files')
-            [CompletionResult]::new('convert-disk', 'convert-disk', [CompletionResultType]::ParameterValue, 'convert or copy a disk')
-            [CompletionResult]::new('copy-file', 'copy-file', [CompletionResultType]::ParameterValue, 'copy a storage pool file')
-            [CompletionResult]::new('copy-url', 'copy-url', [CompletionResultType]::ParameterValue, 'copy a url to the storage pool')
-            [CompletionResult]::new('create', 'create', [CompletionResultType]::ParameterValue, 'Add a new storage pool')
-            [CompletionResult]::new('create-disk', 'create-disk', [CompletionResultType]::ParameterValue, 'create a disk in the storage pool')
-            [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete storage pool')
-            [CompletionResult]::new('delete-file', 'delete-file', [CompletionResultType]::ParameterValue, 'delete a file from the storage pool')
-            [CompletionResult]::new('disk-info', 'disk-info', [CompletionResultType]::ParameterValue, 'get information for a disk in a storage pool')
-            [CompletionResult]::new('download', 'download', [CompletionResultType]::ParameterValue, 'download a file from a storage pool')
-            [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get storage pool details')
-            [CompletionResult]::new('get-id', 'get-id', [CompletionResultType]::ParameterValue, 'get storage pool id from name')
-            [CompletionResult]::new('grow-disk', 'grow-disk', [CompletionResultType]::ParameterValue, 'grow a disk in the storage pool')
-            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list storage pools')
-            [CompletionResult]::new('move-file', 'move-file', [CompletionResultType]::ParameterValue, 'move a storage pool file')
-            [CompletionResult]::new('start', 'start', [CompletionResultType]::ParameterValue, 're-enable a storage pool')
-            [CompletionResult]::new('stop', 'stop', [CompletionResultType]::ParameterValue, 'disable a storage pool')
-            [CompletionResult]::new('upload', 'upload', [CompletionResultType]::ParameterValue, 'upload a file to a storage pool')
-            break
-        }
-        'hioctl;storage;browse' {
-            [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'detailed directory listing')
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--path', 'path', [CompletionResultType]::ParameterName, 'path inside the storage pool to browse')
-            [CompletionResult]::new('--recursive', 'recursive', [CompletionResultType]::ParameterName, 'recursively list files')
-            break
-        }
-        'hioctl;storage;convert-disk' {
-            [CompletionResult]::new('--dest-filename', 'dest-filename', [CompletionResultType]::ParameterName, 'Destination filename')
-            [CompletionResult]::new('--dest-format', 'dest-format', [CompletionResultType]::ParameterName, 'Destination file format')
-            [CompletionResult]::new('--dest-storage', 'dest-storage', [CompletionResultType]::ParameterName, 'Destination storage pool name')
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--src-filename', 'src-filename', [CompletionResultType]::ParameterName, 'Source filename')
-            [CompletionResult]::new('--src-storage', 'src-storage', [CompletionResultType]::ParameterName, 'Source storage pool name')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;storage;copy-file' {
-            [CompletionResult]::new('--dest-filename', 'dest-filename', [CompletionResultType]::ParameterName, 'path to the file in the destination storage pool')
-            [CompletionResult]::new('--dest-storage', 'dest-storage', [CompletionResultType]::ParameterName, 'Destination storage pool id')
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--src-filename', 'src-filename', [CompletionResultType]::ParameterName, 'path to the file in the source storage pool')
-            [CompletionResult]::new('--src-storage', 'src-storage', [CompletionResultType]::ParameterName, 'Source storage pool id')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;storage;copy-url' {
-            [CompletionResult]::new('--filename', 'filename', [CompletionResultType]::ParameterName, 'filename for the disk')
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--url', 'url', [CompletionResultType]::ParameterName, 'url to download')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;storage;create' {
-            break
-        }
-        'hioctl;storage;create-disk' {
-            [CompletionResult]::new('--disk-format', 'disk-format', [CompletionResultType]::ParameterName, 'disk format ()')
-            [CompletionResult]::new('--disk-size', 'disk-size', [CompletionResultType]::ParameterName, 'size of the disk in GB')
-            [CompletionResult]::new('--filename', 'filename', [CompletionResultType]::ParameterName, 'filename for the disk')
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;storage;delete' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            break
-        }
-        'hioctl;storage;delete-file' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            break
-        }
-        'hioctl;storage;disk-info' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            break
-        }
-        'hioctl;storage;download' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('-o', 'o', [CompletionResultType]::ParameterName, 'output file')
-            [CompletionResult]::new('--output', 'output', [CompletionResultType]::ParameterName, 'output file')
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            break
-        }
-        'hioctl;storage;get' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            break
-        }
-        'hioctl;storage;get-id' {
-            break
-        }
-        'hioctl;storage;grow-disk' {
-            [CompletionResult]::new('--disk-size', 'disk-size', [CompletionResultType]::ParameterName, 'size to add in GB')
-            [CompletionResult]::new('--filename', 'filename', [CompletionResultType]::ParameterName, 'filename for the disk')
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;storage;list' {
-            [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
-            [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
-            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
-            [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
-            break
-        }
-        'hioctl;storage;move-file' {
-            [CompletionResult]::new('--dest-filename', 'dest-filename', [CompletionResultType]::ParameterName, 'path to the file in the destination storage pool')
-            [CompletionResult]::new('--dest-storage', 'dest-storage', [CompletionResultType]::ParameterName, 'Destination storage pool id')
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--src-filename', 'src-filename', [CompletionResultType]::ParameterName, 'path to the file in the source storage pool')
-            [CompletionResult]::new('--src-storage', 'src-storage', [CompletionResultType]::ParameterName, 'Source storage pool id')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;storage;start' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            break
-        }
-        'hioctl;storage;stop' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            break
-        }
-        'hioctl;storage;upload' {
-            [CompletionResult]::new('--dest-filename', 'dest-filename', [CompletionResultType]::ParameterName, 'path to the file in the destination storage pool')
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'Storage Pool Id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Storage Pool Name')
-            break
-        }
-        'hioctl;task' {
-            [CompletionResult]::new('force-complete', 'force-complete', [CompletionResultType]::ParameterValue, 'force task state to completed')
-            [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get task details')
-            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list tasks')
-            [CompletionResult]::new('wait', 'wait', [CompletionResultType]::ParameterValue, 'wait for a task to complete')
-            break
-        }
-        'hioctl;task;force-complete' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'task id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'task id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'task name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'task name')
-            break
-        }
-        'hioctl;task;get' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'task id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'task id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'task name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'task name')
-            break
-        }
-        'hioctl;task;list' {
-            [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
-            [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
-            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
-            [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
-            break
-        }
-        'hioctl;task;wait' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'task id')
-            [CompletionResult]::new('--id', 'id', [CompletionResultType]::ParameterName, 'task id')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'task name')
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'task name')
-            [CompletionResult]::new('--progress', 'progress', [CompletionResultType]::ParameterName, 'print progress')
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'print progress-bar')
-            break
-        }
-        'hioctl;template' {
-            [CompletionResult]::new('analyze', 'analyze', [CompletionResultType]::ParameterValue, 'analyze template')
-            [CompletionResult]::new('author', 'author', [CompletionResultType]::ParameterValue, 'author template')
-            [CompletionResult]::new('create', 'create', [CompletionResultType]::ParameterValue, 'Add a new template')
-            [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete template')
-            [CompletionResult]::new('diff', 'diff', [CompletionResultType]::ParameterValue, 'compare 2 templates')
-            [CompletionResult]::new('duplicate', 'duplicate', [CompletionResultType]::ParameterValue, 'Make a copy of a template')
-            [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get template details')
-            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list templates')
-            [CompletionResult]::new('load', 'load', [CompletionResultType]::ParameterValue, 'load template to all hosts')
-            [CompletionResult]::new('unload', 'unload', [CompletionResultType]::ParameterValue, 'unload template from all hosts')
-            [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'update a template')
-            break
-        }
-        'hioctl;template;analyze' {
-            break
-        }
-        'hioctl;template;author' {
-            break
-        }
-        'hioctl;template;create' {
-            break
-        }
-        'hioctl;template;delete' {
-            break
-        }
-        'hioctl;template;diff' {
-            break
-        }
-        'hioctl;template;duplicate' {
-            [CompletionResult]::new('--dest-filename', 'dest-filename', [CompletionResultType]::ParameterName, 'Destination filename')
-            [CompletionResult]::new('--dest-name', 'dest-name', [CompletionResultType]::ParameterName, 'Name for the new Template')
-            [CompletionResult]::new('--dest-storage', 'dest-storage', [CompletionResultType]::ParameterName, 'Destination storage pool id')
-            [CompletionResult]::new('--progress-bar', 'progress-bar', [CompletionResultType]::ParameterName, 'show a progress bar with --wait')
-            [CompletionResult]::new('--raw-progress', 'raw-progress', [CompletionResultType]::ParameterName, 'print progress as a number with --wait')
-            [CompletionResult]::new('--wait', 'wait', [CompletionResultType]::ParameterName, 'wait for task to complete')
-            break
-        }
-        'hioctl;template;get' {
-            break
-        }
-        'hioctl;template;list' {
-            [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
-            [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
-            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
-            [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
-            break
-        }
-        'hioctl;template;load' {
-            [CompletionResult]::new('-s', 's', [CompletionResultType]::ParameterName, 'Location to load the template (disk or ram)')
-            [CompletionResult]::new('--storage', 'storage', [CompletionResultType]::ParameterName, 'Location to load the template (disk or ram)')
-            break
-        }
-        'hioctl;template;unload' {
-            break
-        }
-        'hioctl;template;update' {
-            break
-        }
-        'hioctl;user' {
-            [CompletionResult]::new('create', 'create', [CompletionResultType]::ParameterValue, 'Add a new user')
-            [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'delete a user')
-            [CompletionResult]::new('diff', 'diff', [CompletionResultType]::ParameterValue, 'compare 2 users')
-            [CompletionResult]::new('get', 'get', [CompletionResultType]::ParameterValue, 'get user details')
-            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'list users')
-            [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'update a user')
-            break
-        }
-        'hioctl;user;create' {
-            break
-        }
-        'hioctl;user;delete' {
-            break
-        }
-        'hioctl;user;diff' {
-            break
-        }
-        'hioctl;user;get' {
-            break
-        }
-        'hioctl;user;list' {
-            [CompletionResult]::new('--count', 'count', [CompletionResultType]::ParameterName, 'number of results to show')
-            [CompletionResult]::new('--details', 'details', [CompletionResultType]::ParameterName, 'show details')
-            [CompletionResult]::new('--filter', 'filter', [CompletionResultType]::ParameterName, 'filter results based on a field.')
-            [CompletionResult]::new('--offset', 'offset', [CompletionResultType]::ParameterName, 'first result to show')
-            break
-        }
-        'hioctl;user;update' {
-            break
-        }
-        'hioctl;util' {
-            [CompletionResult]::new('--config', 'config', [CompletionResultType]::ParameterName, 'config file')
-            [CompletionResult]::new('--format', 'format', [CompletionResultType]::ParameterName, 'format (json/yaml)')
-            [CompletionResult]::new('--host', 'host', [CompletionResultType]::ParameterName, 'Hostname or ip address')
-            [CompletionResult]::new('-k', 'k', [CompletionResultType]::ParameterName, 'ignore certificate errors')
-            [CompletionResult]::new('--insecure', 'insecure', [CompletionResultType]::ParameterName, 'ignore certificate errors')
-            [CompletionResult]::new('-p', 'p', [CompletionResultType]::ParameterName, 'Admin user password')
-            [CompletionResult]::new('--password', 'password', [CompletionResultType]::ParameterName, 'Admin user password')
-            [CompletionResult]::new('--port', 'port', [CompletionResultType]::ParameterName, 'port')
-            [CompletionResult]::new('-r', 'r', [CompletionResultType]::ParameterName, 'Admin user realm')
-            [CompletionResult]::new('--realm', 'realm', [CompletionResultType]::ParameterName, 'Admin user realm')
-            [CompletionResult]::new('-u', 'u', [CompletionResultType]::ParameterName, 'Admin username')
-            [CompletionResult]::new('--user', 'user', [CompletionResultType]::ParameterName, 'Admin username')
-            [CompletionResult]::new('bash-completion', 'bash-completion', [CompletionResultType]::ParameterValue, 'Generates bash completion scripts')
-            [CompletionResult]::new('doc', 'doc', [CompletionResultType]::ParameterValue, 'Generates documentation')
-            [CompletionResult]::new('powershell-completion', 'powershell-completion', [CompletionResultType]::ParameterValue, 'Generates zsh completion scripts')
-            [CompletionResult]::new('zsh-completion', 'zsh-completion', [CompletionResultType]::ParameterValue, 'Generates zsh completion scripts')
-            break
-        }
-        'hioctl;util;bash-completion' {
-            break
-        }
-        'hioctl;util;doc' {
-            break
-        }
-        'hioctl;util;powershell-completion' {
-            [CompletionResult]::new('--config', 'config', [CompletionResultType]::ParameterName, 'config file')
-            [CompletionResult]::new('--format', 'format', [CompletionResultType]::ParameterName, 'format (json/yaml)')
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'help for powershell-completion')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'help for powershell-completion')
-            [CompletionResult]::new('--host', 'host', [CompletionResultType]::ParameterName, 'Hostname or ip address')
-            [CompletionResult]::new('-k', 'k', [CompletionResultType]::ParameterName, 'ignore certificate errors')
-            [CompletionResult]::new('--insecure', 'insecure', [CompletionResultType]::ParameterName, 'ignore certificate errors')
-            [CompletionResult]::new('-p', 'p', [CompletionResultType]::ParameterName, 'Admin user password')
-            [CompletionResult]::new('--password', 'password', [CompletionResultType]::ParameterName, 'Admin user password')
-            [CompletionResult]::new('--port', 'port', [CompletionResultType]::ParameterName, 'port')
-            [CompletionResult]::new('-r', 'r', [CompletionResultType]::ParameterName, 'Admin user realm')
-            [CompletionResult]::new('--realm', 'realm', [CompletionResultType]::ParameterName, 'Admin user realm')
-            [CompletionResult]::new('-u', 'u', [CompletionResultType]::ParameterName, 'Admin username')
-            [CompletionResult]::new('--user', 'user', [CompletionResultType]::ParameterName, 'Admin username')
-            break
-        }
-        'hioctl;util;zsh-completion' {
-            break
-        }
-        'hioctl;version' {
-            break
-        }
-    })
-    $completions.Where{ $_.CompletionText -like "$wordToComplete*" } |
-        Sort-Object -Property ListItemText
+
+            # TabCompleteNext and in case we get something unknown
+            Default {
+                # Like MenuComplete but we don't want to add a space here because
+                # the user need to press space anyway to get the completion.
+                # Description will not be shown because that's not possible with TabCompleteNext
+                [System.Management.Automation.CompletionResult]::new($($comp.Name | __hioctl_escapeStringWithSpecialChars), "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
+            }
+        }
+
+    }
 }
