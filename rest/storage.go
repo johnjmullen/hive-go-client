@@ -29,6 +29,8 @@ type StoragePool struct {
 	S3AccessKeyID     string   `json:"s3AccessKeyId,omitempty"`
 	S3SecretAccessKey string   `json:"s3SecretAccessKey,omitempty"`
 	S3Region          string   `json:"s3Region,omitempty"`
+	S3Provider        string   `json:"s3Provider,omitempty"`
+	S3Endpoint        string   `json:"s3Endpoint,omitempty"`
 	Disabled          bool     `json:"disabled"`
 	Replicated        bool     `json:"replicated,omitempty"`
 }
