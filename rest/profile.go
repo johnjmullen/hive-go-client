@@ -52,7 +52,7 @@ type ProfileBackup struct {
 	Frequency       string      `json:"frequency"`
 	TargetStorageID string      `json:"targetStorageId"`
 	UserVolumeList  []string    `json:"userVolumeList,omitempty"`
-	LastBackup      interface{} `json:"date,omitempty"`
+	LastBackup      interface{} `json:"lastBackup,omitempty"`
 }
 
 // Profile is a profile record from the rest api
