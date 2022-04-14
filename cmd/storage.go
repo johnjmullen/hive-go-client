@@ -75,9 +75,10 @@ var storageBrowseCmd = &cobra.Command{
 }
 
 var storageDownloadCmd = &cobra.Command{
-	Use:   "download [file]",
-	Short: "download a file from a storage pool",
-	Args:  cobra.ExactArgs(1),
+	Use:    "download [file]",
+	Short:  "download a file from a storage pool",
+	Args:   cobra.ExactArgs(1),
+	Hidden: true,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("id", cmd.Flags().Lookup("id"))
 		viper.BindPFlag("name", cmd.Flags().Lookup("name"))

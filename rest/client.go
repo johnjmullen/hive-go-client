@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/hashicorp/go-version"
 )
 
 type authToken struct {
@@ -305,4 +306,24 @@ func (client *Client) ClusterID() (string, error) {
 	var objMap map[string]string
 	err = json.Unmarshal(body, &objMap)
 	return objMap["id"], err
+}
+
+// CheckHostVersion returns an error if minimumVersion is greater than the host software version
+func (client *Client) CheckHostVersion(minimumVersion string) error {
+	hostVersion, err := client.HostVersion()
+	if err != nil {
+		return err
+	}
+	minVersion, err := version.NewVersion(minimumVersion)
+	if err != nil {
+		return err
+	}
+	v, err := version.NewVersion(hostVersion.Version)
+	if err != nil {
+		return fmt.Errorf("failed to parse host software version: %s", hostVersion.Version)
+	}
+	if v.LessThan(minVersion) {
+		return fmt.Errorf("unsupported host version %s. Requires %s or greater", hostVersion.Version, minimumVersion)
+	}
+	return nil
 }

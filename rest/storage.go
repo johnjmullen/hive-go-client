@@ -269,6 +269,9 @@ func (pool *StoragePool) Download(client *Client, filePath string) (*http.Respon
 	if pool.ID == "" {
 		return nil, errors.New("invalid Storage Pool")
 	}
+	if err := client.CheckHostVersion("8.5.0"); err != nil {
+		return nil, err
+	}
 	headers := map[string]string{"Content-type": "application/json"}
 	resp, err := client.requestWithHeaders("GET", fmt.Sprintf("storage/pool/%s/download?filePath=%s", pool.ID, url.QueryEscape(filePath)), bytes.NewBuffer(nil), headers, 0)
 	return resp, err

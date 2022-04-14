@@ -6,9 +6,6 @@ import (
 	"fmt"
 	"net/url"
 	"path"
-	"strings"
-
-	version "github.com/hashicorp/go-version"
 )
 
 // Host describes a host record from the rest api
@@ -336,9 +333,7 @@ func (host *Host) DeleteSoftware(client *Client, pkg string) error {
 
 //UploadSoftware uploads a firmware pkg file to the host
 func (host *Host) UploadSoftware(client *Client, filename string) error {
-	minVersion, _ := version.NewVersion("8.2.6-1110")
-	v, err := version.NewVersion(strings.TrimPrefix(host.Appliance.Firmware.Software, "hiveio-fabric-v"))
-	if err != nil || v.LessThan(minVersion) {
+	if client.CheckHostVersion("8.2.6") != nil {
 		_, err := client.postMultipart(fmt.Sprintf("host/%s/firmware/software/upload", host.Hostid), "data", filename, nil)
 		return err
 	}
