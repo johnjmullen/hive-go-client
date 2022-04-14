@@ -10,18 +10,12 @@ import (
 
 // Guest describes a guest record from the rest api
 type Guest struct {
-	Address        string              `json:"address,omitempty"`
-	ADGroup        string              `json:"ADGroup,omitempty"`
-	AgentInstalled bool                `json:"agentInstalled"`
-	AgentMetadata  *GuestAgentMetadata `json:"agentMetadata"`
-	AgentVersion   string              `json:"agentVersion,omitempty"`
-	Backup         *struct {
-		State           string      `json:"state,omitempty"`
-		Frequency       string      `json:"frequency"`
-		TargetStorageID string      `json:"targetStorageId"`
-		LastBackup      interface{} `json:"lastBackup,omitempty"`
-		StateMessage    string      `json:"stateMessage,omitempty"`
-	} `json:"backup,omitempty"`
+	Address             string                  `json:"address,omitempty"`
+	ADGroup             string                  `json:"ADGroup,omitempty"`
+	AgentInstalled      bool                    `json:"agentInstalled"`
+	AgentMetadata       *GuestAgentMetadata     `json:"agentMetadata"`
+	AgentVersion        string                  `json:"agentVersion,omitempty"`
+	Backup              *GuestBackup            `json:"backup,omitempty"`
 	Cpus                int                     `json:"cpus,omitempty"`
 	Currentmem          int                     `json:"currentmem,omitempty"`
 	Disks               []GuestDisk             `json:"disks,omitempty"`
@@ -126,6 +120,7 @@ type GuestSnapshot struct {
 
 // GuestBackup is struct for backup data of VM
 type GuestBackup struct {
+	Enabled         bool        `json:"enabled"`
 	State           string      `json:"state"`
 	Frequency       string      `json:"frequency"`
 	TargetStorageID string      `json:"targetStorageId"`
