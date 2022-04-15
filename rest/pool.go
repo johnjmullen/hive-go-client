@@ -203,7 +203,7 @@ func (pool Pool) WaitForPool(client *Client, targetState string, timeout time.Du
 		return nil
 	}
 	newVal := Pool{}
-	feed, err := client.GetChangeFeed("pool", map[string]string{"id": pool.ID})
+	feed, err := client.GetChangeFeed("pool", map[string]string{"id": pool.ID}, false)
 	if err != nil {
 		return err
 	}

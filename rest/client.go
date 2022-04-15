@@ -233,10 +233,10 @@ func (feed *ChangeFeed) Close() error {
 }
 
 // GetChangeFeed returns a ChangeFeed for monitoring the specified table
-// filter can be use to limit the changes monitored.
+// filter can be used to limit the changes monitored.
 // example to monitor a single task:
 // client.GetChangeFeed("task", map[string]string{"id": task.ID})
-func (client *Client) GetChangeFeed(table string, filter map[string]string) (*ChangeFeed, error) {
+func (client *Client) GetChangeFeed(table string, filter map[string]string, includeInitial bool) (*ChangeFeed, error) {
 	protocol := "wss"
 	var token string
 	if client.Port == 3000 {
@@ -254,7 +254,7 @@ func (client *Client) GetChangeFeed(table string, filter map[string]string) (*Ch
 	if err != nil {
 		return nil, err
 	}
-	options := map[string]interface{}{"table": table, "includeInitial": false, "filter": filter}
+	options := map[string]interface{}{"table": table, "includeInitial": includeInitial, "filter": filter}
 	jsonData := []interface{}{"query:change:register", options}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {

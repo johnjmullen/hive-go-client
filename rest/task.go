@@ -94,22 +94,14 @@ func (task Task) WatchTask(client *Client, taskData chan Task, errorChannel chan
 		return
 	}
 	newVal := Task{}
-	feed, err := client.GetChangeFeed("task", map[string]string{"id": task.ID})
+	feed, err := client.GetChangeFeed("task", map[string]string{"id": task.ID}, true)
 	if err != nil {
 		errorChannel <- err
 		return
 	}
 	defer feed.Close()
-	timer := time.NewTimer(time.Second)
 	for {
 		select {
-		case <-timer.C:
-			//work around race condition
-			t, _ := client.GetTask(task.ID)
-			if t.State == "completed" || t.State == "failed" {
-				taskData <- *t
-				return
-			}
 		case msg := <-feed.Data:
 			if msg.Error != nil {
 				errorChannel <- msg.Error

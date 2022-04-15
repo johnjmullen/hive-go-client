@@ -338,7 +338,7 @@ func (guest Guest) WaitForGuest(client *Client, timeout time.Duration) error {
 		return nil
 	}
 	newVal := Guest{}
-	feed, err := client.GetChangeFeed("guest", map[string]string{"name": guest.Name})
+	feed, err := client.GetChangeFeed("guest", map[string]string{"name": guest.Name}, false)
 	if err != nil {
 		return err
 	}
