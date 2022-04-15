@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -202,13 +203,23 @@ func (feed *ChangeFeed) monitorChangeFeed() {
 			continue
 		}
 		if len(jsonMsg) < 3 {
-			msg.Error = err
+			msg.Error = fmt.Errorf("invalid changefeed message")
 			feed.Data <- msg
 			continue
 		}
-		err = json.Unmarshal(jsonMsg[2], &msg)
-		if err != nil {
-			msg.Error = err
+		if strings.Contains(string(jsonMsg[0]), "initial") {
+			var newValue []json.RawMessage
+			err = json.Unmarshal(jsonMsg[2], &newValue)
+			if err != nil {
+				msg.Error = err
+			} else if len(newValue) > 0 {
+				msg.NewValue = newValue[0]
+			}
+		} else {
+			err = json.Unmarshal(jsonMsg[2], &msg)
+			if err != nil {
+				msg.Error = err
+			}
 		}
 		feed.Data <- msg
 	}
