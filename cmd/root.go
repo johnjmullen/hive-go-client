@@ -93,7 +93,6 @@ func initConfig() {
 	viper.SetEnvPrefix("hio")
 	viper.AutomaticEnv()
 	viper.ReadInConfig()
-
 }
 
 func connectRest(cmd *cobra.Command, args []string) {
@@ -103,7 +102,12 @@ func connectRest(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 		os.Exit(1)
 	}
-	restClient = &rest.Client{Host: viper.GetString("host"), Port: viper.GetUint("port"), AllowInsecure: viper.GetBool("insecure")}
+	restClient = &rest.Client{
+		Host:          viper.GetString("host"),
+		Port:          viper.GetUint("port"),
+		AllowInsecure: viper.GetBool("insecure"),
+		UserAgent:     "hioctl/" + version,
+	}
 	err := restClient.Login(viper.GetString("user"), viper.GetString("password"), viper.GetString("realm"))
 	if err != nil {
 		fmt.Printf("Error: Failed to connect %v", err)

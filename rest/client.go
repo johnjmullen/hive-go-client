@@ -27,6 +27,7 @@ type Client struct {
 	Host          string
 	Port          uint
 	AllowInsecure bool
+	UserAgent     string
 	httpClient    *http.Client
 	token         string
 }
@@ -133,6 +134,9 @@ func (client *Client) requestWithHeaders(method, path string, body io.Reader, he
 	}
 	if client.token != "" {
 		req.Header.Add("Authorization", "Bearer "+client.token)
+	}
+	if client.UserAgent != "" {
+		req.Header.Add("User-Agent", client.UserAgent)
 	}
 	return client.httpClient.Do(req)
 }
