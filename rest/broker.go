@@ -2,17 +2,10 @@ package rest
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/hashicorp/go-version"
 )
 
-/*{"backupSchedule":null,
-"lastReplication":"2021-01-27T02:04:05.099Z",
-"source":"/mnt/9c7c2d0d-3b14-44d1-9a78-54bc7c055770/user1.HOME.qcow2",
-"state":"ready",
-"stateMessage":"Agent added user volume",
-"target":"nocache"}*/
 //BrokerGuest describes a guest assignment
 type BrokerGuest struct {
 	Name       string `json:"name"`
@@ -83,7 +76,6 @@ func (client *Client) GetBrokerConfig() (BrokerConfig, error) {
 	if err != nil {
 		return config, err
 	}
-	fmt.Println(string(body))
 	err = json.Unmarshal(body, &config)
 	if err != nil {
 		return config, err
@@ -92,28 +84,28 @@ func (client *Client) GetBrokerConfig() (BrokerConfig, error) {
 }
 
 // BrokerLogin connects to the broker with the provided username, password, and realm
-// returns a list of available pools for the user or an error
-func (client *Client) BrokerLogin(username, password, realm, token string) ([]BrokerPool, error) {
+// returns nil or an error
+func (client *Client) BrokerLogin(username, password, realm, token, mfaToken string) error {
 	jsonData := map[string]string{"username": username, "password": password, "realm": realm}
 	if token != "" {
 		jsonData["token"] = token
 	}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	body, err := client.request("POST", "authBrokerUser", jsonValue)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	var resp brokerLoginResponse
 	err = json.Unmarshal(body, &resp)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	client.token = resp.Token
-	return resp.Pools, nil
+	return nil
 }
 
 type brokerAssignments struct {
@@ -127,7 +119,6 @@ func (client *Client) BrokerAssignments() ([]BrokerPool, error) {
 		return nil, err
 	}
 	var assignments brokerAssignments
-	fmt.Println(string(body))
 	err = json.Unmarshal(body, &assignments)
 	if err != nil {
 		return nil, err
@@ -148,8 +139,8 @@ func (client *Client) BrokerAssign(poolID string) (BrokerGuest, error) {
 
 // BrokerConnect request the rdp file to connect to a guest.
 // outputType can be rdp, json, or hio
-func (client *Client) BrokerConnect(guest string, remote bool, outputType string) ([]byte, error) {
-	jsonData := map[string]interface{}{"guest": guest, "remote": remote, "outputType": outputType}
+func (client *Client) BrokerConnect(guest string, outputType string) ([]byte, error) {
+	jsonData := map[string]interface{}{"guest": guest, "outputType": outputType}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
 		return nil, err
