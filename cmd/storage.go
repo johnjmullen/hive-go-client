@@ -60,10 +60,10 @@ var storageBrowseCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		if viper.GetBool("details") == false {
+		if !viper.GetBool("details") {
 			paths := []string{}
 			for _, file := range files {
-				if file.IsDir == false {
+				if !file.IsDir {
 					paths = append(paths, file.Path)
 				}
 			}

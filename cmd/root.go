@@ -163,7 +163,7 @@ func unmarshal(data []byte, obj interface{}) error {
 	case "json":
 		return json.Unmarshal(data, obj)
 	default:
-		err = (fmt.Errorf("Error: Unsupported format %s", format))
+		err = (fmt.Errorf("error: Unsupported format %s", format))
 	}
 	return err
 }
