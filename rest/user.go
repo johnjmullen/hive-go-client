@@ -13,7 +13,7 @@ type UserPreferences struct {
 
 // User describes a user record
 type User struct {
-	ID          string           `json:"id"`
+	ID          string           `json:"id,omitempty"`
 	GroupName   string           `json:"groupName,omitempty"`
 	Password    string           `json:"password,omitempty"`
 	Preferences *UserPreferences `json:"preferences,omitempty"`
@@ -57,9 +57,23 @@ func (client *Client) GetUser(id string) (*User, error) {
 	return user, err
 }
 
-// GetUserByName request a task by name
+// GetUserByName request a user by name
 func (client *Client) GetUserByName(name string) (*User, error) {
-	var users, err = client.ListUsers("name=" + url.QueryEscape(name))
+	var users, err = client.ListUsers("username=" + url.QueryEscape(name))
+	if err != nil {
+		return nil, err
+	}
+	for _, user := range users {
+		if user.Username == name {
+			return &user, nil
+		}
+	}
+	return nil, errors.New("User not found")
+}
+
+// GetUserByName request a user by groupname
+func (client *Client) GetUserByGroupName(name string) (*User, error) {
+	var users, err = client.ListUsers("groupname=" + url.QueryEscape(name))
 	if err != nil {
 		return nil, err
 	}
