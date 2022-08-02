@@ -185,6 +185,9 @@ var hostUnjoinCmd = &cobra.Command{
 	Use:   "unjoin [hostid]",
 	Short: "remove host from cluster",
 	Args:  cobra.ExactArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		bindTaskFlags(cmd)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		host, err := restClient.GetHost(args[0])
 
@@ -192,11 +195,10 @@ var hostUnjoinCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		err = host.UnjoinCluster(restClient)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		if viper.GetBool("wait") && viper.GetBool("progress-bar") {
+			fmt.Printf("Removing %s from cluster for\n", host.Hostname)
 		}
+		handleTask(host.UnjoinCluster(restClient))
 	},
 }
 
@@ -338,6 +340,26 @@ var hostDisableCRSCmd = &cobra.Command{
 	},
 }
 
+var hostDeleteCmd = &cobra.Command{
+	Use:    "delete [hostid]",
+	Short:  "delete a host record from the host table",
+	Hidden: true,
+	Args:   cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		host, err := restClient.GetHost(args[0])
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = host.Delete(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(hostCmd)
 	hostCmd.AddCommand(hostGetCmd)
@@ -354,6 +376,7 @@ func init() {
 	hostCmd.AddCommand(hostRebootCmd)
 	hostCmd.AddCommand(hostShutdownCmd)
 	hostCmd.AddCommand(hostUnjoinCmd)
+	addTaskFlags(hostUnjoinCmd)
 
 	hostCmd.AddCommand(hostStateCmd)
 	hostStateCmd.Flags().StringP("set", "s", "", "set host state (available/maintenance)")
@@ -365,4 +388,5 @@ func init() {
 	hostDeleteSoftware.Flags().String("package", "", "package to delete")
 	hostCmd.AddCommand(hostEnableCRSCmd)
 	hostCmd.AddCommand(hostDisableCRSCmd)
+	hostCmd.AddCommand(hostDeleteCmd)
 }

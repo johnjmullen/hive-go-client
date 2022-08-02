@@ -303,9 +303,8 @@ func (host *Host) GetState(client *Client) (string, error) {
 }
 
 // UnjoinCluster removes a host from the cluster
-func (host *Host) UnjoinCluster(client *Client) error {
-	_, err := client.request("POST", "host/"+host.Hostid+"/cluster/unjoin", nil)
-	return err
+func (host *Host) UnjoinCluster(client *Client) (*Task, error) {
+	return client.getTaskFromResponse(client.request("POST", "host/"+host.Hostid+"/cluster/unjoin", nil))
 }
 
 //HostPackageInfo contains information about software and firmware packages
