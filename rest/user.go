@@ -71,18 +71,18 @@ func (client *Client) GetUserByName(name string) (*User, error) {
 	return nil, errors.New("User not found")
 }
 
-// GetUserByName request a user by groupname
+// GetUserByGroupName request a user by groupname
 func (client *Client) GetUserByGroupName(name string) (*User, error) {
-	var users, err = client.ListUsers("groupname=" + url.QueryEscape(name))
+	var users, err = client.ListUsers("groupName=" + url.QueryEscape(name))
 	if err != nil {
 		return nil, err
 	}
 	for _, user := range users {
-		if user.Username == name {
+		if user.GroupName == name {
 			return &user, nil
 		}
 	}
-	return nil, errors.New("User not found")
+	return nil, errors.New("group not found")
 }
 
 // Create creates a new user
