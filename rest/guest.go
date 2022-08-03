@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -334,11 +335,16 @@ func checkGuestState(guest Guest) bool {
 
 // WaitForGuest waits for a guest state to match the targetState
 func (guest Guest) WaitForGuest(client *Client, timeout time.Duration) error {
+	return guest.WaitForGuestWithContext(context.Background(), client, timeout)
+}
+
+// WaitForGuestWithContext waits for a guest state to match the targetState
+func (guest Guest) WaitForGuestWithContext(ctx context.Context, client *Client, timeout time.Duration) error {
 	if checkGuestState(guest) {
 		return nil
 	}
 	newVal := Guest{}
-	feed, err := client.GetChangeFeed("guest", map[string]string{"name": guest.Name}, false)
+	feed, err := client.GetChangeFeedWithContext(ctx, "guest", map[string]string{"name": guest.Name}, false)
 	if err != nil {
 		return err
 	}

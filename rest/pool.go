@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -199,11 +200,16 @@ func (pool *Pool) Refresh(client *Client) error {
 
 // WaitForPool waits for a pool to reach the desired state
 func (pool Pool) WaitForPool(client *Client, targetState string, timeout time.Duration) error {
+	return pool.WaitForPoolWithContext(context.Background(), client, targetState, timeout)
+}
+
+// WaitForPoolWithContext waits for a pool to reach the desired state with a context
+func (pool Pool) WaitForPoolWithContext(ctx context.Context, client *Client, targetState string, timeout time.Duration) error {
 	if pool.State == targetState {
 		return nil
 	}
 	newVal := Pool{}
-	feed, err := client.GetChangeFeed("pool", map[string]string{"id": pool.ID}, false)
+	feed, err := client.GetChangeFeedWithContext(ctx, "pool", map[string]string{"id": pool.ID}, false)
 	if err != nil {
 		return err
 	}

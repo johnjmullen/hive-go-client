@@ -2,6 +2,7 @@ package rest
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -66,8 +67,12 @@ func checkResponse(res *http.Response, err error) ([]byte, error) {
 }
 
 func (client *Client) request(method, path string, data []byte) ([]byte, error) {
+	return client.requestWithContext(context.Background(), method, path, data)
+}
+
+func (client *Client) requestWithContext(ctx context.Context, method, path string, data []byte) ([]byte, error) {
 	headers := map[string]string{"Content-type": "application/json"}
-	return checkResponse(client.requestWithHeaders(method, path, bytes.NewBuffer(data), headers, time.Second*120))
+	return checkResponse(client.requestWithHeaders(ctx, method, path, bytes.NewBuffer(data), headers, time.Second*120))
 }
 
 func (client *Client) postMultipart(path, filenameField, filepath string, params map[string]string) ([]byte, error) {
@@ -100,11 +105,10 @@ func (client *Client) postMultipart(path, filenameField, filepath string, params
 	headers := map[string]string{
 		"Content-Type": fmt.Sprintf("multipart/form-data; boundary=%s", writer.Boundary()),
 	}
-	return checkResponse(client.requestWithHeaders("POST", path, mreader, headers, time.Second*30))
-	//req.ContentLength = fi.Size()+int64(body_buf.Len())+int64(close_buf.Len())
+	return checkResponse(client.requestWithHeaders(context.Background(), "POST", path, mreader, headers, time.Second*30))
 }
 
-func (client *Client) requestWithHeaders(method, path string, body io.Reader, headers map[string]string, timeout time.Duration) (*http.Response, error) {
+func (client *Client) requestWithHeaders(ctx context.Context, method, path string, body io.Reader, headers map[string]string, timeout time.Duration) (*http.Response, error) {
 	protocol := "https"
 	if client.Port == 3000 {
 		protocol = "http"
@@ -124,7 +128,7 @@ func (client *Client) requestWithHeaders(method, path string, body io.Reader, he
 	}
 	client.httpClient.Timeout = timeout
 
-	req, err := http.NewRequest(method, u.String(), body)
+	req, err := http.NewRequestWithContext(ctx, method, u.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -229,11 +233,13 @@ func (feed *ChangeFeed) monitorChangeFeed() {
 	}
 }
 
-func (feed *ChangeFeed) changeFeedKeepAlive(timeout time.Duration) {
+func (feed *ChangeFeed) changeFeedKeepAlive(ctx context.Context, timeout time.Duration) {
 	ticker := time.NewTicker(timeout)
 	defer ticker.Stop()
 	for {
 		select {
+		case <-ctx.Done():
+			return
 		case <-ticker.C:
 			feed.conn.WriteMessage(websocket.TextMessage, []byte("2"))
 		case <-feed.Done:
@@ -252,6 +258,14 @@ func (feed *ChangeFeed) Close() error {
 // example to monitor a single task:
 // client.GetChangeFeed("task", map[string]string{"id": task.ID})
 func (client *Client) GetChangeFeed(table string, filter map[string]string, includeInitial bool) (*ChangeFeed, error) {
+	return client.GetChangeFeedWithContext(context.Background(), table, filter, includeInitial)
+}
+
+// GetChangeFeedWithContext returns a ChangeFeed for monitoring the specified table with a custom context
+// filter can be used to limit the changes monitored.
+// example to monitor a single task:
+// client.GetChangeFeed("task", map[string]string{"id": task.ID})
+func (client *Client) GetChangeFeedWithContext(ctx context.Context, table string, filter map[string]string, includeInitial bool) (*ChangeFeed, error) {
 	protocol := "wss"
 	var token string
 	if client.Port == 3000 {
@@ -265,7 +279,8 @@ func (client *Client) GetChangeFeed(table string, filter map[string]string, incl
 		TLSClientConfig:  &tls.Config{InsecureSkipVerify: true},
 		HandshakeTimeout: 20 * time.Second,
 	}
-	c, _, err := dialer.Dial(u.String(), nil)
+
+	c, _, err := dialer.DialContext(ctx, u.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +299,7 @@ func (client *Client) GetChangeFeed(table string, filter map[string]string, incl
 	incomingData := make(chan ChangeFeedMessage)
 	feed := ChangeFeed{Data: incomingData, Done: done, conn: c}
 
-	go feed.changeFeedKeepAlive(25 * time.Second)
+	go feed.changeFeedKeepAlive(ctx, 25*time.Second)
 	go feed.monitorChangeFeed()
 
 	return &feed, nil

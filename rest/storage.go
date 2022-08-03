@@ -2,6 +2,7 @@ package rest
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -266,6 +267,11 @@ func (pool *StoragePool) Browse(client *Client, filePath string, recursive bool)
 
 //Download downloads a file from a storage pool
 func (pool *StoragePool) Download(client *Client, filePath string) (*http.Response, error) {
+	return pool.DownloadWithContext(context.Background(), client, filePath)
+}
+
+//DownloadWithContext downloads a file from a storage pool with a custom context
+func (pool *StoragePool) DownloadWithContext(ctx context.Context, client *Client, filePath string) (*http.Response, error) {
 	if pool.ID == "" {
 		return nil, errors.New("invalid Storage Pool")
 	}
@@ -273,7 +279,7 @@ func (pool *StoragePool) Download(client *Client, filePath string) (*http.Respon
 		return nil, err
 	}
 	headers := map[string]string{"Content-type": "application/json"}
-	resp, err := client.requestWithHeaders("GET", fmt.Sprintf("storage/pool/%s/download?filePath=%s", pool.ID, url.QueryEscape(filePath)), bytes.NewBuffer(nil), headers, 0)
+	resp, err := client.requestWithHeaders(ctx, "GET", fmt.Sprintf("storage/pool/%s/download?filePath=%s", pool.ID, url.QueryEscape(filePath)), bytes.NewBuffer(nil), headers, 0)
 	return resp, err
 }
 

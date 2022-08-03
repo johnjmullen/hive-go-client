@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -89,12 +90,17 @@ func (task *Task) ForceComplete(client *Client) error {
 
 // WatchTask monitors a task changefeed and sends updates to taskData
 func (task Task) WatchTask(client *Client, taskData chan Task, errorChannel chan error) {
+	task.WatchTaskWithContext(context.Background(), client, taskData, errorChannel)
+}
+
+// WatchTaskWithContext monitors a task changefeed and sends updates to taskData
+func (task Task) WatchTaskWithContext(ctx context.Context, client *Client, taskData chan Task, errorChannel chan error) {
 	if task.State == "completed" || task.State == "failed" {
 		taskData <- task
 		return
 	}
 	newVal := Task{}
-	feed, err := client.GetChangeFeed("task", map[string]string{"id": task.ID}, true)
+	feed, err := client.GetChangeFeedWithContext(ctx, "task", map[string]string{"id": task.ID}, true)
 	if err != nil {
 		errorChannel <- err
 		return
@@ -124,13 +130,20 @@ func (task Task) WatchTask(client *Client, taskData chan Task, errorChannel chan
 
 //WaitForTask blocks until a task is complete and returns the task
 func (task Task) WaitForTask(client *Client, printProgress bool) (*Task, error) {
+	return task.WaitForTaskWithContext(context.Background(), client, printProgress)
+}
+
+//WaitForTask blocks until a task is complete and returns the task
+func (task Task) WaitForTaskWithContext(ctx context.Context, client *Client, printProgress bool) (*Task, error) {
 	var progress float32
 	newVal := task
 	errChannel := make(chan error)
 	taskData := make(chan Task)
-	go task.WatchTask(client, taskData, errChannel)
+	go task.WatchTaskWithContext(ctx, client, taskData, errChannel)
 	for {
 		select {
+		case <-ctx.Done():
+			return nil, fmt.Errorf("cancelled")
 		case newVal = <-taskData:
 			if printProgress && newVal.Progress != progress {
 				progress = newVal.Progress
