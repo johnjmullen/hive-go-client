@@ -18,6 +18,7 @@ type Realm struct {
 	ForceTLS       bool                 `json:"forceTls"`
 	FQDN           string               `json:"fqdn"`
 	Name           string               `json:"name"`
+	Site           string               `json:"site,omitempty"`
 	Tags           []string             `json:"tags,omitempty"`
 	Verified       bool                 `json:"verified"`
 	ServiceAccount *RealmServiceAccount `json:"serviceAccount,omitempty"`
