@@ -124,38 +124,8 @@ type Host struct {
 				Type       string `json:"type"`
 			} `json:"children,omitempty"`
 		} `json:"blockdevices"`
-		Disk struct {
-			Zpool struct {
-				CacheDevices []string `json:"cacheDevices"`
-				Compression  string   `json:"compression"`
-				Dedup        string   `json:"dedup"`
-				Devices      []string `json:"devices"`
-				Filesystems  struct {
-					Hive struct {
-						Filesystems struct {
-							Conf struct {
-								Mountpoint string `json:"mountpoint"`
-							} `json:"conf"`
-						} `json:"filesystems"`
-						Mountpoint string `json:"mountpoint"`
-					} `json:"hive"`
-					Rethink struct {
-						Mountpoint  string `json:"mountpoint"`
-						Reservation string `json:"reservation"`
-					} `json:"rethink"`
-					Root struct {
-						Mountpoint  string `json:"mountpoint"`
-						Reservation string `json:"reservation"`
-					} `json:"root"`
-					Zdata struct {
-					} `json:"zdata"`
-				} `json:"filesystems"`
-				Mountpoint string `json:"mountpoint"`
-				Volumes    struct {
-				} `json:"volumes"`
-			} `json:"zpool"`
-		} `json:"disk"`
-		RAM struct {
+		Disk map[string]interface{} `json:"disk"`
+		RAM  struct {
 			RamdiskPercent int `json:"ramdiskPercent"`
 			SwapSize       int `json:"swapSize"`
 			Swappiness     int `json:"swappiness"`
