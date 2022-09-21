@@ -46,11 +46,11 @@ type PoolGuestProfile struct {
 
 // PoolHostDevice a hostdevice to share with a virtual machine
 type PoolHostDevice struct {
-	Bus    int    `json:"bus,omitempty"`
-	Domain int    `json:"domain,omitempty"`
-	Func   int    `json:"func,omitempty"`
-	Slot   int    `json:"slot,omitempty"`
-	Type   string `json:"type,omitempty"`
+	Bus    int    `json:"bus"`
+	Domain int    `json:"domain"`
+	Func   int    `json:"func"`
+	Slot   int    `json:"slot"`
+	Type   string `json:"type"`
 	UUID   string `json:"uuid,omitempty"`
 }
 
