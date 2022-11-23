@@ -106,26 +106,9 @@ type Host struct {
 	Software interface{} `json:"software"`
 	State    string      `json:"state"`
 	Storage  struct {
-		Blockdevices []struct {
-			MajMin     string `json:"maj:min"`
-			Mountpoint string `json:"mountpoint"`
-			Name       string `json:"name"`
-			Rm         string `json:"rm"`
-			Ro         string `json:"ro"`
-			Size       string `json:"size"`
-			Type       string `json:"type"`
-			Children   []struct {
-				MajMin     string `json:"maj:min"`
-				Mountpoint string `json:"mountpoint"`
-				Name       string `json:"name"`
-				Rm         string `json:"rm"`
-				Ro         string `json:"ro"`
-				Size       string `json:"size"`
-				Type       string `json:"type"`
-			} `json:"children,omitempty"`
-		} `json:"blockdevices"`
-		Disk map[string]interface{} `json:"disk"`
-		RAM  struct {
+		Blockdevices []interface{}          `json:"blockdevices"`
+		Disk         map[string]interface{} `json:"disk"`
+		RAM          struct {
 			RamdiskPercent int `json:"ramdiskPercent"`
 			SwapSize       int `json:"swapSize"`
 			Swappiness     int `json:"swappiness"`
