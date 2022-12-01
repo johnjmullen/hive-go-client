@@ -1,0 +1,22 @@
+{
+  "name": "hive-go-client",
+  "context": "..",
+  "dockerFile": "./Dockerfile",
+  "postStartCommand": "/usr/bin/testenv.sh",
+  "extensions": [
+      "dawidd6.debian-vscode",
+      "DotJoshJohnson.xml",
+      "EditorConfig.EditorConfig",
+      "kisstkondoros.vscode-codemetrics",
+      "mads-hartmann.bash-ide-vscode",
+      "redhat.vscode-yaml",
+      "VisualStudioExptTeam.vscodeintellicode",
+      "wayou.vscode-todo-highlight",
+      "wix.vscode-import-cost",
+      "eamodio.gitlens",
+      "golang.go"
+  ],
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/admin1/.ssh,type=bind,consistency=cached"
+  ]
+}
