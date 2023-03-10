@@ -55,6 +55,7 @@ var realmCreateCmd = &cobra.Command{
 var realmDeleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "delete realm pool",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		realm, err := restClient.GetRealm(args[0])
@@ -117,9 +118,6 @@ func init() {
 	realmCreateCmd.Flags().String("fqdn", "", "FQDN")
 
 	realmCmd.AddCommand(realmDeleteCmd)
-	realmDeleteCmd.Flags().StringP("id", "i", "", "realm Pool Id")
-	realmDeleteCmd.Flags().StringP("name", "n", "", "realm Pool Name")
-
 	realmCmd.AddCommand(realmGetCmd)
 
 	realmCmd.AddCommand(realmListCmd)
