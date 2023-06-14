@@ -46,12 +46,13 @@ type PoolGuestProfile struct {
 
 // PoolHostDevice a hostdevice to share with a virtual machine
 type PoolHostDevice struct {
-	Bus    int    `json:"bus"`
-	Domain int    `json:"domain"`
-	Func   int    `json:"func"`
-	Slot   int    `json:"slot"`
-	Type   string `json:"type"`
-	UUID   string `json:"uuid,omitempty"`
+	Bus     int    `json:"bus"`
+	Domain  int    `json:"domain"`
+	Func    int    `json:"func"`
+	Managed bool   `json:"managed"`
+	Slot    int    `json:"slot"`
+	Type    string `json:"type"`
+	UUID    string `json:"uuid,omitempty"`
 }
 
 // PoolInterface network interface settings for a pool
@@ -70,7 +71,7 @@ type PoolBackup struct {
 	TargetStorageID string `json:"targetStorageId"`
 }
 
-//PoolAffinity host affinity settings for the pool
+// PoolAffinity host affinity settings for the pool
 type PoolAffinity struct {
 	CustomCPUFeatures  string   `json:"customCpuFeatures,omitempty"`
 	UseHostPassthrough bool     `json:"useHostPassthrough"`
@@ -158,7 +159,7 @@ func (client *Client) GetPoolByName(name string) (*Pool, error) {
 	return nil, errors.New("Pool not found")
 }
 
-//Create creates a new pool
+// Create creates a new pool
 func (pool *Pool) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(pool)
@@ -169,7 +170,7 @@ func (pool *Pool) Create(client *Client) (string, error) {
 	return result, err
 }
 
-//Update updates an existing pool record
+// Update updates an existing pool record
 func (pool *Pool) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(pool)
@@ -180,7 +181,7 @@ func (pool *Pool) Update(client *Client) (string, error) {
 	return result, err
 }
 
-//Delete removes a pool record
+// Delete removes a pool record
 func (pool *Pool) Delete(client *Client) error {
 	if pool.ID == "" || client == nil {
 		return errors.New("invalid pool")
@@ -189,7 +190,7 @@ func (pool *Pool) Delete(client *Client) error {
 	return err
 }
 
-//Refresh refreshes a pool to ensure the definition is applied
+// Refresh refreshes a pool to ensure the definition is applied
 func (pool *Pool) Refresh(client *Client) error {
 	if pool.ID == "" || client == nil {
 		return errors.New("invalid pool")
@@ -240,7 +241,7 @@ func (pool Pool) WaitForPoolWithContext(ctx context.Context, client *Client, tar
 	}
 }
 
-//Assign adds a user or group assignment for a standalone pool
+// Assign adds a user or group assignment for a standalone pool
 func (pool *Pool) Assign(client *Client, realm, username, group string) error {
 	if pool.ID == "" || client == nil {
 		return errors.New("invalid pool")
@@ -258,7 +259,7 @@ func (pool *Pool) Assign(client *Client, realm, username, group string) error {
 	return err
 }
 
-//DeleteAssignment removes the assignment for a standalone pool
+// DeleteAssignment removes the assignment for a standalone pool
 func (pool *Pool) DeleteAssignment(client *Client) error {
 	if pool.ID == "" || client == nil {
 		return errors.New("invalid pool")
@@ -268,7 +269,7 @@ func (pool *Pool) DeleteAssignment(client *Client) error {
 	return err
 }
 
-//Snapshot stores pool state and creates disk snapshots for running guests
+// Snapshot stores pool state and creates disk snapshots for running guests
 func (pool *Pool) Snapshot(client *Client) error {
 	if pool.ID == "" || client == nil {
 		return errors.New("invalid pool")
@@ -277,7 +278,7 @@ func (pool *Pool) Snapshot(client *Client) error {
 	return err
 }
 
-//Merge commits the guest snapshots back into their disk
+// Merge commits the guest snapshots back into their disk
 func (pool *Pool) Merge(client *Client) error {
 	if pool.ID == "" || client == nil {
 		return errors.New("invalid pool")
