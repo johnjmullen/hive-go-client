@@ -23,7 +23,7 @@ var (
 	date    = ""
 )
 
-//RootCmd root command for hioctl
+// RootCmd root command for hioctl
 var RootCmd = &cobra.Command{
 	Use:              "hioctl",
 	Short:            "hive fabric rest api client",
@@ -50,7 +50,7 @@ var VersionCmd = &cobra.Command{
 	},
 }
 
-//Execute run root command
+// Execute run root command
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
@@ -68,6 +68,7 @@ func init() {
 	RootCmd.PersistentFlags().StringP("password", "p", "", "Admin user password")
 	RootCmd.PersistentFlags().StringP("realm", "r", "local", "Admin user realm")
 	RootCmd.PersistentFlags().StringP("format", "", "json", "format (json/yaml)")
+	RootCmd.PersistentFlags().String("profile", "", "Load a profile from the config file")
 
 	viper.BindPFlag("host", RootCmd.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("port", RootCmd.PersistentFlags().Lookup("port"))
@@ -76,6 +77,7 @@ func init() {
 	viper.BindPFlag("password", RootCmd.PersistentFlags().Lookup("password"))
 	viper.BindPFlag("realm", RootCmd.PersistentFlags().Lookup("realm"))
 	viper.BindPFlag("format", RootCmd.PersistentFlags().Lookup("format"))
+	viper.BindPFlag("profile", RootCmd.PersistentFlags().Lookup("profile"))
 
 	RootCmd.AddCommand(VersionCmd)
 }
@@ -93,6 +95,15 @@ func initConfig() {
 	viper.SetEnvPrefix("hio")
 	viper.AutomaticEnv()
 	viper.ReadInConfig()
+	profiles := viper.GetStringMap("profiles")
+	if profile, ok := profiles[viper.GetString("profile")]; ok {
+		if options, ok := profile.(map[string]interface{}); ok {
+			for k, v := range options {
+				viper.Set(k, v)
+			}
+		}
+
+	}
 }
 
 func connectRest(cmd *cobra.Command, args []string) {
@@ -102,6 +113,7 @@ func connectRest(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 		os.Exit(1)
 	}
+
 	restClient = &rest.Client{
 		Host:          viper.GetString("host"),
 		Port:          viper.GetUint("port"),
