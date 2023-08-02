@@ -193,7 +193,10 @@ func (client *Client) GetHostByIP(ip string) (*Host, error) {
 func (host *Host) UpdateAppliance(client *Client) (string, error) {
 	var result string
 	data := map[string]interface{}{"appliance": host.Appliance}
-	jsonValue, _ := json.Marshal(data)
+	jsonValue, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
 	body, err := client.request("PUT", "host/"+host.Hostid, jsonValue)
 	if err == nil {
 		result = string(body)
@@ -296,6 +299,13 @@ func (host *Host) UploadSoftware(client *Client, filename string) error {
 // RestartNetworking calls restarts networking on the host
 func (host *Host) RestartNetworking(client *Client) error {
 	_, err := client.request("POST", "host/"+host.Hostid+"/networking/networking/restart", nil)
+	return err
+}
+
+// ChangeGatewayMode enable or disable gateway mode on the host
+func (host *Host) ChangeGatewayMode(client *Client, enable bool) error {
+	jsonValue, _ := json.Marshal(map[string]interface{}{"enable": enable})
+	_, err := client.request("POST", "host/"+host.Hostid+"/changeGatewayMode", jsonValue)
 	return err
 }
 

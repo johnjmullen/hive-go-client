@@ -232,6 +232,49 @@ var hostStateCmd = &cobra.Command{
 	},
 }
 
+var hostEnableGatewayCmd = &cobra.Command{
+	Use:   "enable-gateway-mode [hostid]",
+	Short: "Convert the host into a gateway appliance",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		host, err := restClient.GetHost(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		if host.Appliance.Role == "gateway" {
+			return
+		}
+		err = host.ChangeGatewayMode(restClient, true)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var hostDisableGatewayCmd = &cobra.Command{
+	Use:   "disable-gateway-mode [hostid]",
+	Short: "Convert the host from a gateway appliance to a regular fabric host",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		host, err := restClient.GetHost(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		if host.Appliance.Role != "gateway" {
+			return
+		}
+		err = host.ChangeGatewayMode(restClient, false)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 var hostListSoftwareCmd = &cobra.Command{
 	Use:   "list-software [hostid]",
 	Short: "list available software packages on a host",
@@ -388,5 +431,7 @@ func init() {
 	hostDeleteSoftware.Flags().String("package", "", "package to delete")
 	hostCmd.AddCommand(hostEnableCRSCmd)
 	hostCmd.AddCommand(hostDisableCRSCmd)
+	hostCmd.AddCommand(hostEnableGatewayCmd)
+	hostCmd.AddCommand(hostDisableGatewayCmd)
 	hostCmd.AddCommand(hostDeleteCmd)
 }
