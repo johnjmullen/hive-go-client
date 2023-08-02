@@ -3,6 +3,7 @@ module github.com/hive-io/hive-go-client
 go 1.18
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/eventials/go-tus v0.0.0-20220610120217-05d0564bb571
 	github.com/ghodss/yaml v1.0.0
 	github.com/gocarina/gocsv v0.0.0-20230616125104-99d496ca653d

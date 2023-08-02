@@ -31,14 +31,19 @@ type Broker struct {
 	AllowPhysical             bool        `json:"allowPhysical,omitempty"`
 }
 
+type GatewayHost struct {
+	StartPort       uint   `json:"startPort"`
+	EndPort         uint   `json:"endPort"`
+	ExternalAddress string `json:"externalAddress"`
+}
+
 // Gateway settings from the cluster table
 type Gateway struct {
 	Enabled bool                   `json:"enabled"`
-	PortMap map[string]interface{} `json:"portMap"`
-	URI     string                 `json:"uri"`
+	Hosts   map[string]GatewayHost `json:"hosts"`
 }
 
-//ClusterBackup data protection settings from the cluster table
+// ClusterBackup data protection settings from the cluster table
 type ClusterBackup struct {
 	Enabled     bool   `json:"enabled"`
 	StartWindow string `json:"startWindow"`
@@ -137,7 +142,7 @@ func (cluster *Cluster) GetLicenseInfo(client *Client) (string, string, error) {
 	return objMap["expiration"], objMap["type"], err
 }
 
-//SetLicense replaces the license for the cluster
+// SetLicense replaces the license for the cluster
 func (cluster *Cluster) SetLicense(client *Client, key string) error {
 	jsonData := map[string]string{"key": key}
 	jsonValue, err := json.Marshal(jsonData)
@@ -183,7 +188,7 @@ func (cluster *Cluster) DisableSharedStorage(client *Client) (*Task, error) {
 	return client.getTaskFromResponse(client.request("POST", "cluster/"+cluster.ID+"/disableSharedStorage", nil))
 }
 
-//GetBroker returns the broker settings for the cluster
+// GetBroker returns the broker settings for the cluster
 func (client *Client) GetBroker(clusterID string) (Broker, error) {
 	var broker Broker
 	body, err := client.request("GET", "cluster/"+clusterID+"/broker", nil)
@@ -195,7 +200,7 @@ func (client *Client) GetBroker(clusterID string) (Broker, error) {
 	return broker, err
 }
 
-//SetBroker updates broker settings for the cluster
+// SetBroker updates broker settings for the cluster
 func (client *Client) SetBroker(clusterID string, brokerSettings Broker) error {
 	jsonValue, err := json.Marshal(brokerSettings)
 	if err != nil {
@@ -205,9 +210,31 @@ func (client *Client) SetBroker(clusterID string, brokerSettings Broker) error {
 	return err
 }
 
-//ResetBroker updates broker settings for the cluster
+// ResetBroker updates broker settings for the cluster
 func (client *Client) ResetBroker(clusterID string) error {
 	_, err := client.request("POST", "cluster/"+clusterID+"/broker/reset", nil)
+	return err
+}
+
+// GetGateway returns the gateway settings for the cluster
+func (client *Client) GetGateway(clusterID string) (Gateway, error) {
+	var gateway Gateway
+	body, err := client.request("GET", "cluster/"+clusterID+"/gateway", nil)
+	if err != nil {
+		return gateway, err
+	}
+	err = json.Unmarshal(body, &gateway)
+
+	return gateway, err
+}
+
+// SetGateway updates gateway settings for the cluster
+func (client *Client) SetGateway(clusterID string, gatewaySettings Gateway) error {
+	jsonValue, err := json.Marshal(gatewaySettings)
+	if err != nil {
+		return err
+	}
+	_, err = client.request("PUT", "cluster/"+clusterID+"/gateway", jsonValue)
 	return err
 }
 

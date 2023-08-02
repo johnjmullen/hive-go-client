@@ -188,44 +188,35 @@ func handleTask(task *rest.Task, err error) {
 		os.Exit(1)
 	}
 	if viper.GetBool("wait") {
-		if viper.GetBool("raw-progress") {
-			taskProgressNum(task)
-		} else if viper.GetBool("progress-bar") {
-			taskProgressBar(task)
-		} else {
-			taskVal, err := task.WaitForTask(restClient, false)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-			if taskVal.State == "complete" {
-				fmt.Println(formatString("Task Complete"))
-				os.Exit(1)
-			}
-			if taskVal.State == "failed" {
-				fmt.Println(formatString("Task Failed: " + task.Message))
-				os.Exit(1)
-			}
+		if err := waitForTask(task, viper.GetBool("raw-progress"), viper.GetBool("progress-bar")); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		if !viper.GetBool("raw-progress") && !viper.GetBool("progress-bar") {
+			fmt.Println(formatString("Task Complete"))
 		}
 	} else {
 		fmt.Println(formatString(map[string]string{"taskId": task.ID}))
 	}
+
 }
 
-func taskProgressNum(task *rest.Task) {
-	taskVal, err := task.WaitForTask(restClient, true)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+func waitForTask(task *rest.Task, rawProgress, progressBar bool) error {
+	if progressBar {
+		taskProgressBar(task)
+	} else {
+		taskVal, err := task.WaitForTask(restClient, rawProgress)
+		if err != nil {
+			return err
+		}
+		if taskVal.State == "failed" {
+			return fmt.Errorf(formatString("Task Failed: " + task.Message))
+		}
 	}
-	if taskVal.State == "failed" {
-		fmt.Println(formatString("Task Failed: " + task.Message))
-		os.Exit(1)
-	}
+	return nil
 }
 
-func taskProgressBar(task *rest.Task) {
-	//fmt.Printf(task.Description)
+func taskProgressBar(task *rest.Task) error {
 	bar := progressbar.NewOptions(100,
 		progressbar.OptionFullWidth(),
 		progressbar.OptionSetPredictTime(false),
@@ -243,15 +234,13 @@ func taskProgressBar(task *rest.Task) {
 				bar.Set(100)
 				bar.Finish()
 				fmt.Println("")
-				return
+				return nil
 			} else if newVal.State == "failed" {
 				bar.Set(0)
-				fmt.Println(formatString("Task Failed: " + newVal.Message))
-				return
+				return fmt.Errorf(formatString("Task Failed: " + newVal.Message))
 			}
 		case err := <-errChannel:
-			fmt.Println(err)
-			return
+			return err
 		}
 	}
 }

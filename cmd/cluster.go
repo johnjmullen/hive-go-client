@@ -208,7 +208,7 @@ var clusterGetBrokerCmd = &cobra.Command{
 	},
 }
 
-var clusterSetBrokerCommand = &cobra.Command{
+var clusterSetBrokerCmd = &cobra.Command{
 	Use:   "set-broker [file]",
 	Short: "set broker settings",
 	Args:  cobra.ExactArgs(1),
@@ -245,7 +245,62 @@ var clusterSetBrokerCommand = &cobra.Command{
 	},
 }
 
-var clusterResetBrokerCommand = &cobra.Command{
+var clusterGetGatewayCmd = &cobra.Command{
+	Use:   "get-gateway",
+	Short: "get gateway settings",
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		gateway, err := restClient.GetGateway(clusterID)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(formatString(gateway))
+	},
+}
+
+var clusterSetGatewayCmd = &cobra.Command{
+	Use:   "set-gateway [file]",
+	Short: "set gateway settings",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		var file *os.File
+		var err error
+		if args[0] == "-" {
+			file = os.Stdin
+		} else {
+			file, err = os.Open(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+		defer file.Close()
+		data, _ := ioutil.ReadAll(file)
+		var gateway rest.Gateway
+		err = unmarshal(data, &gateway)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = restClient.SetGateway(clusterID, gateway)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var clusterResetBrokerCmd = &cobra.Command{
 	Use:   "reset-broker [file]",
 	Short: "reset broker settings to the defaults",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -311,8 +366,11 @@ func init() {
 	addTaskFlags(disableSharedStorageCmd)
 
 	clusterCmd.AddCommand(clusterGetBrokerCmd)
-	clusterCmd.AddCommand(clusterSetBrokerCommand)
-	clusterCmd.AddCommand(clusterResetBrokerCommand)
+	clusterCmd.AddCommand(clusterSetBrokerCmd)
+	clusterCmd.AddCommand(clusterResetBrokerCmd)
+
+	clusterCmd.AddCommand(clusterGetGatewayCmd)
+	clusterCmd.AddCommand(clusterSetGatewayCmd)
 
 	clusterCmd.AddCommand(clusterUpdateSoftwareCmd)
 	addTaskFlags(clusterUpdateSoftwareCmd)
