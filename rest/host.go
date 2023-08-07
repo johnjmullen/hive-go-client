@@ -82,30 +82,14 @@ type Host struct {
 			VendorID    int    `json:"vendorId"`
 		} `json:"videoCards"`
 	} `json:"hardware"`
-	Hostid     string `json:"hostid"`
-	Hostname   string `json:"hostname"`
-	IP         string `json:"ip"`
-	Networking struct {
-		Interfaces struct {
-		} `json:"interfaces"`
-		Production struct {
-			Dhcp      bool   `json:"dhcp"`
-			DNS       string `json:"dns"`
-			Interface string `json:"interface"`
-			Search    string `json:"search"`
-			Vlan      int    `json:"vlan"`
-		} `json:"production"`
-		Storage struct {
-			Interface string `json:"interface"`
-			IP        string `json:"ip"`
-			Mask      string `json:"mask"`
-			Vlan      int    `json:"vlan"`
-		} `json:"storage"`
-	} `json:"networking"`
-	RdbID    string      `json:"rdbId"`
-	Software interface{} `json:"software"`
-	State    string      `json:"state"`
-	Storage  struct {
+	Hostid     string                 `json:"hostid"`
+	Hostname   string                 `json:"hostname"`
+	IP         string                 `json:"ip"`
+	Networking map[string]interface{} `json:"networking"`
+	RdbID      string                 `json:"rdbId"`
+	Software   interface{}            `json:"software"`
+	State      string                 `json:"state"`
+	Storage    struct {
 		Blockdevices []interface{}          `json:"blockdevices"`
 		Disk         map[string]interface{} `json:"disk"`
 		RAM          struct {
@@ -189,7 +173,7 @@ func (client *Client) GetHostByIP(ip string) (*Host, error) {
 	return nil, errors.New("Host not found")
 }
 
-//UpdateAppliance updates settings from Host.appliance
+// UpdateAppliance updates settings from Host.appliance
 func (host *Host) UpdateAppliance(client *Client) (string, error) {
 	var result string
 	data := map[string]interface{}{"appliance": host.Appliance}
@@ -263,13 +247,13 @@ func (host *Host) UnjoinCluster(client *Client) (*Task, error) {
 	return client.getTaskFromResponse(client.request("POST", "host/"+host.Hostid+"/cluster/unjoin", nil))
 }
 
-//HostPackageInfo contains information about software and firmware packages
+// HostPackageInfo contains information about software and firmware packages
 type HostPackageInfo struct {
 	Packages []string `json:"packages"`
 	Current  string   `json:"current"`
 }
 
-//ListSoftware returns the current software version and available packages
+// ListSoftware returns the current software version and available packages
 func (host *Host) ListSoftware(client *Client) (HostPackageInfo, error) {
 	var info HostPackageInfo
 	body, err := client.request("GET", "host/"+host.Hostid+"/firmware/software/packages", nil)
@@ -280,13 +264,13 @@ func (host *Host) ListSoftware(client *Client) (HostPackageInfo, error) {
 	return info, err
 }
 
-//DeleteSoftware deletes a software package from a host
+// DeleteSoftware deletes a software package from a host
 func (host *Host) DeleteSoftware(client *Client, pkg string) error {
 	_, err := client.request("DELETE", "host/"+host.Hostid+"/firmware/software/"+pkg, nil)
 	return err
 }
 
-//UploadSoftware uploads a firmware pkg file to the host
+// UploadSoftware uploads a firmware pkg file to the host
 func (host *Host) UploadSoftware(client *Client, filename string) error {
 	if client.CheckHostVersion("8.2.6") != nil {
 		_, err := client.postMultipart(fmt.Sprintf("host/%s/firmware/software/upload", host.Hostid), "data", filename, nil)
