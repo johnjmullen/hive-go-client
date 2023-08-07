@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/gocarina/gocsv"
@@ -159,7 +159,7 @@ var guestUpdateCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
+		data, _ := io.ReadAll(file)
 		var guest rest.Guest
 		err = unmarshal(data, &guest)
 		if err != nil {
@@ -380,7 +380,7 @@ test2,10.0.0.2,user2,TEST
 			}
 		}
 		defer file.Close()
-		data, err := ioutil.ReadAll(file)
+		data, err := io.ReadAll(file)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

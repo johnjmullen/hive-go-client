@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/hive-io/hive-go-client/rest"
@@ -36,7 +36,7 @@ var profileCreateCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
+		data, _ := io.ReadAll(file)
 		var profile rest.Profile
 		err = unmarshal(data, &profile)
 		if err != nil {
@@ -152,7 +152,7 @@ var profileUpdateCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
+		data, _ := io.ReadAll(file)
 		var profile rest.Profile
 		err = unmarshal(data, &profile)
 		if err != nil {

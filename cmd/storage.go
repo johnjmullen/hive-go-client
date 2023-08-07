@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 
@@ -240,7 +239,7 @@ var storageCreateCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
+		data, _ := io.ReadAll(file)
 		var sp rest.StoragePool
 		err = unmarshal(data, &sp)
 		if err != nil {

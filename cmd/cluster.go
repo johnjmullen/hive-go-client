@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/hive-io/hive-go-client/rest"
@@ -225,7 +225,7 @@ var clusterSetBrokerCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
+		data, _ := io.ReadAll(file)
 		var broker rest.Broker
 		err = unmarshal(data, &broker)
 		if err != nil {
@@ -280,7 +280,7 @@ var clusterSetGatewayCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
+		data, _ := io.ReadAll(file)
 		var gateway rest.Gateway
 		err = unmarshal(data, &gateway)
 		if err != nil {

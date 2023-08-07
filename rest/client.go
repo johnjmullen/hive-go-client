@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -33,7 +32,7 @@ type Client struct {
 	token         string
 }
 
-//SetToken sets the token directly instead of calling auth
+// SetToken sets the token directly instead of calling auth
 func (client *Client) SetToken(token string) {
 	client.token = token
 }
@@ -55,7 +54,7 @@ func checkResponse(res *http.Response, err error) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}

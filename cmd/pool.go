@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/google/go-cmp/cmp"
@@ -37,7 +37,7 @@ var poolCreateCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
+		data, _ := io.ReadAll(file)
 		var pool rest.Pool
 		err = unmarshal(data, &pool)
 		if err != nil {
@@ -172,7 +172,7 @@ var poolUpdateCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
+		data, _ := io.ReadAll(file)
 		var pool rest.Pool
 		err = unmarshal(data, &pool)
 		if err != nil {

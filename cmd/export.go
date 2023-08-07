@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -189,7 +188,7 @@ func ReadFile(file *os.File) (ExportData, error) {
 		}
 		parts := strings.Split(hdr.Name, "/")
 		if hdr.Name == "export/broker" {
-			data, err := ioutil.ReadAll(tr)
+			data, err := io.ReadAll(tr)
 			if err != nil {
 				return export, err
 			}
@@ -203,7 +202,7 @@ func ReadFile(file *os.File) (ExportData, error) {
 			log.Printf("unexpected filename: %s", hdr.Name)
 			continue
 		}
-		data, err := ioutil.ReadAll(tr)
+		data, err := io.ReadAll(tr)
 		if err != nil {
 			return export, err
 		}
@@ -470,7 +469,7 @@ var importCmd = &cobra.Command{
 				}
 				if profile.UserVolumes != nil && profile.UserVolumes.Repository == oldSharedStorageId {
 					if newSharedStorageId == "" {
-						log.Printf("Shared Storage not found. Skipping profile %s", profile.Name)
+						log.Printf("Shared Storage not found. Skipping profile %s\n", profile.Name)
 						continue
 					}
 					profile.UserVolumes.Repository = newSharedStorageId
@@ -518,7 +517,7 @@ var importCmd = &cobra.Command{
 				for i, disk := range template.Disks {
 					if disk.StorageID == oldSharedStorageId {
 						if newSharedStorageId == "" {
-							log.Printf("Shared Storage id not found. Skipping template %s", template.Name)
+							log.Printf("Shared Storage id not found. Skipping template %s\n", template.Name)
 							foundDisks = false
 							break
 						}
@@ -526,7 +525,9 @@ var importCmd = &cobra.Command{
 					}
 					sp, err := restClient.GetStoragePool(template.Disks[i].StorageID)
 					if err != nil {
-						log.Fatalln(err)
+						log.Printf("Storage Pool %s not found for template %s\n", disk.StorageID, template.Name)
+						foundDisks = false
+						break
 					}
 					if _, err := sp.DiskInfo(restClient, disk.Filename); err != nil {
 						log.Printf("Disk %s not found for template: %s\n", disk.Filename, template.Name)
@@ -541,14 +542,15 @@ var importCmd = &cobra.Command{
 				fmt.Printf("Adding template %s\n", template.Name)
 				_, err := template.Create(restClient)
 				if err != nil {
-					log.Fatalln(err)
+					log.Printf("Error adding template: %v\n", err)
+					continue
 				}
 				time.Sleep(time.Second * 10)
 				template, err = restClient.GetTemplate(template.Name)
 				if err != nil {
-					log.Fatalln(err)
+					log.Println(err)
 				} else if template.State != "available" {
-					log.Fatalln(template.StateMessage)
+					log.Println(template.StateMessage)
 				}
 			}
 		}
@@ -562,7 +564,7 @@ var importCmd = &cobra.Command{
 				}
 				if pool.StorageID == oldSharedStorageId {
 					if newSharedStorageId == "" {
-						log.Printf("Shared Storage id not found. Skipping pool %s", pool.Name)
+						log.Printf("Shared Storage id not found. Skipping pool %s\n", pool.Name)
 						continue
 					}
 					pool.StorageID = newSharedStorageId
@@ -577,7 +579,7 @@ var importCmd = &cobra.Command{
 				for i, disk := range pool.GuestProfile.Disks {
 					if disk.StorageID == oldSharedStorageId {
 						if newSharedStorageId == "" {
-							log.Printf("Shared Storage id not found. Skipping pool %s", pool.Name)
+							log.Printf("Shared Storage id not found. Skipping pool %s\n", pool.Name)
 							foundDisks = false
 							break
 						}
@@ -585,7 +587,8 @@ var importCmd = &cobra.Command{
 					}
 					sp, err := restClient.GetStoragePool(pool.GuestProfile.Disks[i].StorageID)
 					if err != nil {
-						log.Fatalln(err)
+						log.Printf("Storage Pool %s not found for pool: %s\n", disk.StorageID, pool.Name)
+						foundDisks = false
 					}
 					if _, err := sp.DiskInfo(restClient, disk.Filename); err != nil {
 						log.Printf("Disk %s not found for pool: %s\n", disk.Filename, pool.Name)
@@ -603,7 +606,7 @@ var importCmd = &cobra.Command{
 				}
 				_, err := pool.Create(restClient)
 				if err != nil {
-					log.Fatalln(err)
+					log.Printf("Error adding pool: %v\n", err)
 				}
 			}
 		}
@@ -624,7 +627,7 @@ var importCmd = &cobra.Command{
 				}
 				_, err := externalGuest.Create(restClient)
 				if err != nil {
-					log.Fatalln(err)
+					log.Printf("Error adding external guest: %v\n", err)
 				}
 			}
 		}

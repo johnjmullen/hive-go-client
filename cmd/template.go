@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/google/go-cmp/cmp"
@@ -73,7 +73,7 @@ var templateCreateCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
+		data, _ := io.ReadAll(file)
 		var template rest.Template
 		err = unmarshal(data, &template)
 		if err != nil {
@@ -223,7 +223,7 @@ var templateUpdateCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
+		data, _ := io.ReadAll(file)
 		var template rest.Template
 		err = unmarshal(data, &template)
 		if err != nil {

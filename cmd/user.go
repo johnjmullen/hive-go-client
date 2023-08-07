@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/google/go-cmp/cmp"
@@ -36,7 +36,7 @@ var userCreateCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
+		data, _ := io.ReadAll(file)
 		var user rest.User
 		err = unmarshal(data, &user)
 		if err != nil {
@@ -152,7 +152,7 @@ var userUpdateCmd = &cobra.Command{
 			}
 		}
 		defer file.Close()
-		data, _ := ioutil.ReadAll(file)
+		data, _ := io.ReadAll(file)
 		var user rest.User
 		err = unmarshal(data, &user)
 		if err != nil {
