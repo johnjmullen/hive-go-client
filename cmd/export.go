@@ -467,7 +467,7 @@ var importCmd = &cobra.Command{
 				if _, err := restClient.GetProfile(profile.ID); err == nil {
 					continue //already exists
 				}
-				if profile.UserVolumes != nil && profile.UserVolumes.Repository == oldSharedStorageId {
+				if profile.UserVolumes != nil && profile.UserVolumes.Repository != "" && profile.UserVolumes.Repository == oldSharedStorageId {
 					if newSharedStorageId == "" {
 						log.Printf("Shared Storage not found. Skipping profile %s\n", profile.Name)
 						continue
