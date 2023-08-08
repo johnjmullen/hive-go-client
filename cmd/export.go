@@ -489,7 +489,7 @@ var importCmd = &cobra.Command{
 		}
 		if slices.Contains(include, "broker") {
 			if err = restClient.SetBroker(clusterID, data.Broker); err != nil {
-				log.Fatalln(err)
+				log.Printf("Failed to set broker settings: %v\n", err)
 			}
 		}
 
@@ -503,7 +503,13 @@ var importCmd = &cobra.Command{
 			data.Clusters[0].Gateway.Hosts = gwHostInfo
 			if len(gwHostInfo) > 0 {
 				if err = restClient.SetGateway(clusterID, *data.Clusters[0].Gateway); err != nil {
-					log.Fatalln(err)
+					log.Printf("Failed to set gateway settings: %v\n", err)
+				}
+			}
+			if data.Clusters[0].Backup != nil && data.Clusters[0].Backup.Enabled {
+				err = cluster.EnableBackup(restClient, data.Clusters[0].Backup.StartWindow, data.Clusters[0].Backup.EndWindow)
+				if err != nil {
+					log.Printf("Failed to enable backup: %v\n", err)
 				}
 			}
 		}
