@@ -10,6 +10,7 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/gorilla/websocket v1.5.0
 	github.com/hashicorp/go-version v1.6.0
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/schollz/progressbar/v3 v3.13.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
@@ -28,7 +29,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.9 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect

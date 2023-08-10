@@ -304,3 +304,109 @@ func (host *Host) DisableCRS(client *Client) error {
 	_, err := client.request("POST", "host/"+host.Hostid+"/disableCRS", nil)
 	return err
 }
+
+type HostNetwork struct {
+	Name      string `json:"-"`
+	DHCP      bool   `json:"dhcp"`
+	DNS       string `json:"dns"`
+	Gw        string `json:"gw"`
+	Interface string `json:"interface"`
+	IP        string `json:"ip"`
+	Mask      string `json:"mask"`
+	Search    string `json:"search"`
+	VLAN      int64  `json:"vlan"`
+}
+
+func (net HostNetwork) MarshalJSON() ([]byte, error) {
+	switch net.Name {
+	case "production":
+		return json.Marshal(net)
+	case "storage":
+		return json.Marshal(map[string]interface{}{
+			"interface": net.Interface,
+			"ip":        net.IP,
+			"mask":      net.Mask,
+			"vlan":      net.VLAN,
+		})
+	default:
+		return json.Marshal(map[string]interface{}{
+			"interface": net.Interface,
+			"vlan":      net.VLAN,
+		})
+	}
+}
+
+func (net *HostNetwork) UnmarshalJSON(b []byte) error {
+	return json.Unmarshal(b, &(net))
+}
+
+// GetNetwork retrieves settings for a host network
+func (host Host) GetNetwork(client *Client, name string) (HostNetwork, error) {
+	net := HostNetwork{Name: name}
+	body, err := client.request("GET", "host/"+host.Hostid+"/networking/"+name, nil)
+	if err != nil {
+		return net, err
+	}
+	err = json.Unmarshal(body, &net)
+	return net, err
+}
+
+// SetNetwork adds or edits network settings for the host
+func (host Host) SetNetwork(client *Client, net HostNetwork) error {
+	jsonValue, err := json.Marshal(net)
+	if err != nil {
+		return err
+	}
+	_, err = client.request("POST", "host/"+host.Hostid+"/networking/"+net.Name, jsonValue)
+	return err
+}
+
+type HostNetworkInterface struct {
+	Name      string `json:"name"`
+	Address   string `json:"address"`
+	Speed     int64  `json:"speed"`
+	Carrier   int64  `json:"carrier"`
+	Duplex    string `json:"duplex"`
+	MTU       int64  `json:"mtu"`
+	LinkModes []struct {
+		Speed  string `json:"speed"`
+		Duplex string `json:"duplex"`
+	} `json:"linkModes"`
+	Autoneg   bool   `json:"autoneg"`
+	Link      bool   `json:"link"`
+	PortTypes string `json:"portTypes"`
+	Driver    string `json:"driver"`
+}
+
+// ListNics returns information about the network interfaces on a host
+func (host Host) ListNics(client *Client) ([]HostNetworkInterface, error) {
+	interfaces := []HostNetworkInterface{}
+	body, err := client.request("GET", "host/"+host.Hostid+"/networking/interfaces", nil)
+	if err != nil {
+		return interfaces, err
+	}
+	err = json.Unmarshal(body, &interfaces)
+	return interfaces, err
+}
+
+type HostNetworkInterfaceSettings struct {
+	Speed  int64  `json:"speed"`
+	Duplex string `json:"duplex"`
+	MTU    int64  `json:"mtu,omitempty"`
+}
+
+// UpdateNetworkInterface hardcodes settings for a nic
+func (host Host) UpdateNicSettings(client *Client, nic string, settings HostNetworkInterfaceSettings) error {
+	jsonValue, err := json.Marshal(settings)
+	if err != nil {
+		return err
+	}
+	_, err = client.request("POST", "host/"+host.Hostid+"/networking/interface/"+nic, jsonValue)
+	return err
+}
+
+// UpdateNetworkInterface resets the settings for a nic
+func (host Host) ResetNicSettings(client *Client, nic string) error {
+	_, err := client.request("DELETE", "host/"+host.Hostid+"/networking/interface/"+nic, nil)
+	return err
+}

@@ -13,6 +13,7 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/hive-io/hive-go-client/rest"
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
@@ -401,7 +402,26 @@ var importCmd = &cobra.Command{
 					}
 					err = waitForTask(task, false, true)
 					if err != nil {
-						log.Printf("Failed to set state for Host %s (%s)\n", host.Hostname, host.IP)
+						log.Printf("Failed to set state for Host %s (%s)\n", host.Hostname, host.Hostname)
+					}
+				}
+				for key, value := range host.Networking {
+					if key == "production" || key == "storage" || key == "interfaces" {
+						continue //only add missing virtual networks
+					}
+					if _, ok := hostRecord.Networking[key]; ok {
+						continue //already configured
+					}
+					network := rest.HostNetwork{
+						Name: key,
+					}
+					if err = mapstructure.Decode(value, &network); err != nil {
+						fmt.Printf("Failed to parse network %s: %v\n", key, err)
+						continue
+					}
+					fmt.Printf("Adding network %s on host %s\n", key, host.Hostname)
+					if err = hostRecord.SetNetwork(restClient, network); err != nil {
+						fmt.Printf("Failed to add network %s: %v\n", key, err)
 					}
 				}
 				updateApplianceConf := false
@@ -468,7 +488,7 @@ var importCmd = &cobra.Command{
 		if slices.Contains(include, "storagePools") {
 			for _, storagePool := range data.StoragePools {
 				if storagePool.Name == "HF_Shared" {
-					continue //TODO: enable shared storage and update storageIds
+					continue
 				}
 				if _, err := restClient.GetStoragePool(storagePool.ID); err == nil {
 					continue //already exists
