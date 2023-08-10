@@ -62,6 +62,7 @@ type ExportData struct {
 	Pools        []rest.Pool
 	Guests       []rest.Guest
 	Broker       rest.Broker
+	Users        []rest.User
 }
 
 func (export ExportData) WriteFile(file *os.File) error {
@@ -129,6 +130,13 @@ func (export ExportData) WriteFile(file *os.File) error {
 			return err
 		}
 	}
+	if slices.Contains(include, "users") {
+		for _, user := range export.Users {
+			if err := exportWriter.AddFile(path.Join("users", user.ID), user); err != nil {
+				return err
+			}
+		}
+	}
 	return exportWriter.Close()
 }
 
@@ -170,6 +178,9 @@ func CreateExport() (ExportData, error) {
 		return export, err
 	}
 	if export.Broker, err = restClient.GetBroker(clusterID); err != nil {
+		return export, err
+	}
+	if export.Users, err = restClient.ListUsers(""); err != nil {
 		return export, err
 	}
 	return export, nil
@@ -266,6 +277,13 @@ func ReadFile(file *os.File) (ExportData, error) {
 			if guest.External {
 				export.Guests = append(export.Guests, guest)
 			}
+		case "users":
+			user := rest.User{}
+			err = json.Unmarshal(data, &user)
+			if err != nil {
+				return export, err
+			}
+			export.Users = append(export.Users, user)
 		}
 	}
 	return export, nil
@@ -308,6 +326,7 @@ var importCmd = &cobra.Command{
 		viper.BindPFlag("enable-shared-storage", cmd.Flags().Lookup("enable-shared-storage"))
 		viper.BindPFlag("create-cluster", cmd.Flags().Lookup("create-cluster"))
 		viper.BindPFlag("enable-pools", cmd.Flags().Lookup("enable-pools"))
+		viper.BindPFlag("import-standalone", cmd.Flags().Lookup("import-standalone"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var file *os.File
@@ -565,6 +584,9 @@ var importCmd = &cobra.Command{
 				if _, err := restClient.GetPool(pool.ID); err == nil {
 					continue //already exists
 				}
+				if !viper.GetBool("import-standalone") && pool.Type == "Standalone" {
+					continue //Skip standalone vms by default in case they are still running on the old cluster
+				}
 				if pool.GuestProfile == nil {
 					continue //skip if guestProfile is missing
 				}
@@ -637,18 +659,29 @@ var importCmd = &cobra.Command{
 				}
 			}
 		}
-
+		if slices.Contains(include, "users") {
+			for _, user := range data.Users {
+				if _, err := restClient.GetUser(user.ID); err == nil {
+					continue //already exists
+				}
+				_, err := user.Create(restClient)
+				if err != nil {
+					log.Printf("Error adding user: %v\n", err)
+				}
+			}
+		}
 	},
 }
 
 func init() {
-	importCmd.Flags().StringArray("include", []string{"broker", "clusters", "hosts", "guests", "pools", "profiles", "realms", "storagePools", "templates"}, "Data to import from the export file")
+	importCmd.Flags().StringArray("include", []string{"broker", "clusters", "hosts", "guests", "pools", "profiles", "realms", "storagePools", "templates", "users"}, "Data to import from the export file")
 	importCmd.Flags().Bool("enable-shared-storage", false, "Automatically create shared storage")
 	importCmd.Flags().Bool("create-cluster", false, "Automatically add hosts from the export file to the cluster")
 	importCmd.Flags().Bool("enable-pools", false, "Enable guest pools automatically")
+	importCmd.Flags().Bool("import-standalone", false, "Import standalone vms")
 	RootCmd.AddCommand(importCmd)
 
-	exportCmd.Flags().StringArray("include", []string{"broker", "clusters", "guests", "hosts", "pools", "profiles", "realms", "storagePools", "templates"}, "Data to include in the export file")
+	exportCmd.Flags().StringArray("include", []string{"broker", "clusters", "guests", "hosts", "pools", "profiles", "realms", "storagePools", "templates", "users"}, "Data to include in the export file")
 	RootCmd.AddCommand(exportCmd)
 
 }
