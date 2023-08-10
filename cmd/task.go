@@ -202,6 +202,9 @@ func handleTask(task *rest.Task, err error) {
 }
 
 func waitForTask(task *rest.Task, rawProgress, progressBar bool) error {
+	if task == nil {
+		return fmt.Errorf("Error reading task")
+	}
 	if progressBar {
 		taskProgressBar(task)
 	} else {
