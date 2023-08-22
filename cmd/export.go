@@ -585,6 +585,7 @@ var importCmd = &cobra.Command{
 					continue
 				}
 				fmt.Printf("Adding template %s\n", template.Name)
+				template.TemplateMap = map[string]interface{}{}
 				_, err := template.Create(restClient)
 				if err != nil {
 					log.Printf("Error adding template: %v\n", err)
@@ -681,6 +682,9 @@ var importCmd = &cobra.Command{
 		}
 		if slices.Contains(include, "users") {
 			for _, user := range data.Users {
+				if user.Realm == "local" {
+					continue
+				}
 				if _, err := restClient.GetUser(user.ID); err == nil {
 					continue //already exists
 				}
@@ -694,14 +698,14 @@ var importCmd = &cobra.Command{
 }
 
 func init() {
-	importCmd.Flags().StringArray("include", []string{"broker", "clusters", "hosts", "guests", "pools", "profiles", "realms", "storagePools", "templates", "users"}, "Data to import from the export file")
+	importCmd.Flags().StringSlice("include", []string{"broker", "clusters", "hosts", "guests", "pools", "profiles", "realms", "storagePools", "templates", "users"}, "Data to import from the export file")
 	importCmd.Flags().Bool("enable-shared-storage", false, "Automatically create shared storage")
 	importCmd.Flags().Bool("create-cluster", false, "Automatically add hosts from the export file to the cluster")
 	importCmd.Flags().Bool("enable-pools", false, "Enable guest pools automatically")
 	importCmd.Flags().Bool("import-standalone", false, "Import standalone vms")
 	RootCmd.AddCommand(importCmd)
 
-	exportCmd.Flags().StringArray("include", []string{"broker", "clusters", "guests", "hosts", "pools", "profiles", "realms", "storagePools", "templates", "users"}, "Data to include in the export file")
+	exportCmd.Flags().StringSlice("include", []string{"broker", "clusters", "guests", "hosts", "pools", "profiles", "realms", "storagePools", "templates", "users"}, "Data to include in the export file")
 	RootCmd.AddCommand(exportCmd)
 
 }
