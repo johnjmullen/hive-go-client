@@ -494,6 +494,18 @@ var importCmd = &cobra.Command{
 					continue //already exists
 				}
 				fmt.Printf("Adding storage pool %s\n", storagePool.Name)
+				if storagePool.Type == "cifs" && storagePool.Password != "" {
+					prompt := &survey.Password{
+						Message: fmt.Sprintf("Password required for %s:", storagePool.Username),
+					}
+					survey.AskOne(prompt, &storagePool.Password)
+				}
+				if storagePool.Type == "s3" && storagePool.S3SecretAccessKey != "" {
+					prompt := &survey.Password{
+						Message: fmt.Sprintf("S3SecretAccessKey required (id: %s):", storagePool.S3AccessKeyID),
+					}
+					survey.AskOne(prompt, &storagePool.Password)
+				}
 				_, err := storagePool.Create(restClient)
 				if err != nil {
 					log.Printf("Error adding storage pool: %v\n", err)
