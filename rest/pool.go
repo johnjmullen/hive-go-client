@@ -42,6 +42,10 @@ type PoolGuestProfile struct {
 	TemplateName   string            `json:"templateName,omitempty"`
 	Vga            string            `json:"vga,omitempty"`
 	CloudInit      *PoolCloudInit    `json:"cloudInit,omitempty"`
+	BrokerOptions  struct {
+		Port     uint   `json:"port,omitempty"`
+		Protocol string `json:"protocol,omitempty"`
+	} `json:"brokerOptions,omitempty"`
 }
 
 // PoolHostDevice a hostdevice to share with a virtual machine

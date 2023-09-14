@@ -55,6 +55,13 @@ type Guest struct {
 	UserSessionState    string                  `json:"userSessionState,omitempty"`
 	UserSession         *UserSession            `json:"userSession,omitempty"`
 	UUID                string                  `json:"uuid,omitempty"`
+	BrokerOptions       *GuestBrokerOptions     `json:"brokerOptions,omitempty"`
+}
+
+// GuestBrokerOptions allows setting the port and protocol for broker connections
+type GuestBrokerOptions struct {
+	Port     uint   `json:"port,omitempty"`
+	Protocol string `json:"protocol,omitempty"`
 }
 
 // GuestDisk is the structure for GuestDisk object in db
@@ -427,12 +434,13 @@ func (guest *Guest) ResetRecord(client *Client) error {
 
 // ExternalGuest is used to add external guest records to the system
 type ExternalGuest struct {
-	GuestName string `json:"guestName,omitempty"`
-	Address   string `json:"address,omitempty"`
-	Username  string `json:"username,omitempty"`
-	ADGroup   string `json:"ADGroup,omitempty"`
-	Realm     string `json:"realm,omitempty"`
-	OS        string `json:"os,omitempty"`
+	GuestName     string             `json:"guestName,omitempty"`
+	Address       string             `json:"address,omitempty"`
+	Username      string             `json:"username,omitempty"`
+	ADGroup       string             `json:"ADGroup,omitempty"`
+	Realm         string             `json:"realm,omitempty"`
+	OS            string             `json:"os,omitempty"`
+	BrokerOptions GuestBrokerOptions `json:"brokerOptions,omitempty"`
 }
 
 // Create creates a new pool

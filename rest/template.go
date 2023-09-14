@@ -6,14 +6,14 @@ import (
 	"net/url"
 )
 
-//TemplateInterface a network interface from a template record
+// TemplateInterface a network interface from a template record
 type TemplateInterface struct {
 	Network   string `json:"network"`
 	Vlan      int    `json:"vlan"`
 	Emulation string `json:"emulation"`
 }
 
-//TemplateDisk a disk from a template record
+// TemplateDisk a disk from a template record
 type TemplateDisk struct {
 	DiskDriver string `json:"diskDriver"`
 	Filename   string `json:"filename"`
@@ -25,7 +25,7 @@ type TemplateDisk struct {
 	OsVolume   int    `json:"osvolume"`
 }
 
-//Template a template record from the rest interface
+// Template a template record from the rest interface
 type Template struct {
 	Name               string                 `json:"name"`
 	Vcpu               int                    `json:"vcpu"`
@@ -41,6 +41,10 @@ type Template struct {
 	StateMessage       string                 `json:"stateMessage,omitempty"`
 	ManualAgentInstall bool                   `json:"manualAgentInstall"`
 	TemplateMap        map[string]interface{} `json:"templateMap,omitempty"`
+	BrokerOptions      struct {
+		Port     uint   `json:"port,omitempty"`
+		Protocol string `json:"protocol,omitempty"`
+	} `json:"brokerOptions,omitempty"`
 }
 
 func (template Template) String() string {
@@ -77,7 +81,7 @@ func (client *Client) GetTemplate(name string) (Template, error) {
 	return template, err
 }
 
-//Create creates a new template
+// Create creates a new template
 func (template *Template) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(template)
@@ -88,7 +92,7 @@ func (template *Template) Create(client *Client) (string, error) {
 	return result, err
 }
 
-//Update updates an existing template
+// Update updates an existing template
 func (template *Template) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(template)
@@ -99,7 +103,7 @@ func (template *Template) Update(client *Client) (string, error) {
 	return result, err
 }
 
-//Delete deletes a template record
+// Delete deletes a template record
 func (template *Template) Delete(client *Client) error {
 	if template.Name == "" {
 		return errors.New("name cannot be empty")
@@ -133,7 +137,7 @@ func (template *Template) Unload(client *Client) error {
 	return err
 }
 
-//Analyze validates a template
+// Analyze validates a template
 func (template *Template) Analyze(client *Client) error {
 	if template.Name == "" {
 		return errors.New("name cannot be empty")
@@ -142,7 +146,7 @@ func (template *Template) Analyze(client *Client) error {
 	return err
 }
 
-//Author creates a virtual machine to author a template
+// Author creates a virtual machine to author a template
 func (template *Template) Author(client *Client) error {
 	if template.Name == "" {
 		return errors.New("name cannot be empty")
@@ -151,7 +155,7 @@ func (template *Template) Author(client *Client) error {
 	return err
 }
 
-//Duplicate copies a template
+// Duplicate copies a template
 func (template *Template) Duplicate(client *Client, dstName, dstStorage, dstFilename string) (*Task, error) {
 	if template.Name == "" {
 		return nil, errors.New("name cannot be empty")

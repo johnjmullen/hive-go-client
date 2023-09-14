@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/go-version"
 )
 
-//BrokerGuest describes a guest assignment
+// BrokerGuest describes a guest assignment
 type BrokerGuest struct {
 	Name       string `json:"name"`
 	UUID       string `json:"uuid"`
@@ -15,6 +15,8 @@ type BrokerGuest struct {
 	Username   string `json:"username"`
 	PoolID     string `json:"poolID"`
 	IP         string `json:"ip"`
+	Port       uint   `json:"port"`
+	Protocol   string `json:"protocol"`
 	UserVolume *struct {
 		BackupSchedule  interface{} `json:",omitempty"`
 		LastReplication interface{} `json:",omitempty"`
@@ -26,7 +28,7 @@ type BrokerGuest struct {
 	} `json:"userVolume,omitempty"`
 }
 
-//BrokerPool describes a pool received from BrokerLogin
+// BrokerPool describes a pool received from BrokerLogin
 type BrokerPool struct {
 	ID        string        `json:"id"`
 	Name      string        `json:"name"`
