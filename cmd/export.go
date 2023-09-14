@@ -481,7 +481,7 @@ var importCmd = &cobra.Command{
 				}
 				_, err := realm.Create(restClient)
 				if err != nil {
-					log.Fatalln(err)
+					log.Printf("Error adding realm: %v\n", err)
 				}
 			}
 		}
@@ -496,7 +496,7 @@ var importCmd = &cobra.Command{
 				fmt.Printf("Adding storage pool %s\n", storagePool.Name)
 				_, err := storagePool.Create(restClient)
 				if err != nil {
-					log.Fatalln(err)
+					log.Printf("Error adding storage pool: %v\n", err)
 				}
 			}
 		}
@@ -522,7 +522,7 @@ var importCmd = &cobra.Command{
 				}
 				_, err := profile.Create(restClient)
 				if err != nil {
-					log.Fatalln(err)
+					log.Printf("Error adding profile: %v\n", err)
 				}
 			}
 		}
