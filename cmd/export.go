@@ -605,7 +605,7 @@ var importCmd = &cobra.Command{
 				if _, err := restClient.GetPool(pool.ID); err == nil {
 					continue //already exists
 				}
-				if !viper.GetBool("import-standalone") && pool.Type == "Standalone" {
+				if !viper.GetBool("import-standalone") && pool.Type == "standalone" {
 					continue //Skip standalone vms by default in case they are still running on the old cluster
 				}
 				if pool.GuestProfile == nil {
