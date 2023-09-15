@@ -37,6 +37,18 @@ type GatewayHost struct {
 	ExternalAddress string `json:"externalAddress"`
 }
 
+type EmailAlerts struct {
+	BlackList []map[string]interface{} `json:"blackList,omitempty"`
+	From      string                   `json:"from,omitempty"`
+	Level     string                   `json:"level,omitempty"`
+	Password  string                   `json:"password"`
+	Secure    bool                     `json:"secure"`
+	SMTP      string                   `json:"smtp"`
+	SMTPPort  uint                     `json:"smtpPort,omitempty"`
+	To        string                   `json:"to"`
+	Username  string                   `json:"username"`
+}
+
 // Gateway settings from the cluster table
 type Gateway struct {
 	Enabled                  bool                   `json:"enabled"`
@@ -241,11 +253,21 @@ func (client *Client) SetGateway(clusterID string, gatewaySettings Gateway) erro
 }
 
 // UpdateSoftware applies a software package across the cluster
-func (cluster *Cluster) UpdateSoftware(client *Client, packageName string) (*Task, error) {
+func (cluster Cluster) UpdateSoftware(client *Client, packageName string) (*Task, error) {
 	jsonData := map[string]string{"packageName": packageName}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
 		return nil, err
 	}
 	return client.getTaskFromResponse(client.request("POST", "cluster/"+cluster.ID+"/updatePackage", jsonValue))
+}
+
+// EmailAlerts updates cluster email alert settings
+func (cluster Cluster) EmailAlerts(client *Client, emailAlerts EmailAlerts) error {
+	jsonValue, err := json.Marshal(emailAlerts)
+	if err != nil {
+		return err
+	}
+	_, err = client.request("POST", "cluster/"+cluster.ID+"/emailAlerts", jsonValue)
+	return err
 }

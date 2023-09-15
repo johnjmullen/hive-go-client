@@ -340,6 +340,52 @@ var clusterUpdateSoftwareCmd = &cobra.Command{
 	},
 }
 
+var clusterEmailAlertsCmd = &cobra.Command{
+	Use:   "email-alerts [file]",
+	Short: "set email alert settings",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		var file *os.File
+		var err error
+		if args[0] == "-" {
+			file = os.Stdin
+		} else {
+			file, err = os.Open(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+		defer file.Close()
+		data, err := io.ReadAll(file)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		var emailAlerts rest.EmailAlerts
+		err = unmarshal(data, &emailAlerts)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		cluster, err := restClient.GetCluster(clusterID)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = cluster.EmailAlerts(restClient, emailAlerts)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(clusterCmd)
 	clusterCmd.AddCommand(addHostCmd)
@@ -375,4 +421,6 @@ func init() {
 	clusterCmd.AddCommand(clusterUpdateSoftwareCmd)
 	addTaskFlags(clusterUpdateSoftwareCmd)
 	clusterUpdateSoftwareCmd.Flags().String("package", "", "package to deploy")
+
+	clusterCmd.AddCommand(clusterEmailAlertsCmd)
 }
