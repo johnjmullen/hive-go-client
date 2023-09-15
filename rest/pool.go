@@ -93,6 +93,7 @@ type PoolAssignment struct {
 type Pool struct {
 	ID                        string            `json:"id,omitempty"`
 	Density                   []int             `json:"density"`
+	Description               string            `json:"description,omitempty"`
 	GuestProfile              *PoolGuestProfile `json:"guestProfile,omitempty"`
 	InjectAgent               bool              `json:"injectAgent"`
 	Name                      string            `json:"name"`
