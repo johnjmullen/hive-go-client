@@ -662,7 +662,7 @@ var importCmd = &cobra.Command{
 					continue
 				}
 				fmt.Printf("Adding guest pool %s\n", pool.Name)
-				if !viper.GetBool("enable-pools") {
+				if !viper.GetBool("enable-pools") && pool.Type != "standalone" {
 					pool.State = "disabled"
 				}
 				_, err := pool.Create(restClient)
