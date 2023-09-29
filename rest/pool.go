@@ -27,25 +27,22 @@ type PoolCloudInit struct {
 
 // PoolGuestProfile guestProfile section of a pool record
 type PoolGuestProfile struct {
-	AgentInstalled bool              `json:"agentInstalled"`
-	CPU            []int             `json:"cpu,omitempty"`
-	Debug          bool              `json:"debug,omitempty"`
-	Disks          []*PoolDisk       `json:"disks,omitempty"`
-	Firmware       string            `json:"firmware,omitempty"`
-	Gpu            bool              `json:"gpu"`
-	HostDevices    []*PoolHostDevice `json:"hostDevices,omitempty"`
-	Interfaces     []*PoolInterface  `json:"interfaces,omitempty"`
-	Mem            []int             `json:"mem,omitempty"`
-	OS             string            `json:"os,omitempty"`
-	Persistent     bool              `json:"persistent"`
-	Protocol       string            `json:"protocol,omitempty"`
-	TemplateName   string            `json:"templateName,omitempty"`
-	Vga            string            `json:"vga,omitempty"`
-	CloudInit      *PoolCloudInit    `json:"cloudInit,omitempty"`
-	BrokerOptions  struct {
-		Port     uint   `json:"port,omitempty"`
-		Protocol string `json:"protocol,omitempty"`
-	} `json:"brokerOptions,omitempty"`
+	AgentInstalled bool               `json:"agentInstalled"`
+	CPU            []int              `json:"cpu,omitempty"`
+	Debug          bool               `json:"debug,omitempty"`
+	Disks          []*PoolDisk        `json:"disks,omitempty"`
+	Firmware       string             `json:"firmware,omitempty"`
+	Gpu            bool               `json:"gpu"`
+	HostDevices    []*PoolHostDevice  `json:"hostDevices,omitempty"`
+	Interfaces     []*PoolInterface   `json:"interfaces,omitempty"`
+	Mem            []int              `json:"mem,omitempty"`
+	OS             string             `json:"os,omitempty"`
+	Persistent     bool               `json:"persistent"`
+	Protocol       string             `json:"protocol,omitempty"`
+	TemplateName   string             `json:"templateName,omitempty"`
+	Vga            string             `json:"vga,omitempty"`
+	CloudInit      *PoolCloudInit     `json:"cloudInit,omitempty"`
+	BrokerOptions  GuestBrokerOptions `json:"brokerOptions,omitempty"`
 }
 
 // PoolHostDevice a hostdevice to share with a virtual machine

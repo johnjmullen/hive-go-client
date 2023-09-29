@@ -58,10 +58,24 @@ type Guest struct {
 	BrokerOptions       *GuestBrokerOptions     `json:"brokerOptions,omitempty"`
 }
 
-// GuestBrokerOptions allows setting the port and protocol for broker connections
+// GuestBrokerOptions allows configuring broker connection settings for a guest
 type GuestBrokerOptions struct {
-	Port     uint   `json:"port,omitempty"`
-	Protocol string `json:"protocol,omitempty"`
+	Enabled           bool                    `json:"enabled"`
+	DefaultConnection string                  `json:"defaultConnection,omitempty"`
+	Connections       []GuestBrokerConnection `json:"connections,omitempty"`
+}
+
+// GuestBrokerConnection contains settings for a broker connection to a guest
+type GuestBrokerConnection struct {
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	Port        uint   `json:"port,omitempty"`
+	Protocol    string `json:"protocol,omitempty"`
+	Gateway     struct {
+		Disabled   bool   `json:"enabled"`
+		Protocols  string `json:"prococols"`
+		Persistent bool   `json:"persistent"`
+	} `json:"gateway"`
 }
 
 // GuestDisk is the structure for GuestDisk object in db

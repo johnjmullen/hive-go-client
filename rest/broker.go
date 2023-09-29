@@ -8,24 +8,15 @@ import (
 
 // BrokerGuest describes a guest assignment
 type BrokerGuest struct {
-	Name       string `json:"name"`
-	UUID       string `json:"uuid"`
-	HostID     string `json:"hostid"`
-	GuestState string `json:"guestState"`
-	Username   string `json:"username"`
-	PoolID     string `json:"poolID"`
-	IP         string `json:"ip"`
-	Port       uint   `json:"port"`
-	Protocol   string `json:"protocol"`
-	UserVolume *struct {
-		BackupSchedule  interface{} `json:",omitempty"`
-		LastReplication interface{} `json:",omitempty"`
-		Source          string      `json:"source,omitempty"`
-		State           string      `json:"state,omitempty"`
-		StateMessage    interface{} `json:"stateMessage,omitempty"`
-		Target          string      `json:"Target,omitempty"`
-		RunningBackup   bool        `json:"runningBackup,omitempty"`
-	} `json:"userVolume,omitempty"`
+	Name        string                  `json:"name"`
+	UUID        string                  `json:"uuid"`
+	HostID      string                  `json:"hostid"`
+	GuestState  string                  `json:"guestState"`
+	Username    string                  `json:"username"`
+	PoolID      string                  `json:"poolID"`
+	IP          string                  `json:"ip"`
+	Connections []GuestBrokerConnection `json:"connections"`
+	UserVolume  *UserVolume             `json:"userVolume,omitempty"`
 }
 
 // BrokerPool describes a pool received from BrokerLogin
@@ -141,8 +132,8 @@ func (client *Client) BrokerAssign(poolID string) (BrokerGuest, error) {
 
 // BrokerConnect request the rdp file to connect to a guest.
 // outputType can be rdp, json, or hio
-func (client *Client) BrokerConnect(guest string, outputType string) ([]byte, error) {
-	jsonData := map[string]interface{}{"guest": guest, "outputType": outputType}
+func (client *Client) BrokerConnect(guest string, outputType string, connection string) ([]byte, error) {
+	jsonData := map[string]interface{}{"guest": guest, "outputType": outputType, "connection": connection}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
 		return nil, err

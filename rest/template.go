@@ -41,10 +41,7 @@ type Template struct {
 	StateMessage       string                 `json:"stateMessage,omitempty"`
 	ManualAgentInstall bool                   `json:"manualAgentInstall"`
 	TemplateMap        map[string]interface{} `json:"templateMap,omitempty"`
-	BrokerOptions      struct {
-		Port     uint   `json:"port,omitempty"`
-		Protocol string `json:"protocol,omitempty"`
-	} `json:"brokerOptions,omitempty"`
+	BrokerOptions      GuestBrokerOptions     `json:"brokerOptions,omitempty"`
 }
 
 func (template Template) String() string {
