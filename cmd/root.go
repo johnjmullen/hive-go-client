@@ -8,6 +8,7 @@ import (
 	"runtime/debug"
 	"strconv"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/ghodss/yaml"
 	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
@@ -120,7 +121,15 @@ func connectRest(cmd *cobra.Command, args []string) {
 		AllowInsecure: viper.GetBool("insecure"),
 		UserAgent:     "hioctl/" + version,
 	}
-	err := restClient.Login(viper.GetString("user"), viper.GetString("password"), viper.GetString("realm"))
+
+	password := viper.GetString("password")
+	if password == "" {
+		prompt := &survey.Password{
+			Message: "Password:",
+		}
+		survey.AskOne(prompt, &password)
+	}
+	err := restClient.Login(viper.GetString("user"), password, viper.GetString("realm"))
 	if err != nil {
 		fmt.Printf("Error: Failed to connect %v", err)
 		os.Exit(1)
