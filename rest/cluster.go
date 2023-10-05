@@ -37,16 +37,18 @@ type GatewayHost struct {
 	ExternalAddress string `json:"externalAddress"`
 }
 
+//Settings for email alerts
 type EmailAlerts struct {
-	BlackList []map[string]interface{} `json:"blackList,omitempty"`
-	From      string                   `json:"from,omitempty"`
-	Level     string                   `json:"level,omitempty"`
-	Password  string                   `json:"password"`
-	Secure    bool                     `json:"secure"`
-	SMTP      string                   `json:"smtp"`
+	Service   string                   `json:"smtp,omitempty"`
+	Host      string                   `json:"host,omitempty"`
 	SMTPPort  uint                     `json:"smtpPort,omitempty"`
-	To        string                   `json:"to"`
+	Secure    bool                     `json:"secure"`
 	Username  string                   `json:"username"`
+	Password  string                   `json:"password"`
+	Level     string                   `json:"level,omitempty"`
+	From      string                   `json:"from,omitempty"`
+	To        string                   `json:"to"`
+	BlackList []map[string]interface{} `json:"blackList,omitempty"`
 }
 
 // Gateway settings from the cluster table
