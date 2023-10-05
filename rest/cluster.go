@@ -37,9 +37,9 @@ type GatewayHost struct {
 	ExternalAddress string `json:"externalAddress"`
 }
 
-//Settings for email alerts
+// Settings for email alerts
 type EmailAlerts struct {
-	Service   string                   `json:"smtp,omitempty"`
+	Service   string                   `json:"service,omitempty"`
 	Host      string                   `json:"host,omitempty"`
 	SMTPPort  uint                     `json:"smtpPort,omitempty"`
 	Secure    bool                     `json:"secure"`
