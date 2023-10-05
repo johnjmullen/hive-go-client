@@ -95,8 +95,9 @@ type Cluster struct {
 		State              string `json:"state"`
 		StorageUtilization int    `json:"storageUtilization"`
 	} `json:"sharedStorage"`
-	Backup *ClusterBackup `json:"backup,omitempty"`
-	Tags   []string       `json:"tags"`
+	Backup      *ClusterBackup `json:"backup,omitempty"`
+	Tags        []string       `json:"tags"`
+	EmailAlerts EmailAlerts    `json:"emailAlerts,omitEmpty"`
 }
 
 func (cluster Cluster) String() string {
@@ -263,11 +264,17 @@ func (cluster Cluster) UpdateSoftware(client *Client, packageName string) (*Task
 }
 
 // EmailAlerts updates cluster email alert settings
-func (cluster Cluster) EmailAlerts(client *Client, emailAlerts EmailAlerts) error {
+func (cluster Cluster) SetEmailAlerts(client *Client, emailAlerts EmailAlerts) error {
 	jsonValue, err := json.Marshal(emailAlerts)
 	if err != nil {
 		return err
 	}
 	_, err = client.request("POST", "cluster/"+cluster.ID+"/emailAlerts", jsonValue)
+	return err
+}
+
+// ClearEmailAlerts updates cluster email alert settings
+func (cluster Cluster) ClearEmailAlerts(client *Client) error {
+	_, err := client.request("POST", "cluster/"+cluster.ID+"/clearEmailAlerts", nil)
 	return err
 }

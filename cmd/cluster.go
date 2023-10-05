@@ -378,7 +378,29 @@ var clusterEmailAlertsCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		err = cluster.EmailAlerts(restClient, emailAlerts)
+		err = cluster.SetEmailAlerts(restClient, emailAlerts)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var clusterClearEmailAlertsCmd = &cobra.Command{
+	Use:   "clear-email-alerts",
+	Short: "remove set email alert settings",
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		cluster, err := restClient.GetCluster(clusterID)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = cluster.ClearEmailAlerts(restClient)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -423,4 +445,5 @@ func init() {
 	clusterUpdateSoftwareCmd.Flags().String("package", "", "package to deploy")
 
 	clusterCmd.AddCommand(clusterEmailAlertsCmd)
+	clusterCmd.AddCommand(clusterClearEmailAlertsCmd)
 }
