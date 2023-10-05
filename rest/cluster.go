@@ -97,7 +97,7 @@ type Cluster struct {
 	} `json:"sharedStorage"`
 	Backup      *ClusterBackup `json:"backup,omitempty"`
 	Tags        []string       `json:"tags"`
-	EmailAlerts EmailAlerts    `json:"emailAlerts,omitEmpty"`
+	EmailAlerts EmailAlerts    `json:"emailAlerts,omitempty"`
 }
 
 func (cluster Cluster) String() string {
