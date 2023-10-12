@@ -48,15 +48,15 @@
           },
         ],
         commands: [
-          'docker build -f .devcontainer/Dockerfile -t hive-go-client-${DRONE_COMMIT_BRANCH} .',
-          'docker run --name hive-go-client-${DRONE_COMMIT_BRANCH}-${DRONE_COMMIT_SHA:0:8} hive-go-client-${DRONE_COMMIT_BRANCH}',
+          'docker build -f .devcontainer/Dockerfile -t hive-go-client-${DRONE_COMMIT_BRANCH,,} .',
+          'docker run --name hive-go-client-${DRONE_COMMIT_BRANCH,,}-${DRONE_COMMIT_SHA:0:8} hive-go-client-${DRONE_COMMIT_BRANCH,,}',
         ],
         dry_run: true,
       },
       {
         name: 'run test',
         pull: 'never',
-        image: 'hive-go-client-${DRONE_COMMIT_BRANCH}',
+        image: 'hive-go-client-${DRONE_COMMIT_BRANCH,,}',
         privileged: true,
         volumes: [
           {
@@ -80,7 +80,7 @@
       {
         name: 'build package',
         pull: 'never',
-        image: 'hive-go-client-${DRONE_COMMIT_BRANCH}',
+        image: 'hive-go-client-${DRONE_COMMIT_BRANCH,,}',
         privileged: true,
         volumes: [
           {
@@ -118,8 +118,8 @@
         privileged: true,
         failure: 'ignore',
         commands: [
-          'docker container stop hive-go-client-${DRONE_COMMIT_BRANCH}-${DRONE_COMMIT_SHA:0:8}',
-          'docker container rm -f hive-go-client-${DRONE_COMMIT_BRANCH}-${DRONE_COMMIT_SHA:0:8}',
+          'docker container stop hive-go-client-${DRONE_COMMIT_BRANCH,,}-${DRONE_COMMIT_SHA:0:8}',
+          'docker container rm -f hive-go-client-${DRONE_COMMIT_BRANCH,,}-${DRONE_COMMIT_SHA:0:8}',
         ],
         when: {
           status: [
