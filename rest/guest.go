@@ -60,21 +60,21 @@ type Guest struct {
 
 // GuestBrokerOptions allows configuring broker connection settings for a guest
 type GuestBrokerOptions struct {
-	Enabled           bool                    `json:"enabled"`
 	DefaultConnection string                  `json:"defaultConnection,omitempty"`
 	Connections       []GuestBrokerConnection `json:"connections,omitempty"`
 }
 
 // GuestBrokerConnection contains settings for a broker connection to a guest
 type GuestBrokerConnection struct {
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	Port        uint   `json:"port,omitempty"`
-	Protocol    string `json:"protocol,omitempty"`
-	Gateway     struct {
-		Disabled   bool   `json:"enabled"`
-		Protocols  string `json:"prococols"`
-		Persistent bool   `json:"persistent"`
+	Name         string `json:"name,omitempty"`
+	Description  string `json:"description,omitempty"`
+	Port         uint   `json:"port,omitempty"`
+	Protocol     string `json:"protocol,omitempty"`
+	DisableHtml5 bool   `json:"disableHtml5"`
+	Gateway      struct {
+		Disabled   bool     `json:"disabled"`
+		Protocols  []string `json:"prococols,omitempty"`
+		Persistent bool     `json:"persistent"`
 	} `json:"gateway"`
 }
 
