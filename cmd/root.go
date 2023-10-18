@@ -123,7 +123,7 @@ func connectRest(cmd *cobra.Command, args []string) {
 	}
 
 	password := viper.GetString("password")
-	if password == "" {
+	if password == "" && restClient.Host != "localhost" {
 		prompt := &survey.Password{
 			Message: "Password:",
 		}
