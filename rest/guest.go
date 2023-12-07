@@ -23,6 +23,7 @@ type Guest struct {
 	DuplicateMitigation bool                    `json:"duplicateMitigation"`
 	Error               *GuestError             `json:"error,omitempty"`
 	External            bool                    `json:"external"`
+	DisablePortCheck    bool                    `json:"disablePortCheck"`
 	Gateway             string                  `json:"gateway,omitempty"`
 	GPU                 bool                    `json:"gpu"`
 	GuestState          string                  `json:"guestState,omitempty"`
@@ -448,13 +449,14 @@ func (guest *Guest) ResetRecord(client *Client) error {
 
 // ExternalGuest is used to add external guest records to the system
 type ExternalGuest struct {
-	GuestName     string             `json:"guestName,omitempty"`
-	Address       string             `json:"address,omitempty"`
-	Username      string             `json:"username,omitempty"`
-	ADGroup       string             `json:"ADGroup,omitempty"`
-	Realm         string             `json:"realm,omitempty"`
-	OS            string             `json:"os,omitempty"`
-	BrokerOptions GuestBrokerOptions `json:"brokerOptions,omitempty"`
+	GuestName        string             `json:"guestName,omitempty"`
+	Address          string             `json:"address,omitempty"`
+	Username         string             `json:"username,omitempty"`
+	ADGroup          string             `json:"ADGroup,omitempty"`
+	Realm            string             `json:"realm,omitempty"`
+	OS               string             `json:"os,omitempty"`
+	DisablePortCheck bool               `json:"disablePortCheck"`
+	BrokerOptions    GuestBrokerOptions `json:"brokerOptions,omitempty"`
 }
 
 // Create creates a new pool
