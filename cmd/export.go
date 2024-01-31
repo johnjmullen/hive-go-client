@@ -144,34 +144,34 @@ func (export ExportData) WriteFile(file *os.File) error {
 func CreateExport() (ExportData, error) {
 	export := ExportData{}
 	var err error
-	if export.Clusters, err = restClient.ListClusters(""); err != nil {
+	if export.Clusters, err = restClient.ListClusters("count=1000"); err != nil {
 		return export, err
 	}
 
-	if export.Hosts, err = restClient.ListHosts(""); err != nil {
+	if export.Hosts, err = restClient.ListHosts("count=1000"); err != nil {
 		return export, err
 	}
 
-	if export.Realms, err = restClient.ListRealms(""); err != nil {
+	if export.Realms, err = restClient.ListRealms("count=1000"); err != nil {
 		return export, err
 	}
 
-	if export.Profiles, err = restClient.ListProfiles(""); err != nil {
+	if export.Profiles, err = restClient.ListProfiles("count=1000"); err != nil {
 		return export, err
 	}
 
-	if export.StoragePools, err = restClient.ListStoragePools(""); err != nil {
+	if export.StoragePools, err = restClient.ListStoragePools("count=1000"); err != nil {
 		return export, err
 	}
 
-	if export.Templates, err = restClient.ListTemplates(""); err != nil {
+	if export.Templates, err = restClient.ListTemplates("count=1000"); err != nil {
 		return export, err
 	}
 
-	if export.Pools, err = restClient.ListGuestPools(""); err != nil {
+	if export.Pools, err = restClient.ListGuestPools("count=1000"); err != nil {
 		return export, err
 	}
-	if export.Guests, err = restClient.ListGuests(""); err != nil {
+	if export.Guests, err = restClient.ListGuests("count=1000"); err != nil {
 		return export, err
 	}
 	clusterID, err := restClient.ClusterID()
@@ -181,7 +181,7 @@ func CreateExport() (ExportData, error) {
 	if export.Broker, err = restClient.GetBroker(clusterID); err != nil {
 		return export, err
 	}
-	if export.Users, err = restClient.ListUsers(""); err != nil {
+	if export.Users, err = restClient.ListUsers("count=1000"); err != nil {
 		return export, err
 	}
 	return export, nil
@@ -572,7 +572,7 @@ var importCmd = &cobra.Command{
 				}
 				foundDisks := true
 				for i, disk := range template.Disks {
-					if disk.StorageID == oldSharedStorageId {
+					if disk.StorageID != "" && disk.StorageID == oldSharedStorageId {
 						if newSharedStorageId == "" {
 							log.Printf("Shared Storage id not found. Skipping template %s\n", template.Name)
 							foundDisks = false
@@ -623,7 +623,7 @@ var importCmd = &cobra.Command{
 				if pool.GuestProfile == nil {
 					continue //skip if guestProfile is missing
 				}
-				if pool.StorageID == oldSharedStorageId {
+				if pool.Type != "standalone" && pool.StorageID != "" && pool.StorageID == oldSharedStorageId {
 					if newSharedStorageId == "" {
 						log.Printf("Shared Storage id not found. Skipping pool %s\n", pool.Name)
 						continue
@@ -638,13 +638,17 @@ var importCmd = &cobra.Command{
 					}
 				}
 				for i, disk := range pool.GuestProfile.Disks {
-					if disk.StorageID == oldSharedStorageId {
+					if disk.StorageID != "" && disk.StorageID == oldSharedStorageId {
 						if newSharedStorageId == "" {
 							log.Printf("Shared Storage id not found. Skipping pool %s\n", pool.Name)
 							foundDisks = false
 							break
 						}
 						pool.GuestProfile.Disks[i].StorageID = newSharedStorageId
+					}
+					//skip drivers iso entries
+					if disk.StorageID == "local" {
+						continue
 					}
 					sp, err := restClient.GetStoragePool(pool.GuestProfile.Disks[i].StorageID)
 					if err != nil {
