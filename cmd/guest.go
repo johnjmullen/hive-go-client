@@ -290,6 +290,7 @@ var guestBackupCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		bindTaskFlags(cmd)
+		viper.BindPFlag("storage", cmd.Flags().Lookup("storage"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		guest, err := restClient.GetGuest(args[0])
@@ -297,7 +298,31 @@ var guestBackupCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		handleTask(guest.StartBackup(restClient))
+		handleTask(guest.StartBackup(restClient, viper.GetString("storage")))
+	},
+}
+
+var guestListBackupsCmd = &cobra.Command{
+	Use:   "list-backups [Name]",
+	Short: "list available backups for a guest",
+	Args:  cobra.ExactArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		bindTaskFlags(cmd)
+		viper.BindPFlag("storage", cmd.Flags().Lookup("storage"))
+		viper.BindPFlag("backup", cmd.Flags().Lookup("backup"))
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		guest, err := restClient.GetGuest(args[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		backups, err := guest.ListBackups(restClient, viper.GetString("storage"))
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(formatString(backups))
 	},
 }
 
@@ -307,6 +332,8 @@ var guestRestoreCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		bindTaskFlags(cmd)
+		viper.BindPFlag("storage", cmd.Flags().Lookup("storage"))
+		viper.BindPFlag("backup", cmd.Flags().Lookup("backup"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		guest, err := restClient.GetGuest(args[0])
@@ -314,7 +341,7 @@ var guestRestoreCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		handleTask(guest.Restore(restClient))
+		handleTask(guest.Restore(restClient, viper.GetString("storage"), viper.GetString("backup")))
 	},
 }
 
@@ -447,8 +474,15 @@ func init() {
 
 	guestCmd.AddCommand(guestBackupCmd)
 	addTaskFlags(guestBackupCmd)
+	guestBackupCmd.Flags().String("storage", "", "storage id for a one time full backup")
+
+	guestCmd.AddCommand(guestListBackupsCmd)
+	guestListBackupsCmd.Flags().String("storage", "", "override guest record backup storage pool id")
+
 	guestCmd.AddCommand(guestRestoreCmd)
 	addTaskFlags(guestRestoreCmd)
+	guestRestoreCmd.Flags().String("storage", "", "override guest record backup storage pool id")
+	guestRestoreCmd.Flags().String("backup", "", "name of the backup to restore")
 
 	guestCmd.AddCommand(guestMigrateCmd)
 	guestMigrateCmd.Flags().String("hostid", "", "The host the guest will be migrated to")

@@ -654,6 +654,7 @@ var importCmd = &cobra.Command{
 					if err != nil {
 						log.Printf("Storage Pool %s not found for pool: %s\n", disk.StorageID, pool.Name)
 						foundDisks = false
+						break
 					}
 					if _, err := sp.DiskInfo(restClient, disk.Filename); err != nil {
 						log.Printf("Disk %s not found for pool: %s\n", disk.Filename, pool.Name)

@@ -281,7 +281,7 @@ func (guest *Guest) Update(client *Client) (string, error) {
 	return result, err
 }
 
-//Delete deletes a guest
+// Delete deletes a guest
 func (guest *Guest) Delete(client *Client) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
@@ -294,23 +294,64 @@ func (guest *Guest) Delete(client *Client) error {
 	return err
 }
 
-//StartBackup requests starting a backup immediately
-func (guest *Guest) StartBackup(client *Client) (*Task, error) {
+// StartBackup requests starting a backup immediately
+func (guest *Guest) StartBackup(client *Client, storageId string) (*Task, error) {
 	if guest.Name == "" {
 		return nil, errors.New("name cannot be empty")
 	}
-	return client.getTaskFromResponse(client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/backup", nil))
+	data := map[string]interface{}{}
+	if storageId != "" {
+		data["storageId"] = storageId
+	}
+	jsonValue, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return client.getTaskFromResponse(client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/backup", jsonValue))
 }
 
-//Restore restores a guest from a backup
-func (guest *Guest) Restore(client *Client) (*Task, error) {
+// StartBackup requests starting a backup immediately
+func (guest *Guest) ListBackups(client *Client, storageId string) ([]string, error) {
 	if guest.Name == "" {
 		return nil, errors.New("name cannot be empty")
 	}
-	return client.getTaskFromResponse(client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/restore", nil))
+	data := map[string]interface{}{}
+	if storageId != "" {
+		data["storageId"] = storageId
+	}
+	jsonValue, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	backups := []string{}
+	body, err := client.request("GET", "guest/"+url.PathEscape(guest.Name)+"/backups", jsonValue)
+	if err != nil {
+		return backups, err
+	}
+	err = json.Unmarshal(body, &backups)
+	return backups, err
 }
 
-//Migrate migrate a guest to a different host
+// Restore restores a guest from a backup
+func (guest *Guest) Restore(client *Client, storageId, backup string) (*Task, error) {
+	if guest.Name == "" {
+		return nil, errors.New("name cannot be empty")
+	}
+	data := map[string]interface{}{}
+	if storageId != "" {
+		data["storageId"] = storageId
+	}
+	if backup != "" {
+		data["backup"] = backup
+	}
+	jsonValue, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return client.getTaskFromResponse(client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/restore", jsonValue))
+}
+
+// Migrate migrate a guest to a different host
 func (guest *Guest) Migrate(client *Client, destinationHostid string) error {
 	if guest.Name == "" {
 		return errors.New("name cannot be empty")
@@ -384,7 +425,7 @@ func (guest *Guest) ResetRecord(client *Client) error {
 	return err
 }
 
-//ExternalGuest is used to add external guest records to the system
+// ExternalGuest is used to add external guest records to the system
 type ExternalGuest struct {
 	GuestName string `json:"guestName,omitempty"`
 	Address   string `json:"address,omitempty"`
@@ -394,7 +435,7 @@ type ExternalGuest struct {
 	OS        string `json:"os,omitempty"`
 }
 
-//Create creates a new pool
+// Create creates a new pool
 func (guest *ExternalGuest) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(guest)
