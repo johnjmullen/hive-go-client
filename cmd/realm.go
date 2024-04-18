@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var realmCmd = &cobra.Command{
@@ -22,28 +22,60 @@ var realmCreateCmd = &cobra.Command{
 	Use:   "create [file]",
 	Short: "Add a new realm",
 	Args:  cobra.MaximumNArgs(1),
-	PreRun: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			cmd.MarkFlagRequired("name")
-			cmd.MarkFlagRequired("fqdn")
-		}
-	},
 	Run: func(cmd *cobra.Command, args []string) {
-		v := viper.New()
-		if len(args) == 1 {
-			v.SetConfigFile(args[0])
-			v.ReadInConfig()
+		var file *os.File
+		var err error
+		if args[0] == "-" {
+			file = os.Stdin
+		} else {
+			file, err = os.Open(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
-		v.BindPFlag("fqdn", cmd.Flags().Lookup("fqdn"))
-		v.BindPFlag("name", cmd.Flags().Lookup("name"))
+		defer file.Close()
+		data, _ := io.ReadAll(file)
 		var realm rest.Realm
-		err := v.Unmarshal(&realm)
+		err = unmarshal(data, &realm)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		realm.Verified = true
 		msg, err := realm.Create(restClient)
+		fmt.Println(msg)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var realmUpdateCmd = &cobra.Command{
+	Use:   "update [file]",
+	Short: "update a realm",
+	Args:  cobra.MaximumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		var file *os.File
+		var err error
+		if args[0] == "-" {
+			file = os.Stdin
+		} else {
+			file, err = os.Open(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+		defer file.Close()
+		data, _ := io.ReadAll(file)
+		var realm rest.Realm
+		err = unmarshal(data, &realm)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		msg, err := realm.Update(restClient)
 		fmt.Println(msg)
 		if err != nil {
 			fmt.Println(err)
@@ -114,9 +146,7 @@ func init() {
 	RootCmd.AddCommand(realmCmd)
 
 	realmCmd.AddCommand(realmCreateCmd)
-	realmCreateCmd.Flags().StringP("name", "n", "", "Netbios Name")
-	realmCreateCmd.Flags().String("fqdn", "", "FQDN")
-
+	realmCmd.AddCommand(realmUpdateCmd)
 	realmCmd.AddCommand(realmDeleteCmd)
 	realmCmd.AddCommand(realmGetCmd)
 
