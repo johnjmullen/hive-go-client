@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime/debug"
 	"strconv"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/ghodss/yaml"
@@ -97,7 +98,7 @@ func initConfig() {
 	viper.AutomaticEnv()
 	viper.ReadInConfig()
 	profiles := viper.GetStringMap("profiles")
-	if profile, ok := profiles[viper.GetString("profile")]; ok {
+	if profile, ok := profiles[strings.ToLower(viper.GetString("profile"))]; ok {
 		if options, ok := profile.(map[string]interface{}); ok {
 			for k, v := range options {
 				viper.Set(k, v)
