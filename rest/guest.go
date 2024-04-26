@@ -337,16 +337,8 @@ func (guest *Guest) ListBackups(client *Client, storageId string) ([]string, err
 	if guest.Name == "" {
 		return nil, errors.New("name cannot be empty")
 	}
-	data := map[string]interface{}{}
-	if storageId != "" {
-		data["storageId"] = storageId
-	}
-	jsonValue, err := json.Marshal(data)
-	if err != nil {
-		return nil, err
-	}
 	backups := []string{}
-	body, err := client.request("GET", "guest/"+url.PathEscape(guest.Name)+"/backups", jsonValue)
+	body, err := client.request("GET", "guest/"+url.PathEscape(guest.Name)+"/backups?storageId="+url.QueryEscape(storageId), nil)
 	if err != nil {
 		return backups, err
 	}
