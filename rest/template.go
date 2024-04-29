@@ -28,6 +28,7 @@ type TemplateDisk struct {
 // Template a template record from the rest interface
 type Template struct {
 	Name               string                 `json:"name"`
+	Description        string                 `json:"description"`
 	Vcpu               int                    `json:"vcpu"`
 	Mem                int                    `json:"mem"`
 	OS                 string                 `json:"os"`
@@ -42,6 +43,8 @@ type Template struct {
 	ManualAgentInstall bool                   `json:"manualAgentInstall"`
 	TemplateMap        map[string]interface{} `json:"templateMap,omitempty"`
 	BrokerOptions      GuestBrokerOptions     `json:"brokerOptions,omitempty"`
+	Secureboot         bool                   `json:"secureboot"`
+	Machine            string                 `json:"machine,omitempty"`
 }
 
 func (template Template) String() string {
