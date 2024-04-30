@@ -69,9 +69,10 @@ type PoolInterface struct {
 
 // PoolBackup data protection settings from a pool record
 type PoolBackup struct {
-	Enabled         bool   `json:"enabled"`
-	Frequency       string `json:"frequency"`
-	TargetStorageID string `json:"targetStorageId"`
+	Enabled            bool   `json:"enabled"`
+	Frequency          string `json:"frequency"`
+	TargetStorageID    string `json:"targetStorageId"`
+	IncrementalBackups int    `json:"incrementalBackups"`
 }
 
 // PoolAffinity host affinity settings for the pool
