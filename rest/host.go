@@ -307,37 +307,14 @@ func (host *Host) DisableCRS(client *Client) error {
 
 type HostNetwork struct {
 	Name      string `json:"-"`
-	DHCP      bool   `json:"dhcp"`
-	DNS       string `json:"dns"`
-	Gw        string `json:"gw"`
-	Interface string `json:"interface"`
-	IP        string `json:"ip"`
-	Mask      string `json:"mask"`
-	Search    string `json:"search"`
-	VLAN      int64  `json:"vlan"`
-}
-
-func (net HostNetwork) MarshalJSON() ([]byte, error) {
-	switch net.Name {
-	case "production":
-		return json.Marshal(net)
-	case "storage":
-		return json.Marshal(map[string]interface{}{
-			"interface": net.Interface,
-			"ip":        net.IP,
-			"mask":      net.Mask,
-			"vlan":      net.VLAN,
-		})
-	default:
-		return json.Marshal(map[string]interface{}{
-			"interface": net.Interface,
-			"vlan":      net.VLAN,
-		})
-	}
-}
-
-func (net *HostNetwork) UnmarshalJSON(b []byte) error {
-	return json.Unmarshal(b, &(net))
+	DHCP      bool   `json:"dhcp,omitempty"`
+	DNS       string `json:"dns,omitempty"`
+	Gw        string `json:"gw,omitempty"`
+	Interface string `json:"interface,omitempty"`
+	IP        string `json:"ip,omitempty"`
+	Mask      string `json:"mask,omitempty"`
+	Search    string `json:"search,omitempty"`
+	VLAN      int    `json:"vlan,omitempty"`
 }
 
 // GetNetwork retrieves settings for a host network
@@ -361,13 +338,19 @@ func (host Host) SetNetwork(client *Client, net HostNetwork) error {
 	return err
 }
 
+// DeleteNetwork adds or edits network settings for the host
+func (host Host) DeleteNetwork(client *Client, name string) error {
+	_, err := client.request("DELETE", "host/"+host.Hostid+"/networking/"+name, nil)
+	return err
+}
+
 type HostNetworkInterface struct {
 	Name      string `json:"name"`
 	Address   string `json:"address"`
-	Speed     int64  `json:"speed"`
-	Carrier   int64  `json:"carrier"`
+	Speed     int    `json:"speed"`
+	Carrier   int    `json:"carrier"`
 	Duplex    string `json:"duplex"`
-	MTU       int64  `json:"mtu"`
+	MTU       int    `json:"mtu"`
 	LinkModes []struct {
 		Speed  string `json:"speed"`
 		Duplex string `json:"duplex"`
@@ -390,9 +373,9 @@ func (host Host) ListNics(client *Client) ([]HostNetworkInterface, error) {
 }
 
 type HostNetworkInterfaceSettings struct {
-	Speed  int64  `json:"speed"`
-	Duplex string `json:"duplex"`
-	MTU    int64  `json:"mtu,omitempty"`
+	Speed  int    `json:"speed,omitempty"`
+	Duplex string `json:"duplex,omitempty"`
+	MTU    int    `json:"mtu,omitempty"`
 }
 
 // UpdateNetworkInterface hardcodes settings for a nic
