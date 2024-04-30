@@ -42,7 +42,7 @@ type Template struct {
 	StateMessage       string                 `json:"stateMessage,omitempty"`
 	ManualAgentInstall bool                   `json:"manualAgentInstall"`
 	TemplateMap        map[string]interface{} `json:"templateMap,omitempty"`
-	BrokerOptions      GuestBrokerOptions     `json:"brokerOptions,omitempty"`
+	BrokerOptions      *GuestBrokerOptions    `json:"brokerOptions,omitempty"`
 	Secureboot         bool                   `json:"secureboot"`
 	Machine            string                 `json:"machine,omitempty"`
 }

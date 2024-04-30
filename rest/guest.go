@@ -57,6 +57,8 @@ type Guest struct {
 	UserSession         *UserSession            `json:"userSession,omitempty"`
 	UUID                string                  `json:"uuid,omitempty"`
 	BrokerOptions       *GuestBrokerOptions     `json:"brokerOptions,omitempty"`
+	Secureboot          bool                    `json:"secureboot"`
+	Machine             string                  `json:"machine,omitempty"`
 }
 
 // GuestBrokerOptions allows configuring broker connection settings for a guest
