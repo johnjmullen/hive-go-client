@@ -265,7 +265,7 @@ func (cluster Cluster) UpdateSoftware(client *Client, packageName string) (*Task
 	return client.getTaskFromResponse(client.request("POST", "cluster/"+cluster.ID+"/updatePackage", jsonValue))
 }
 
-// EmailAlerts updates cluster email alert settings
+// EmailAlerts updates email alert settings
 func (cluster Cluster) SetEmailAlerts(client *Client, emailAlerts EmailAlerts) error {
 	jsonValue, err := json.Marshal(emailAlerts)
 	if err != nil {
@@ -275,8 +275,14 @@ func (cluster Cluster) SetEmailAlerts(client *Client, emailAlerts EmailAlerts) e
 	return err
 }
 
-// ClearEmailAlerts updates cluster email alert settings
+// ClearEmailAlerts updates email alert settings
 func (cluster Cluster) ClearEmailAlerts(client *Client) error {
 	_, err := client.request("POST", "cluster/"+cluster.ID+"/clearEmailAlerts", nil)
+	return err
+}
+
+// SendTestEmail sends an email to test the email alert settings
+func (cluster Cluster) SendTestEmail(client *Client) error {
+	_, err := client.request("POST", "cluster/"+cluster.ID+"/sendTestEmail", nil)
 	return err
 }

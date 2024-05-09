@@ -408,6 +408,28 @@ var clusterClearEmailAlertsCmd = &cobra.Command{
 	},
 }
 
+var clusterTestEmailCmd = &cobra.Command{
+	Use:   "test-email",
+	Short: "send a test email to verify the email alert settings",
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		cluster, err := restClient.GetCluster(clusterID)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = cluster.SendTestEmail(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(clusterCmd)
 	clusterCmd.AddCommand(addHostCmd)
@@ -446,4 +468,5 @@ func init() {
 
 	clusterCmd.AddCommand(clusterEmailAlertsCmd)
 	clusterCmd.AddCommand(clusterClearEmailAlertsCmd)
+	clusterCmd.AddCommand(clusterTestEmailCmd)
 }
