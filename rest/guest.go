@@ -150,8 +150,9 @@ type GuestBackup struct {
 	Frequency       string      `json:"frequency"`
 	TargetStorageID string      `json:"targetStorageId"`
 	LastBackup      interface{} `json:"lastBackup"`
-	StateMessage    string      `json:"stateMessage"`
+	StateMessage    string      `json:"stateMessage,omitempty"`
 	DiskFrozen      bool        `json:"diskFrozen"`
+	Backups         []string    `json:"backups,omitempty"`
 }
 
 type GuestMigrationMetadata struct {
@@ -443,14 +444,14 @@ func (guest *Guest) ResetRecord(client *Client) error {
 
 // ExternalGuest is used to add external guest records to the system
 type ExternalGuest struct {
-	GuestName        string             `json:"guestName,omitempty"`
-	Address          string             `json:"address,omitempty"`
-	Username         string             `json:"username,omitempty"`
-	ADGroup          string             `json:"ADGroup,omitempty"`
-	Realm            string             `json:"realm,omitempty"`
-	OS               string             `json:"os,omitempty"`
-	DisablePortCheck bool               `json:"disablePortCheck"`
-	BrokerOptions    GuestBrokerOptions `json:"brokerOptions,omitempty"`
+	GuestName        string              `json:"guestName,omitempty"`
+	Address          string              `json:"address,omitempty"`
+	Username         string              `json:"username,omitempty"`
+	ADGroup          string              `json:"ADGroup,omitempty"`
+	Realm            string              `json:"realm,omitempty"`
+	OS               string              `json:"os,omitempty"`
+	DisablePortCheck bool                `json:"disablePortCheck"`
+	BrokerOptions    *GuestBrokerOptions `json:"brokerOptions,omitempty"`
 }
 
 // Create creates a new pool
