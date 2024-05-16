@@ -306,7 +306,7 @@ func (host *Host) DisableCRS(client *Client) error {
 }
 
 type HostNetwork struct {
-	Name      string `json:"-"`
+	Name      string `json:"name,omitempty"`
 	DHCP      bool   `json:"dhcp,omitempty"`
 	DNS       string `json:"dns,omitempty"`
 	Gw        string `json:"gw,omitempty"`
@@ -315,6 +315,17 @@ type HostNetwork struct {
 	Mask      string `json:"mask,omitempty"`
 	Search    string `json:"search,omitempty"`
 	VLAN      int    `json:"vlan,omitempty"`
+}
+
+// ListNetworks returns a list of networks configured on the host
+func (host Host) ListNetworks(client *Client) ([]string, error) {
+	networks := []string{}
+	body, err := client.request("GET", "host/"+host.Hostid+"/networking/bridges", nil)
+	if err != nil {
+		return networks, err
+	}
+	err = json.Unmarshal(body, &networks)
+	return networks, err
 }
 
 // GetNetwork retrieves settings for a host network
@@ -330,11 +341,13 @@ func (host Host) GetNetwork(client *Client, name string) (HostNetwork, error) {
 
 // SetNetwork adds or edits network settings for the host
 func (host Host) SetNetwork(client *Client, net HostNetwork) error {
+	name := net.Name
+	net.Name = ""
 	jsonValue, err := json.Marshal(net)
 	if err != nil {
 		return err
 	}
-	_, err = client.request("POST", "host/"+host.Hostid+"/networking/"+net.Name, jsonValue)
+	_, err = client.request("POST", "host/"+host.Hostid+"/networking/"+name, jsonValue)
 	return err
 }
 
@@ -361,8 +374,8 @@ type HostNetworkInterface struct {
 	Driver    string `json:"driver"`
 }
 
-// ListNics returns information about the network interfaces on a host
-func (host Host) ListNics(client *Client) ([]HostNetworkInterface, error) {
+// ListInterfaces returns information about the network interfaces on a host
+func (host Host) ListInterfaces(client *Client) ([]HostNetworkInterface, error) {
 	interfaces := []HostNetworkInterface{}
 	body, err := client.request("GET", "host/"+host.Hostid+"/networking/interfaces", nil)
 	if err != nil {
@@ -379,7 +392,7 @@ type HostNetworkInterfaceSettings struct {
 }
 
 // UpdateNetworkInterface hardcodes settings for a nic
-func (host Host) UpdateNicSettings(client *Client, nic string, settings HostNetworkInterfaceSettings) error {
+func (host Host) UpdateInterfaceSettings(client *Client, nic string, settings HostNetworkInterfaceSettings) error {
 	jsonValue, err := json.Marshal(settings)
 	if err != nil {
 		return err
@@ -389,7 +402,7 @@ func (host Host) UpdateNicSettings(client *Client, nic string, settings HostNetw
 }
 
 // UpdateNetworkInterface resets the settings for a nic
-func (host Host) ResetNicSettings(client *Client, nic string) error {
+func (host Host) ResetInterfaceSettings(client *Client, nic string) error {
 	_, err := client.request("DELETE", "host/"+host.Hostid+"/networking/interface/"+nic, nil)
 	return err
 }

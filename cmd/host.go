@@ -3,7 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/hive-io/hive-go-client/rest"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -17,13 +19,43 @@ var hostCmd = &cobra.Command{
 	},
 }
 
-var hostGetCmd = &cobra.Command{
-	Use:   "get [hostid]",
-	Short: "get host details",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
+func addHostIDFlags(cmd *cobra.Command) {
+	cmd.Flags().StringP("id", "i", "", "hostid")
+	cmd.Flags().StringP("name", "n", "", "hostname")
+	cmd.Flags().String("ip", "", "host ip address")
+}
 
+func bindHostIDFlags(cmd *cobra.Command, args []string) {
+	viper.BindPFlag("id", cmd.Flags().Lookup("id"))
+	viper.BindPFlag("name", cmd.Flags().Lookup("name"))
+	viper.BindPFlag("ip", cmd.Flags().Lookup("ip"))
+}
+
+func getHost(cmd *cobra.Command, args []string) (*rest.Host, error) {
+	switch {
+	case cmd.Flags().Changed("id"):
+		host, err := restClient.GetHost(viper.GetString("id"))
+		return &host, err
+	case cmd.Flags().Changed("name"):
+		return restClient.GetHostByName(viper.GetString("name"))
+	case cmd.Flags().Changed("ip"):
+		return restClient.GetHostByIP(viper.GetString("ip"))
+	case len(args) == 1 && strings.Contains(cmd.Use, "| hostid}"):
+		host, err := restClient.GetHost(args[0])
+		return &host, err
+	default:
+		cmd.Usage()
+		os.Exit(1)
+	}
+	return nil, fmt.Errorf("error getting host")
+}
+
+var hostGetCmd = &cobra.Command{
+	Use:    "get {-i hostid | -n hostname | --ip ip_address | hostid}",
+	Short:  "get host details",
+	PreRun: bindHostIDFlags,
+	Run: func(cmd *cobra.Command, args []string) {
+		host, err := getHost(cmd, args)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -84,7 +116,7 @@ var hostListCmd = &cobra.Command{
 }
 
 var hostGetIDCmd = &cobra.Command{
-	Use:   "get-id [name]",
+	Use:   "get-id name",
 	Short: "get hostid from hostname",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -98,14 +130,14 @@ var hostGetIDCmd = &cobra.Command{
 }
 
 var hostLogLevelCmd = &cobra.Command{
-	Use:   "log-level [hostid]",
+	Use:   "log-level {-i hostid | -n hostname | --ip ip_address | hostid}",
 	Short: "get or set host log level",
-	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
+		bindHostIDFlags(cmd, args)
 		viper.BindPFlag("set", cmd.Flags().Lookup("set"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
+		host, err := getHost(cmd, args)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -125,12 +157,11 @@ var hostLogLevelCmd = &cobra.Command{
 }
 
 var hostRestartServicesCmd = &cobra.Command{
-	Use:   "restart-services [hostid]",
-	Short: "restart hive servies",
-	Args:  cobra.ExactArgs(1),
+	Use:    "restart-services {-i hostid | -n hostname | --ip ip_address | hostid}",
+	Short:  "restart hive servies",
+	PreRun: bindHostIDFlags,
 	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
-
+		host, err := getHost(cmd, args)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -144,11 +175,11 @@ var hostRestartServicesCmd = &cobra.Command{
 }
 
 var hostRebootCmd = &cobra.Command{
-	Use:   "reboot [hostid]",
-	Short: "reboot a host",
-	Args:  cobra.ExactArgs(1),
+	Use:    "reboot {-i hostid | -n hostname | --ip ip_address | hostid}",
+	Short:  "reboot a host",
+	PreRun: bindHostIDFlags,
 	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
+		host, err := getHost(cmd, args)
 
 		if err != nil {
 			fmt.Println(err)
@@ -163,11 +194,11 @@ var hostRebootCmd = &cobra.Command{
 }
 
 var hostShutdownCmd = &cobra.Command{
-	Use:   "shutdown [hostid]",
-	Short: "shutdown a host",
-	Args:  cobra.ExactArgs(1),
+	Use:    "shutdown {-i hostid | -n hostname | --ip ip_address | hostid}",
+	Short:  "shutdown a host",
+	PreRun: bindHostIDFlags,
 	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
+		host, err := getHost(cmd, args)
 
 		if err != nil {
 			fmt.Println(err)
@@ -182,14 +213,14 @@ var hostShutdownCmd = &cobra.Command{
 }
 
 var hostUnjoinCmd = &cobra.Command{
-	Use:   "unjoin [hostid]",
+	Use:   "unjoin {-i hostid | -n hostname | --ip ip_address | hostid}",
 	Short: "remove host from cluster",
-	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
+		bindHostIDFlags(cmd, args)
 		bindTaskFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
+		host, err := getHost(cmd, args)
 
 		if err != nil {
 			fmt.Println(err)
@@ -203,15 +234,15 @@ var hostUnjoinCmd = &cobra.Command{
 }
 
 var hostStateCmd = &cobra.Command{
-	Use:   "state [hostid]",
+	Use:   "state {-i hostid | -n hostname | --ip ip_address | hostid}",
 	Short: "get or set host state",
-	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
+		bindHostIDFlags(cmd, args)
 		viper.BindPFlag("set", cmd.Flags().Lookup("set"))
 		bindTaskFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
+		host, err := getHost(cmd, args)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -233,11 +264,11 @@ var hostStateCmd = &cobra.Command{
 }
 
 var hostEnableGatewayCmd = &cobra.Command{
-	Use:   "enable-gateway-mode [hostid]",
-	Short: "Convert the host into a gateway appliance",
-	Args:  cobra.ExactArgs(1),
+	Use:    "enable-gateway-mode {-i hostid | -n hostname | --ip ip_address | hostid}",
+	Short:  "Convert the host into a gateway appliance",
+	PreRun: bindHostIDFlags,
 	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
+		host, err := getHost(cmd, args)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -254,11 +285,11 @@ var hostEnableGatewayCmd = &cobra.Command{
 }
 
 var hostDisableGatewayCmd = &cobra.Command{
-	Use:   "disable-gateway-mode [hostid]",
-	Short: "Convert the host from a gateway appliance to a regular fabric host",
-	Args:  cobra.ExactArgs(1),
+	Use:    "disable-gateway-mode {-i hostid | -n hostname | --ip ip_address | hostid}",
+	Short:  "Convert the host from a gateway appliance to a regular fabric host",
+	PreRun: bindHostIDFlags,
 	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
+		host, err := getHost(cmd, args)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -276,11 +307,11 @@ var hostDisableGatewayCmd = &cobra.Command{
 }
 
 var hostListSoftwareCmd = &cobra.Command{
-	Use:   "list-software [hostid]",
-	Short: "list available software packages on a host",
-	Args:  cobra.ExactArgs(1),
+	Use:    "list-software {-i hostid | -n hostname | --ip ip_address | hostid}",
+	Short:  "list available software packages on a host",
+	PreRun: bindHostIDFlags,
 	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
+		host, err := getHost(cmd, args)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -323,15 +354,15 @@ var hostUploadSoftware = &cobra.Command{
 }
 
 var hostDeleteSoftware = &cobra.Command{
-	Use:   "delete-software [hostid]",
+	Use:   "delete-software {-i hostid | -n hostname | --ip ip_address | hostid}",
 	Short: "delete a software package",
-	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
+		bindHostIDFlags(cmd, args)
 		viper.BindPFlag("package", cmd.Flags().Lookup("package"))
 		cmd.MarkFlagRequired("package")
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
+		host, err := getHost(cmd, args)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -346,11 +377,11 @@ var hostDeleteSoftware = &cobra.Command{
 }
 
 var hostEnableCRSCmd = &cobra.Command{
-	Use:   "enable-crs [hostid]",
-	Short: "enable crs on a host",
-	Args:  cobra.ExactArgs(1),
+	Use:    "enable-crs {-i hostid | -n hostname | --ip ip_address | hostid}",
+	Short:  "enable crs on a host",
+	PreRun: bindHostIDFlags,
 	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
+		host, err := getHost(cmd, args)
 
 		if err != nil {
 			fmt.Println(err)
@@ -365,11 +396,11 @@ var hostEnableCRSCmd = &cobra.Command{
 }
 
 var hostDisableCRSCmd = &cobra.Command{
-	Use:   "disable-crs [hostid]",
-	Short: "disable crs on a host",
-	Args:  cobra.ExactArgs(1),
+	Use:    "disable-crs {-i hostid | -n hostname | --ip ip_address | hostid}",
+	Short:  "disable crs on a host",
+	PreRun: bindHostIDFlags,
 	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
+		host, err := getHost(cmd, args)
 
 		if err != nil {
 			fmt.Println(err)
@@ -384,12 +415,12 @@ var hostDisableCRSCmd = &cobra.Command{
 }
 
 var hostDeleteCmd = &cobra.Command{
-	Use:    "delete [hostid]",
+	Use:    "delete {-i hostid | -n hostname | --ip ip_address | hostid}",
 	Short:  "delete a host record from the host table",
 	Hidden: true,
-	Args:   cobra.ExactArgs(1),
+	PreRun: bindHostIDFlags,
 	Run: func(cmd *cobra.Command, args []string) {
-		host, err := restClient.GetHost(args[0])
+		host, err := getHost(cmd, args)
 
 		if err != nil {
 			fmt.Println(err)
@@ -405,33 +436,47 @@ var hostDeleteCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(hostCmd)
-	hostCmd.AddCommand(hostGetCmd)
 	hostCmd.AddCommand(hostInfoCmd)
 	hostCmd.AddCommand(hostGetIDCmd)
+	hostCmd.AddCommand(hostGetCmd)
+	addHostIDFlags(hostGetCmd)
 
 	hostCmd.AddCommand(hostListCmd)
 	addListFlags(hostListCmd)
 
 	hostCmd.AddCommand(hostLogLevelCmd)
 	hostLogLevelCmd.Flags().StringP("set", "s", "", "set log level (error/warn/info/debug)")
+	addHostIDFlags(hostLogLevelCmd)
 
 	hostCmd.AddCommand(hostRestartServicesCmd)
+	addHostIDFlags(hostRestartServicesCmd)
 	hostCmd.AddCommand(hostRebootCmd)
+	addHostIDFlags(hostRebootCmd)
 	hostCmd.AddCommand(hostShutdownCmd)
+	addHostIDFlags(hostShutdownCmd)
 	hostCmd.AddCommand(hostUnjoinCmd)
+	addHostIDFlags(hostUnjoinCmd)
 	addTaskFlags(hostUnjoinCmd)
 
 	hostCmd.AddCommand(hostStateCmd)
+	addHostIDFlags(hostStateCmd)
 	hostStateCmd.Flags().StringP("set", "s", "", "set host state (available/maintenance)")
 	addTaskFlags(hostStateCmd)
 
 	hostCmd.AddCommand(hostListSoftwareCmd)
+	addHostIDFlags(hostListSoftwareCmd)
 	hostCmd.AddCommand(hostUploadSoftware)
 	hostCmd.AddCommand(hostDeleteSoftware)
+	addHostIDFlags(hostDeleteSoftware)
 	hostDeleteSoftware.Flags().String("package", "", "package to delete")
 	hostCmd.AddCommand(hostEnableCRSCmd)
+	addHostIDFlags(hostEnableCRSCmd)
 	hostCmd.AddCommand(hostDisableCRSCmd)
+	addHostIDFlags(hostDisableCRSCmd)
 	hostCmd.AddCommand(hostEnableGatewayCmd)
+	addHostIDFlags(hostEnableGatewayCmd)
 	hostCmd.AddCommand(hostDisableGatewayCmd)
+	addHostIDFlags(hostDisableGatewayCmd)
 	hostCmd.AddCommand(hostDeleteCmd)
+	addHostIDFlags(hostDeleteCmd)
 }
