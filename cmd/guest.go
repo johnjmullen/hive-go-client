@@ -290,8 +290,8 @@ var guestBackupCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		bindTaskFlags(cmd)
-		viper.BindPFlag("id", cmd.Flags().Lookup("id"))
-		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
+		viper.BindPFlag("id", cmd.Flags().Lookup("storage-id"))
+		viper.BindPFlag("name", cmd.Flags().Lookup("storage-name"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		guest, err := restClient.GetGuest(args[0])
@@ -309,8 +309,8 @@ var guestListBackupsCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		bindTaskFlags(cmd)
-		viper.BindPFlag("id", cmd.Flags().Lookup("id"))
-		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
+		viper.BindPFlag("id", cmd.Flags().Lookup("storage-id"))
+		viper.BindPFlag("name", cmd.Flags().Lookup("storage-name"))
 		viper.BindPFlag("backup", cmd.Flags().Lookup("backup"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -334,8 +334,8 @@ var guestRestoreCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		bindTaskFlags(cmd)
-		viper.BindPFlag("id", cmd.Flags().Lookup("id"))
-		viper.BindPFlag("name", cmd.Flags().Lookup("name"))
+		viper.BindPFlag("id", cmd.Flags().Lookup("storage-id"))
+		viper.BindPFlag("name", cmd.Flags().Lookup("storage-name"))
 		viper.BindPFlag("backup", cmd.Flags().Lookup("backup"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -456,11 +456,11 @@ func getBackupStoragePoolId(cmd *cobra.Command) string {
 	sp := &rest.StoragePool{}
 	var err error
 	switch {
-	case cmd.Flags().Changed("id"):
-		id, _ := cmd.Flags().GetString("id")
+	case cmd.Flags().Changed("storage-id"):
+		id, _ := cmd.Flags().GetString("storage-id")
 		sp, err = restClient.GetStoragePool(id)
-	case cmd.Flags().Changed("name"):
-		name, _ := cmd.Flags().GetString("name")
+	case cmd.Flags().Changed("storage-name"):
+		name, _ := cmd.Flags().GetString("storage-name")
 		sp, err = restClient.GetStoragePoolByName(name)
 	}
 	if err != nil {
