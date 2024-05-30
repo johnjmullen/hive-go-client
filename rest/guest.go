@@ -146,12 +146,11 @@ type GuestSnapshot struct {
 // GuestBackup is struct for backup data of VM
 type GuestBackup struct {
 	Enabled         bool        `json:"enabled"`
-	State           string      `json:"state"`
-	Frequency       string      `json:"frequency"`
-	TargetStorageID string      `json:"targetStorageId"`
-	LastBackup      interface{} `json:"lastBackup"`
+	State           string      `json:"state,omitempty"`
+	Frequency       string      `json:"frequency,omitempty"`
+	TargetStorageID string      `json:"targetStorageId,omitempty"`
+	LastBackup      interface{} `json:"lastBackup,omitempty"`
 	StateMessage    string      `json:"stateMessage,omitempty"`
-	DiskFrozen      bool        `json:"diskFrozen"`
 	Backups         []string    `json:"backups,omitempty"`
 }
 
