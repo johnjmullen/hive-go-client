@@ -70,7 +70,10 @@ func (client *Client) request(method, path string, data []byte) ([]byte, error) 
 }
 
 func (client *Client) requestWithContext(ctx context.Context, method, path string, data []byte) ([]byte, error) {
-	headers := map[string]string{"Content-type": "application/json"}
+	headers := map[string]string{}
+	if data != nil {
+		headers["Content-type"] = "application/json"
+	}
 	return checkResponse(client.requestWithHeaders(ctx, method, path, bytes.NewBuffer(data), headers, time.Second*120))
 }
 
