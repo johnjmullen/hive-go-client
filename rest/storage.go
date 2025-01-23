@@ -13,27 +13,37 @@ import (
 	"github.com/eventials/go-tus"
 )
 
+// StorageDevice matches a device by path or id
+type StorageDevice struct {
+	ID   string `json:"id,omitempty"`
+	Path string `json:"path,omitempty"`
+}
+
 // StoragePool describes a storage pool returned from the rest api
 type StoragePool struct {
 	ID                string   `json:"id,omitempty"`
 	Name              string   `json:"name"`
 	Type              string   `json:"type"`
+	Hosts             []string `json:"hosts,omitempty"`
+	Disabled          bool     `json:"disabled"`
+	MountOptions      []string `json:"mountOptions,omitempty"`
+	Roles             []string `json:"roles,omitempty"`
+	Tags              []string `json:"tags,omitempty"`
 	Server            string   `json:"server,omitempty"`
 	Path              string   `json:"path,omitempty"`
 	URL               string   `json:"url,omitempty"`
 	Username          string   `json:"username,omitempty"`
 	Password          string   `json:"password,omitempty"`
 	Key               string   `json:"key,omitempty"`
-	MountOptions      []string `json:"mountOptions,omitempty"`
-	Roles             []string `json:"roles,omitempty"`
-	Tags              []string `json:"tags,omitempty"`
 	S3AccessKeyID     string   `json:"s3AccessKeyId,omitempty"`
 	S3SecretAccessKey string   `json:"s3SecretAccessKey,omitempty"`
 	S3Region          string   `json:"s3Region,omitempty"`
 	S3Provider        string   `json:"s3Provider,omitempty"`
 	S3Endpoint        string   `json:"s3Endpoint,omitempty"`
-	Disabled          bool     `json:"disabled"`
 	Replicated        bool     `json:"replicated,omitempty"`
+	//ocfs2 options
+	Device      *StorageDevice `json:"device,omitempty"`
+	FSName      string         `json:"fsName,omitempty"`
 }
 
 // DiskInfo contains information about a disk from a storage pool
