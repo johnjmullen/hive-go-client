@@ -228,7 +228,12 @@ type Version struct {
 
 // SetState can be used to set a host's state to available or maintenance
 func (host *Host) SetState(client *Client, state string) (*Task, error) {
-	return client.getTaskFromResponse(client.request("POST", "host/"+host.Hostid+"/state?state="+state, nil))
+	data := map[string]interface{}{"state": state}
+	jsonValue, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return client.getTaskFromResponse(client.request("POST", "host/"+host.Hostid+"/state", jsonValue))
 }
 
 // GetState gets the current state of the host
