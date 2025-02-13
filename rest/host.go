@@ -411,3 +411,27 @@ func (host Host) ResetInterfaceSettings(client *Client, nic string) error {
 	_, err := client.request("DELETE", "host/"+host.Hostid+"/networking/interface/"+nic, nil)
 	return err
 }
+
+func (host Host) IscsiDiscover(client *Client, portal string) ([]byte, error) {
+	jsonValue, _ := json.Marshal(map[string]interface{}{"portal": portal})
+	result, err := client.request("POST", "host/"+host.Hostid+"/iscsi/discover", jsonValue)
+	return result, err
+}
+
+func (host Host) IscsiLogin(client *Client, portal string, target string, authMethod string, username string, password string) error {
+	data := map[string]interface{}{"portal": portal, "target": target, "authMethod": authMethod, "username": username, "password": password}
+	jsonValue, _ := json.Marshal(data)
+	_, err := client.request("POST", "host/"+host.Hostid+"/iscsi/login", jsonValue)
+	return err
+}
+
+func (host Host) IscsiSessions(client *Client) ([]byte, error) {
+	result, err := client.request("GET", "host/"+host.Hostid+"/iscsi/sessions", nil)
+	return result, err
+}
+
+func (host Host) IscsiLogout(client *Client, portal string, target string) error {
+	jsonValue, _ := json.Marshal(map[string]interface{}{"portal": portal, "target": target})
+	_, err := client.request("POST", "host/"+host.Hostid+"/iscsi/logout", jsonValue)
+	return err
+}

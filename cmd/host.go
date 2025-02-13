@@ -434,6 +434,102 @@ var hostDeleteCmd = &cobra.Command{
 	},
 }
 
+var hostIscsiDiscoverCmd = &cobra.Command{
+	Use:   "iscsi-discover",
+	Short: "discover iscsi targets",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		bindHostIDFlags(cmd, args)
+		viper.BindPFlag("portal", cmd.Flags().Lookup("portal"))
+		cmd.MarkFlagRequired("portal")
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		host, err := getHost(cmd, args)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		result, err := host.IscsiDiscover(restClient, viper.GetString("portal"))
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(string(result))
+	},
+}
+
+var hostIscsiLoginCmd = &cobra.Command{
+	Use:   "iscsi-login",
+	Short: "login to an iscsi target",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		bindHostIDFlags(cmd, args)
+		viper.BindPFlag("portal", cmd.Flags().Lookup("portal"))
+		viper.BindPFlag("target", cmd.Flags().Lookup("target"))
+		viper.BindPFlag("iscsiUsername", cmd.Flags().Lookup("iscsi-username"))
+		viper.BindPFlag("iscsiPassword", cmd.Flags().Lookup("iscsi-password"))
+		cmd.MarkFlagRequired("portal")
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		host, err := getHost(cmd, args)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		authMethod := "None"
+		if viper.GetString("iscsiUsername") != "" {
+			authMethod = "CHAP"
+		}
+		err = host.IscsiLogin(restClient, viper.GetString("portal"), viper.GetString("target"), authMethod, viper.GetString("iscsiUsername"), viper.GetString("iscsiPassword"))
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var hostIscsiSessionsCmd = &cobra.Command{
+	Use:   "iscsi-sessions",
+	Short: "list iscsi sessions",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		bindHostIDFlags(cmd, args)
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		host, err := getHost(cmd, args)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		result, err := host.IscsiSessions(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(string(result))
+	},
+}
+
+var hostIscsiLogoutCmd = &cobra.Command{
+	Use:   "iscsi-logout",
+	Short: "logout from an iscsi target",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		bindHostIDFlags(cmd, args)
+		viper.BindPFlag("portal", cmd.Flags().Lookup("portal"))
+		viper.BindPFlag("target", cmd.Flags().Lookup("target"))
+		cmd.MarkFlagRequired("portal")
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		host, err := getHost(cmd, args)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = host.IscsiLogout(restClient, viper.GetString("portal"), viper.GetString("target"))
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(hostCmd)
 	hostCmd.AddCommand(hostInfoCmd)
@@ -479,4 +575,20 @@ func init() {
 	addHostIDFlags(hostDisableGatewayCmd)
 	hostCmd.AddCommand(hostDeleteCmd)
 	addHostIDFlags(hostDeleteCmd)
+
+	hostCmd.AddCommand(hostIscsiDiscoverCmd)
+	addHostIDFlags(hostIscsiDiscoverCmd)
+	hostIscsiDiscoverCmd.Flags().String("portal", "", "portal")
+	hostCmd.AddCommand(hostIscsiLoginCmd)
+	addHostIDFlags(hostIscsiLoginCmd)
+	hostIscsiLoginCmd.Flags().String("portal", "", "portal")
+	hostIscsiLoginCmd.Flags().String("target", "", "target")
+	hostIscsiLoginCmd.Flags().String("iscsi-username", "", "iscsi username")
+	hostIscsiLoginCmd.Flags().String("iscsi-password", "", "iscsi password")
+	hostCmd.AddCommand(hostIscsiSessionsCmd)
+	addHostIDFlags(hostIscsiSessionsCmd)
+	hostCmd.AddCommand(hostIscsiLogoutCmd)
+	addHostIDFlags(hostIscsiLogoutCmd)
+	hostIscsiLogoutCmd.Flags().String("portal", "", "portal")
+	hostIscsiLogoutCmd.Flags().String("target", "", "target")
 }
