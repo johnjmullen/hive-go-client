@@ -298,6 +298,15 @@ func (guest *Guest) Reset(client *Client) error {
 func (guest *Guest) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(guest)
+	if guest.External {
+		externalGuest, err := guest.ToExternalGuest()
+		if err != nil {
+			return "", err
+		}
+		if err = client.CheckHostVersion("8.6.0"); err != nil {
+			return externalGuest.Update(client)
+		}
+	}
 	body, err := client.request("PUT", "guest/"+url.PathEscape(guest.Name), jsonValue)
 	if err == nil {
 		result = string(body)
@@ -432,21 +441,13 @@ func (guest Guest) WaitForGuestWithContext(ctx context.Context, client *Client, 
 	}
 }
 
-// ResetRecord forces a guest record to be reset so it can be rebuilt
-func (guest *Guest) ResetRecord(client *Client) error {
-	if guest.Name == "" {
-		return errors.New("name cannot be empty")
-	}
-	_, err := client.request("POST", "guest/"+url.PathEscape(guest.Name)+"/resetRecord", nil)
-	return err
-}
-
 // ExternalGuest is used to add external guest records to the system
 type ExternalGuest struct {
 	GuestName        string              `json:"guestName,omitempty"`
 	Address          string              `json:"address,omitempty"`
 	Username         string              `json:"username,omitempty"`
 	ADGroup          string              `json:"ADGroup,omitempty"`
+	ProfileID        string              `json:"profileId,omitempty"`
 	Realm            string              `json:"realm,omitempty"`
 	OS               string              `json:"os,omitempty"`
 	DisablePortCheck bool                `json:"disablePortCheck"`
@@ -458,6 +459,44 @@ func (guest *ExternalGuest) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(guest)
 	body, err := client.request("POST", "guest/external", jsonValue)
+	if err == nil {
+		result = string(body)
+	}
+	return result, err
+}
+
+func (guest *Guest) ToExternalGuest() (*ExternalGuest, error) {
+	if !guest.External {
+		return nil, errors.New("guest is not an external guest")
+	}
+	externalGuest := ExternalGuest{
+		GuestName:        guest.Name,
+		Address:          guest.Address,
+		Username:         guest.Username,
+		ADGroup:          guest.ADGroup,
+		Realm:            guest.Realm,
+		ProfileID:        guest.ProfileID,
+		OS:               guest.Os,
+		BrokerOptions:    guest.BrokerOptions,
+		DisablePortCheck: guest.DisablePortCheck,
+	}
+	return &externalGuest, nil
+}
+
+func (client *Client) GetExternalGuest(name string) (*ExternalGuest, error) {
+	guest, err := client.GetGuest(name)
+	if err != nil {
+		return nil, err
+	}
+	return guest.ToExternalGuest()
+}
+
+func (guest *ExternalGuest) Update(client *Client) (string, error) {
+	var result string
+	guestName := guest.GuestName
+	guest.GuestName = ""
+	jsonValue, _ := json.Marshal(guest)
+	body, err := client.request("PUT", "guest/external/"+guestName, jsonValue)
 	if err == nil {
 		result = string(body)
 	}

@@ -166,13 +166,12 @@ var guestUpdateCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-
 		msg, err := guest.Update(restClient)
-		fmt.Println(msg)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+		fmt.Println(msg)
 	},
 }
 
@@ -368,7 +367,7 @@ var guestMigrateCmd = &cobra.Command{
 
 var guestAddExternalCmd = &cobra.Command{
 	Use:   "add-external [File]",
-	Short: "add extrnal guests from a file",
+	Short: "add external guests from a file",
 	Long: `Add guests to the Physical Machines pool from a file
 The file must contain a list of guests in json, yaml, or csv specified by --format
 
@@ -423,12 +422,20 @@ test2,10.0.0.2,user2,TEST
 			}
 		} else {
 			if err := unmarshal(data, &guests); err != nil {
-				fmt.Println(formatString("Error: Failed to parse input file"))
+				fmt.Println(err, formatString("Error: Failed to parse input file"))
 				os.Exit(1)
 			}
 		}
 
 		for _, guest := range guests {
+			if _, err := restClient.GetGuest(guest.GuestName); err == nil {
+				_, err := guest.Update(restClient)
+				if err != nil {
+					fmt.Println(err)
+					os.Exit(1)
+				}
+				continue
+			}
 			if _, err := guest.Create(restClient); err != nil {
 				fmt.Println(err)
 				os.Exit(1)
@@ -438,17 +445,37 @@ test2,10.0.0.2,user2,TEST
 	},
 }
 
-var guestResetRecordCmd = &cobra.Command{
-	Use:   "resetRecord [Name]",
-	Short: "Resets a guest record",
+var guestUpdateExternalCmd = &cobra.Command{
+	Use:   "update-external [file]",
+	Short: "update an external guest",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		guest, err := restClient.GetGuest(args[0])
+		var file *os.File
+		var err error
+		if args[0] == "-" {
+			file = os.Stdin
+		} else {
+			file, err = os.Open(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+		defer file.Close()
+		data, _ := io.ReadAll(file)
+		var guest rest.ExternalGuest
+		err = unmarshal(data, &guest)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		guest.ResetRecord(restClient)
+
+		msg, err := guest.Update(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(msg)
 	},
 }
 
@@ -514,5 +541,5 @@ func init() {
 	guestMigrateCmd.Flags().String("hostid", "", "The host the guest will be migrated to")
 
 	guestCmd.AddCommand(guestAddExternalCmd)
-	guestCmd.AddCommand(guestResetRecordCmd)
+	guestCmd.AddCommand(guestUpdateExternalCmd)
 }

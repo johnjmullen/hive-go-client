@@ -678,20 +678,20 @@ var importCmd = &cobra.Command{
 		}
 		if slices.Contains(include, "guests") {
 			for _, guest := range data.Guests {
+				if !guest.External {
+					continue
+				}
 				if _, err := restClient.GetGuest(guest.Name); err == nil {
 					continue //already exists
 				}
 
 				fmt.Printf("Adding external guest %s\n", guest.Name)
-				externalGuest := rest.ExternalGuest{
-					GuestName: guest.Name,
-					Address:   guest.Address,
-					Username:  guest.Username,
-					ADGroup:   guest.ADGroup,
-					Realm:     guest.Realm,
-					OS:        guest.Os,
+				externalGuest, err := guest.ToExternalGuest()
+				if err != nil {
+					log.Printf("Error converting guest to external guest: %v\n", err)
+					continue
 				}
-				_, err := externalGuest.Create(restClient)
+				_, err = externalGuest.Create(restClient)
 				if err != nil {
 					log.Printf("Error adding external guest: %v\n", err)
 				}
