@@ -413,12 +413,18 @@ func (host Host) ResetInterfaceSettings(client *Client, nic string) error {
 }
 
 func (host Host) IscsiDiscover(client *Client, portal string) ([]byte, error) {
+	if client.CheckHostVersion("8.6.0") != nil {
+		return nil, errors.New("Host version must be 8.6.0 or higher")
+	}
 	jsonValue, _ := json.Marshal(map[string]interface{}{"portal": portal})
 	result, err := client.request("POST", "host/"+host.Hostid+"/iscsi/discover", jsonValue)
 	return result, err
 }
 
 func (host Host) IscsiLogin(client *Client, portal string, target string, authMethod string, username string, password string) error {
+	if client.CheckHostVersion("8.6.0") != nil {
+		return errors.New("Host version must be 8.6.0 or higher")
+	}
 	data := map[string]interface{}{"portal": portal, "target": target, "authMethod": authMethod, "username": username, "password": password}
 	jsonValue, _ := json.Marshal(data)
 	_, err := client.request("POST", "host/"+host.Hostid+"/iscsi/login", jsonValue)
@@ -426,11 +432,17 @@ func (host Host) IscsiLogin(client *Client, portal string, target string, authMe
 }
 
 func (host Host) IscsiSessions(client *Client) ([]byte, error) {
+	if client.CheckHostVersion("8.6.0") != nil {
+		return nil, errors.New("Host version must be 8.6.0 or higher")
+	}
 	result, err := client.request("GET", "host/"+host.Hostid+"/iscsi/sessions", nil)
 	return result, err
 }
 
 func (host Host) IscsiLogout(client *Client, portal string, target string) error {
+	if client.CheckHostVersion("8.6.0") != nil {
+		return errors.New("Host version must be 8.6.0 or higher")
+	}
 	jsonValue, _ := json.Marshal(map[string]interface{}{"portal": portal, "target": target})
 	_, err := client.request("POST", "host/"+host.Hostid+"/iscsi/logout", jsonValue)
 	return err

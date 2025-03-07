@@ -213,7 +213,7 @@ func waitForTask(task *rest.Task, rawProgress, progressBar bool) error {
 			return err
 		}
 		if taskVal.State == "failed" {
-			return fmt.Errorf(formatString("Task Failed: " + task.Message))
+			return fmt.Errorf("%s", formatString("Task Failed: "+task.Message))
 		}
 	}
 	return nil
@@ -240,7 +240,7 @@ func taskProgressBar(task *rest.Task) error {
 				return nil
 			} else if newVal.State == "failed" {
 				bar.Set(0)
-				return fmt.Errorf(formatString("Task Failed: " + newVal.Message))
+				return fmt.Errorf("%s", formatString("Task Failed: "+newVal.Message))
 			}
 		case err := <-errChannel:
 			return err
