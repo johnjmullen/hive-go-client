@@ -8,6 +8,23 @@ import (
 	"path"
 )
 
+type HostBlockDevice struct {
+	Children   []HostBlockDevice `json:"children,omitempty"`
+	Fstype     *string           `json:"fstype,omitempty"`
+	MajMin     string            `json:"maj:min"`
+	Model      *string           `json:"model,omitempty"`
+	Mountpoint *string           `json:"mountpoint,omitempty"`
+	Name       string            `json:"name,omitempty"`
+	Path       string            `json:"path,omitempty"`
+	Rm         interface{}       `json:"rm"`
+	Ro         interface{}       `json:"ro"`
+	Serial     *string           `json:"serial,omitempty"`
+	Size       string            `json:"size"`
+	Symlinks   []string          `json:"symlinks,omitempty"`
+	Type       string            `json:"type"`
+	Vendor     *string           `json:"vendor,omitempty"`
+}
+
 // Host describes a host record from the rest api
 type Host struct {
 	Appliance struct {
@@ -90,7 +107,7 @@ type Host struct {
 	Software   interface{}            `json:"software"`
 	State      string                 `json:"state"`
 	Storage    struct {
-		Blockdevices []interface{}          `json:"blockdevices"`
+		Blockdevices []HostBlockDevice      `json:"blockdevices"`
 		Disk         map[string]interface{} `json:"disk"`
 		RAM          struct {
 			RamdiskPercent int `json:"ramdiskPercent"`
@@ -421,22 +438,40 @@ func (host Host) IscsiDiscover(client *Client, portal string) ([]byte, error) {
 	return result, err
 }
 
-func (host Host) IscsiLogin(client *Client, portal string, target string, authMethod string, username string, password string) error {
+func (host Host) IscsiLogin(client *Client, portal string, target string, authMethod string, username string, password string) ([]IscsiSession, error) {
 	if client.CheckHostVersion("8.6.0") != nil {
-		return errors.New("Host version must be 8.6.0 or higher")
+		return nil, errors.New("Host version must be 8.6.0 or higher")
 	}
 	data := map[string]interface{}{"portal": portal, "target": target, "authMethod": authMethod, "username": username, "password": password}
 	jsonValue, _ := json.Marshal(data)
-	_, err := client.request("POST", "host/"+host.Hostid+"/iscsi/login", jsonValue)
-	return err
+	result, err := client.request("POST", "host/"+host.Hostid+"/iscsi/login", jsonValue)
+	if err != nil {
+		return nil, err
+	}
+	var sessions []IscsiSession
+	err = json.Unmarshal(result, &sessions)
+	return sessions, err
 }
 
-func (host Host) IscsiSessions(client *Client) ([]byte, error) {
+type IscsiSession struct {
+	Transport   string          `json:"transport"`
+	Sid         int64           `json:"sid"`
+	Portal      string          `json:"portal"`
+	Target      string          `json:"target"`
+	BlockDevice HostBlockDevice `json:"blockDevice"`
+}
+
+func (host Host) IscsiSessions(client *Client) ([]IscsiSession, error) {
 	if client.CheckHostVersion("8.6.0") != nil {
 		return nil, errors.New("Host version must be 8.6.0 or higher")
 	}
 	result, err := client.request("GET", "host/"+host.Hostid+"/iscsi/sessions", nil)
-	return result, err
+	if err != nil {
+		return nil, err
+	}
+	var sessions []IscsiSession
+	err = json.Unmarshal(result, &sessions)
+	return sessions, err
 }
 
 func (host Host) IscsiLogout(client *Client, portal string, target string) error {

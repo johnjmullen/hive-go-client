@@ -478,11 +478,12 @@ var hostIscsiLoginCmd = &cobra.Command{
 		if viper.GetString("iscsiUsername") != "" {
 			authMethod = "CHAP"
 		}
-		err = host.IscsiLogin(restClient, viper.GetString("portal"), viper.GetString("target"), authMethod, viper.GetString("iscsiUsername"), viper.GetString("iscsiPassword"))
+		result, err := host.IscsiLogin(restClient, viper.GetString("portal"), viper.GetString("target"), authMethod, viper.GetString("iscsiUsername"), viper.GetString("iscsiPassword"))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+		fmt.Println(formatString(result))
 	},
 }
 
@@ -503,7 +504,7 @@ var hostIscsiSessionsCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		fmt.Println(string(result))
+		fmt.Println(formatString(result))
 	},
 }
 
