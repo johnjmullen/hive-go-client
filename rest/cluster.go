@@ -53,10 +53,10 @@ type EmailAlerts struct {
 
 // Gateway settings from the cluster table
 type Gateway struct {
-	Enabled                  bool                   `json:"enabled"`
-	ClientSourceIsolation    bool                   `json:"clientSourceIsolation"`
-	PersistentPortAssignment bool                   `json:"persistentPortAssignment"`
-	Hosts                    map[string]GatewayHost `json:"hosts"`
+	Enabled               bool                   `json:"enabled"`
+	ClientSourceIsolation bool                   `json:"clientSourceIsolation"`
+	PersistentAssignment  bool                   `json:"persistentAssignment"`
+	Hosts                 map[string]GatewayHost `json:"hosts"`
 }
 
 // ClusterBackup data protection settings from the cluster table
