@@ -42,8 +42,10 @@ type StoragePool struct {
 	S3Endpoint        string   `json:"s3Endpoint,omitempty"`
 	Replicated        bool     `json:"replicated,omitempty"`
 	//ocfs2 options
-	Device      *StorageDevice `json:"device,omitempty"`
-	FSName      string         `json:"fsName,omitempty"`
+	Device           *StorageDevice `json:"device,omitempty"`
+	FSName           string         `json:"fsName,omitempty"`
+	CreateFilesystem bool           `json:"createFilesystem,omitempty"`
+	ClearDisk        bool           `json:"clearDisk,omitempty"`
 }
 
 // DiskInfo contains information about a disk from a storage pool
