@@ -453,7 +453,7 @@ var hostIscsiDiscoverCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		fmt.Println(string(result))
+		fmt.Println(formatString(result))
 	},
 }
 
@@ -492,6 +492,8 @@ var hostIscsiSessionsCmd = &cobra.Command{
 	Short: "list iscsi sessions",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		bindHostIDFlags(cmd, args)
+		viper.BindPFlag("portal", cmd.Flags().Lookup("portal"))
+		viper.BindPFlag("target", cmd.Flags().Lookup("target"))
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		host, err := getHost(cmd, args)
@@ -499,7 +501,7 @@ var hostIscsiSessionsCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		result, err := host.IscsiSessions(restClient)
+		result, err := host.IscsiSessions(restClient, viper.GetString("portal"), viper.GetString("target"))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -588,6 +590,8 @@ func init() {
 	hostIscsiLoginCmd.Flags().String("iscsi-password", "", "iscsi password")
 	hostCmd.AddCommand(hostIscsiSessionsCmd)
 	addHostIDFlags(hostIscsiSessionsCmd)
+	hostIscsiSessionsCmd.Flags().String("portal", "", "filter sessions by portal")
+	hostIscsiSessionsCmd.Flags().String("target", "", "filter sessions by target")
 	hostCmd.AddCommand(hostIscsiLogoutCmd)
 	addHostIDFlags(hostIscsiLogoutCmd)
 	hostIscsiLogoutCmd.Flags().String("portal", "", "portal")

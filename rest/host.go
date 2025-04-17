@@ -429,13 +429,26 @@ func (host Host) ResetInterfaceSettings(client *Client, nic string) error {
 	return err
 }
 
-func (host Host) IscsiDiscover(client *Client, portal string) ([]byte, error) {
+type IscsiDiscoverEntry struct {
+	Portal string `json:"portal"`
+	Target string `json:"target"`
+}
+
+func (host Host) IscsiDiscover(client *Client, portal string) ([]IscsiDiscoverEntry, error) {
 	if client.CheckHostVersion("8.6.0") != nil {
 		return nil, errors.New("Host version must be 8.6.0 or higher")
 	}
 	jsonValue, _ := json.Marshal(map[string]interface{}{"portal": portal})
 	result, err := client.request("POST", "host/"+host.Hostid+"/iscsi/discover", jsonValue)
-	return result, err
+	if err != nil {
+		return nil, err
+	}
+	var entries []IscsiDiscoverEntry
+	err = json.Unmarshal(result, &entries)
+	if err != nil {
+		return nil, err
+	}
+	return entries, err
 }
 
 func (host Host) IscsiLogin(client *Client, portal string, target string, authMethod string, username string, password string) ([]IscsiSession, error) {
@@ -443,7 +456,11 @@ func (host Host) IscsiLogin(client *Client, portal string, target string, authMe
 		return nil, errors.New("Host version must be 8.6.0 or higher")
 	}
 	data := map[string]interface{}{"portal": portal, "target": target, "authMethod": authMethod, "username": username, "password": password}
-	jsonValue, _ := json.Marshal(data)
+	jsonValue, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+
 	result, err := client.request("POST", "host/"+host.Hostid+"/iscsi/login", jsonValue)
 	if err != nil {
 		return nil, err
@@ -461,11 +478,24 @@ type IscsiSession struct {
 	BlockDevice HostBlockDevice `json:"blockDevice"`
 }
 
-func (host Host) IscsiSessions(client *Client) ([]IscsiSession, error) {
+func (host Host) IscsiSessions(client *Client, portal string, target string) ([]IscsiSession, error) {
 	if client.CheckHostVersion("8.6.0") != nil {
 		return nil, errors.New("Host version must be 8.6.0 or higher")
 	}
-	result, err := client.request("GET", "host/"+host.Hostid+"/iscsi/sessions", nil)
+	values := url.Values{}
+	if portal != "" {
+		values.Set("portal", portal)
+	}
+	if target != "" {
+		values.Set("target", target)
+	}
+
+	path := "host/" + host.Hostid + "/iscsi/sessions"
+	query := values.Encode()
+	if query != "" {
+		path += "?" + query
+	}
+	result, err := client.request("GET", path, nil)
 	if err != nil {
 		return nil, err
 	}
