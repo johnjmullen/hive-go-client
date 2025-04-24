@@ -23,6 +23,7 @@ type HostBlockDevice struct {
 	Symlinks   []string          `json:"symlinks,omitempty"`
 	Type       string            `json:"type"`
 	Vendor     *string           `json:"vendor,omitempty"`
+	Transport  *string           `json:"tran,omitempty"`
 }
 
 // Host describes a host record from the rest api
@@ -107,9 +108,14 @@ type Host struct {
 	Software   interface{}            `json:"software"`
 	State      string                 `json:"state"`
 	Storage    struct {
-		Blockdevices []HostBlockDevice      `json:"blockdevices"`
-		Disk         map[string]interface{} `json:"disk"`
-		RAM          struct {
+		Blockdevices []HostBlockDevice `json:"blockdevices"`
+		Iscsi        []struct {
+			Portal    string `json:"portal"`
+			Target    string `json:"target"`
+			Connected bool   `json:"connected"`
+		} `json:"iscsi,omitempty"`
+		Disk map[string]interface{} `json:"disk"`
+		RAM  struct {
 			RamdiskPercent int `json:"ramdiskPercent"`
 			SwapSize       int `json:"swapSize"`
 			Swappiness     int `json:"swappiness"`
