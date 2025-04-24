@@ -298,14 +298,12 @@ func (guest *Guest) Reset(client *Client) error {
 func (guest *Guest) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(guest)
-	if guest.External {
+	if guest.External && client.CheckHostVersion("8.6.0") == nil {
 		externalGuest, err := guest.ToExternalGuest()
 		if err != nil {
 			return "", err
 		}
-		if err = client.CheckHostVersion("8.6.0"); err != nil {
-			return externalGuest.Update(client)
-		}
+		return externalGuest.Update(client)
 	}
 	body, err := client.request("PUT", "guest/"+url.PathEscape(guest.Name), jsonValue)
 	if err == nil {
