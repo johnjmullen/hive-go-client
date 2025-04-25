@@ -100,12 +100,12 @@ type GuestDisk struct {
 
 // GuestNetwork is the structure for guest network interfaces
 type GuestNetwork struct {
-	Emulation   string `json:"emulation"`
-	MacAddress  string `json:"macAddress"`
-	NetworkType string `json:"network"`
-	Vlan        int    `json:"vlan"`
-	Bus         string `json:"bus"`
-	IPAddress   string `json:"ipAddress"`
+	Emulation  string `json:"emulation"`
+	MacAddress string `json:"macAddress"`
+	Network    string `json:"network"`
+	Vlan       int    `json:"vlan"`
+	Bus        string `json:"bus"`
+	IPAddress  string `json:"ipAddress"`
 }
 
 // GuestError is a struct for errors in the guest record
