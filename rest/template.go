@@ -45,6 +45,7 @@ type Template struct {
 	BrokerOptions      *GuestBrokerOptions    `json:"brokerOptions,omitempty"`
 	Secureboot         bool                   `json:"secureboot"`
 	Machine            string                 `json:"machine,omitempty"`
+	TargetPoolTypes    []string               `json:"targetPoolTypes,omitempty"`
 }
 
 func (template Template) String() string {

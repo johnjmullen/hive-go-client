@@ -59,6 +59,7 @@ type Guest struct {
 	BrokerOptions       *GuestBrokerOptions     `json:"brokerOptions,omitempty"`
 	Secureboot          bool                    `json:"secureboot"`
 	Machine             string                  `json:"machine,omitempty"`
+	GuestType           string                  `json:"guestType,omitempty"`
 }
 
 // GuestBrokerOptions allows configuring broker connection settings for a guest

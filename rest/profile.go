@@ -6,7 +6,7 @@ import (
 	"net/url"
 )
 
-//ProfileADConfig contains the active directory settings for a profile
+// ProfileADConfig contains the active directory settings for a profile
 type ProfileADConfig struct {
 	Domain    string `json:"domain,omitempty"`
 	Ou        string `json:"ou,omitempty"`
@@ -15,7 +15,7 @@ type ProfileADConfig struct {
 	Username  string `json:"username,omitempty"`
 }
 
-//ProfileBrokerOptions contains rdp settings for a profile
+// ProfileBrokerOptions contains rdp settings for a profile
 type ProfileBrokerOptions struct {
 	AllowDesktopComposition   bool `json:"allowDesktopComposition"`
 	AudioCapture              bool `json:"audioCapture"`
@@ -38,7 +38,7 @@ type ProfileBrokerOptions struct {
 	EnableHTML5               bool `json:"enableHtml5"`
 }
 
-//ProfileUserVolumes contains user volume settings for a profile
+// ProfileUserVolumes contains user volume settings for a profile
 type ProfileUserVolumes struct {
 	BackupSchedule int    `json:"backupSchedule,omitempty"`
 	Repository     string `json:"repository,omitempty"`
@@ -46,7 +46,7 @@ type ProfileUserVolumes struct {
 	Target         string `json:"target,omitempty"`
 }
 
-//ProfileBackup contains data protection settings for a profile
+// ProfileBackup contains data protection settings for a profile
 type ProfileBackup struct {
 	Enabled         bool        `json:"enabled"`
 	Frequency       string      `json:"frequency"`
@@ -57,16 +57,17 @@ type ProfileBackup struct {
 
 // Profile is a profile record from the rest api
 type Profile struct {
-	AdConfig      *ProfileADConfig      `json:"adConfig,omitempty"`
-	BrokerOptions *ProfileBrokerOptions `json:"brokerOptions,omitempty"`
-	BypassBroker  bool                  `json:"bypassBroker"`
-	ID            string                `json:"id,omitempty"`
-	Name          string                `json:"name"`
-	Tags          []string              `json:"tags,omitempty"`
-	Timezone      string                `json:"timezone,omitempty"`
-	UserVolumes   *ProfileUserVolumes   `json:"userVolumes,omitempty"`
-	Vlan          int                   `json:"vlan,omitempty"`
-	Backup        *ProfileBackup        `json:"backup,omitempty"`
+	AdConfig        *ProfileADConfig      `json:"adConfig,omitempty"`
+	BrokerOptions   *ProfileBrokerOptions `json:"brokerOptions,omitempty"`
+	BypassBroker    bool                  `json:"bypassBroker"`
+	ID              string                `json:"id,omitempty"`
+	Name            string                `json:"name"`
+	Tags            []string              `json:"tags,omitempty"`
+	Timezone        string                `json:"timezone,omitempty"`
+	UserVolumes     *ProfileUserVolumes   `json:"userVolumes,omitempty"`
+	Vlan            int                   `json:"vlan,omitempty"`
+	Backup          *ProfileBackup        `json:"backup,omitempty"`
+	TargetPoolTypes []string              `json:"targetPoolTypes,omitempty"`
 }
 
 func (profile Profile) String() string {
@@ -74,7 +75,7 @@ func (profile Profile) String() string {
 	return string(json)
 }
 
-//Create creates a new profile
+// Create creates a new profile
 func (profile *Profile) Create(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(profile)
@@ -85,7 +86,7 @@ func (profile *Profile) Create(client *Client) (string, error) {
 	return result, err
 }
 
-//Update updates an existing profile
+// Update updates an existing profile
 func (profile *Profile) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(profile)
@@ -96,7 +97,7 @@ func (profile *Profile) Update(client *Client) (string, error) {
 	return result, err
 }
 
-//Delete deletes a profile
+// Delete deletes a profile
 func (profile *Profile) Delete(client *Client) error {
 	if profile.ID == "" {
 		return errors.New("id cannot be empty")

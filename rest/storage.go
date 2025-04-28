@@ -13,12 +13,6 @@ import (
 	"github.com/eventials/go-tus"
 )
 
-// StorageDevice matches a device by path or id
-type StorageDevice struct {
-	ID   string `json:"id,omitempty"`
-	Path string `json:"path,omitempty"`
-}
-
 // StoragePool describes a storage pool returned from the rest api
 type StoragePool struct {
 	ID                string   `json:"id,omitempty"`
