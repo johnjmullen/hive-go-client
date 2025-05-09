@@ -255,6 +255,40 @@ var storageCreateCmd = &cobra.Command{
 	},
 }
 
+var storageUpdateCmd = &cobra.Command{
+	Use:   "update [file]",
+	Short: "update a template",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		var file *os.File
+		var err error
+		if args[0] == "-" {
+			file = os.Stdin
+		} else {
+			file, err = os.Open(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+		defer file.Close()
+		data, _ := io.ReadAll(file)
+		var storage rest.StoragePool
+		err = unmarshal(data, &storage)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		msg, err := storage.Update(restClient)
+		fmt.Println(msg)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
 var storageDeleteFileCmd = &cobra.Command{
 	Use:   "delete-file [file]",
 	Short: "delete a file from the storage pool",
@@ -456,6 +490,7 @@ func initIDFlags(cmd *cobra.Command) {
 func init() {
 	RootCmd.AddCommand(storageCmd)
 	storageCmd.AddCommand(storageCreateCmd)
+	storageCmd.AddCommand(storageUpdateCmd)
 	storageCmd.AddCommand(storageDeleteCmd)
 	initIDFlags(storageDeleteCmd)
 

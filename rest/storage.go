@@ -147,6 +147,20 @@ func (pool *StoragePool) Create(client *Client) (string, error) {
 	return result, err
 }
 
+// Update updates an existing storage pool.  Only roles, tags, and hosts will be updated
+func (pool *StoragePool) Update(client *Client) (string, error) {
+	var result string
+	jsonValue, err := json.Marshal(pool)
+	if err != nil {
+		return "", err
+	}
+	body, err := client.request("PUT", "storage/pool/"+pool.ID, jsonValue)
+	if err == nil {
+		result = string(body)
+	}
+	return result, err
+}
+
 // Delete deletes a storage pool
 func (pool *StoragePool) Delete(client *Client) error {
 	if pool.ID == "" {
