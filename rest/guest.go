@@ -389,13 +389,27 @@ func (guest *Guest) Migrate(client *Client, destinationHostid string) error {
 	return err
 }
 
-func checkGuestState(guest Guest) bool {
+func IsGuestReady(guest Guest) bool {
+	return guest.GuestState == "ready"
+}
+
+// compare GuestState to TargetState
+func GuestHasTargetState(guest Guest) bool {
 	for _, v := range guest.TargetState {
 		if v == guest.GuestState {
 			return true
 		}
 	}
 	return false
+}
+
+func GuestHasIpAddress(guest Guest) bool {
+	for _, iface := range guest.Interfaces {
+		if iface.IPAddress != "" {
+			return true
+		}
+	}
+	return true
 }
 
 // WaitForGuest waits for a guest state to match the targetState
@@ -405,7 +419,12 @@ func (guest Guest) WaitForGuest(client *Client, timeout time.Duration) error {
 
 // WaitForGuestWithContext waits for a guest state to match the targetState
 func (guest Guest) WaitForGuestWithContext(ctx context.Context, client *Client, timeout time.Duration) error {
-	if checkGuestState(guest) {
+	return guest.WaitForGuestChange(ctx, client, timeout, GuestHasTargetState)
+}
+
+// WaitForGuestChange block until a guest changefeed update matches a validation function
+func (guest Guest) WaitForGuestChange(ctx context.Context, client *Client, timeout time.Duration, validate func(Guest) bool) error {
+	if validate(guest) {
 		return nil
 	}
 	newVal := Guest{}
@@ -432,7 +451,7 @@ func (guest Guest) WaitForGuestWithContext(ctx context.Context, client *Client, 
 				feed.Close()
 				return err
 			}
-			if checkGuestState(newVal) {
+			if validate(newVal) {
 				feed.Close()
 				return nil
 			}

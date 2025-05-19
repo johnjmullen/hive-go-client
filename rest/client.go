@@ -184,54 +184,59 @@ type ChangeFeedMessage struct {
 	Error    error
 }
 
-func (feed *ChangeFeed) monitorChangeFeed() {
+func (feed *ChangeFeed) monitorChangeFeed(ctx context.Context) {
 	defer close(feed.Done)
 	defer feed.conn.Close()
 	for {
-		var msg ChangeFeedMessage
-		_, message, err := feed.conn.ReadMessage()
-		if err != nil {
-			msg.Error = err
-			feed.Data <- msg
+		select {
+		case <-ctx.Done():
 			return
-		}
-		if len(message) < 3 {
-			continue
-		}
-		if string(message[:2]) == "44" {
-			msg.Error = fmt.Errorf("%s", message[2:])
-			feed.Data <- msg
-		} else if string(message[:2]) != "42" {
-			continue
-		}
+		default:
+			var msg ChangeFeedMessage
+			_, message, err := feed.conn.ReadMessage()
+			if err != nil {
+				msg.Error = err
+				feed.Data <- msg
+				return
+			}
+			if len(message) < 3 {
+				continue
+			}
+			if string(message[:2]) == "44" {
+				msg.Error = fmt.Errorf("%s", message[2:])
+				feed.Data <- msg
+			} else if string(message[:2]) != "42" {
+				continue
+			}
 
-		var jsonMsg []json.RawMessage
-		err = json.Unmarshal(message[2:], &jsonMsg)
-		if err != nil {
-			msg.Error = err
-			feed.Data <- msg
-			continue
-		}
-		if len(jsonMsg) < 3 {
-			msg.Error = fmt.Errorf("invalid changefeed message")
-			feed.Data <- msg
-			continue
-		}
-		if strings.Contains(string(jsonMsg[0]), "initial") {
-			var newValue []json.RawMessage
-			err = json.Unmarshal(jsonMsg[2], &newValue)
+			var jsonMsg []json.RawMessage
+			err = json.Unmarshal(message[2:], &jsonMsg)
 			if err != nil {
 				msg.Error = err
-			} else if len(newValue) > 0 {
-				msg.NewValue = newValue[0]
+				feed.Data <- msg
+				continue
 			}
-		} else {
-			err = json.Unmarshal(jsonMsg[2], &msg)
-			if err != nil {
-				msg.Error = err
+			if len(jsonMsg) < 3 {
+				msg.Error = fmt.Errorf("invalid changefeed message")
+				feed.Data <- msg
+				continue
 			}
+			if strings.Contains(string(jsonMsg[0]), "initial") {
+				var newValue []json.RawMessage
+				err = json.Unmarshal(jsonMsg[2], &newValue)
+				if err != nil {
+					msg.Error = err
+				} else if len(newValue) > 0 {
+					msg.NewValue = newValue[0]
+				}
+			} else {
+				err = json.Unmarshal(jsonMsg[2], &msg)
+				if err != nil {
+					msg.Error = err
+				}
+			}
+			feed.Data <- msg
 		}
-		feed.Data <- msg
 	}
 }
 
@@ -302,7 +307,7 @@ func (client *Client) GetChangeFeedWithContext(ctx context.Context, table string
 	feed := ChangeFeed{Data: incomingData, Done: done, conn: c}
 
 	go feed.changeFeedKeepAlive(ctx, 25*time.Second)
-	go feed.monitorChangeFeed()
+	go feed.monitorChangeFeed(ctx)
 
 	return &feed, nil
 }
