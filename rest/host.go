@@ -24,6 +24,12 @@ type HostBlockDevice struct {
 	Type       string            `json:"type"`
 	Vendor     *string           `json:"vendor,omitempty"`
 	Transport  *string           `json:"tran,omitempty"`
+	Label      *string           `json:"label,omitempty"`
+	PTType     *string           `json:"pttype,omitempty"`
+	PartType   *string           `json:"parttype,omitempty"`
+	PartLabel  *string           `json:"partlabel,omitempty"`
+	Subsystems string            `json:"subsystems"`
+	WWN        *string           `json:"wwn,omitempty"`
 }
 
 // Host describes a host record from the rest api
@@ -477,11 +483,11 @@ func (host Host) IscsiLogin(client *Client, portal string, target string, authMe
 }
 
 type IscsiSession struct {
-	Transport   string          `json:"transport"`
-	Sid         int64           `json:"sid"`
-	Portal      string          `json:"portal"`
-	Target      string          `json:"target"`
-	BlockDevice HostBlockDevice `json:"blockDevice"`
+	Transport    string            `json:"transport"`
+	Sid          int64             `json:"sid"`
+	Portal       string            `json:"portal"`
+	Target       string            `json:"target"`
+	BlockDevices []HostBlockDevice `json:"blockDevices"`
 }
 
 func (host Host) IscsiSessions(client *Client, portal string, target string) ([]IscsiSession, error) {
