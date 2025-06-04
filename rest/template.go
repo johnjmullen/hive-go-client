@@ -156,6 +156,15 @@ func (template *Template) Author(client *Client) error {
 	return err
 }
 
+// ExitAuthoring exits the authoring mode of a template
+func (template *Template) ExitAuthoring(client *Client) error {
+	if template.Name == "" {
+		return errors.New("name cannot be empty")
+	}
+	_, err := client.request("PUT", "template/"+url.PathEscape(template.Name)+"/exitauthoring", nil)
+	return err
+}
+
 // Duplicate copies a template
 func (template *Template) Duplicate(client *Client, dstName, dstStorage, dstFilename string) (*Task, error) {
 	if template.Name == "" {

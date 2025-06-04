@@ -430,6 +430,98 @@ var clusterTestEmailCmd = &cobra.Command{
 	},
 }
 
+var clusterEnableSSOCmd = &cobra.Command{
+	Use:   "enable-sso [file]",
+	Args:  cobra.ExactArgs(1),
+	Short: "Enable Single Sign-On (SSO) for the cluster",
+	Run: func(cmd *cobra.Command, args []string) {
+		var file *os.File
+		var err error
+		if args[0] == "-" {
+			file = os.Stdin
+		} else {
+			file, err = os.Open(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+		defer file.Close()
+		data, err := io.ReadAll(file)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		var ssoSettings rest.ClusterSSO
+		err = unmarshal(data, &ssoSettings)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		cluster, err := restClient.GetCluster(clusterID)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = cluster.EnableSSO(restClient, ssoSettings)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var clusterDisableSSOCmd = &cobra.Command{
+	Use:   "disable-sso",
+	Short: "Disable Single Sign-On (SSO) for the cluster",
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		cluster, err := restClient.GetCluster(clusterID)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = cluster.DisableSSO(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var clusterSSOInfoCmd = &cobra.Command{
+	Use:   "sso-info",
+	Short: "Get information about the current SSO configuration",
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterID, err := restClient.ClusterID()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		cluster, err := restClient.GetCluster(clusterID)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		ssoInfo, err := cluster.SSOInfo(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(formatString(ssoInfo))
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(clusterCmd)
 	clusterCmd.AddCommand(addHostCmd)
@@ -469,4 +561,7 @@ func init() {
 	clusterCmd.AddCommand(clusterEmailAlertsCmd)
 	clusterCmd.AddCommand(clusterClearEmailAlertsCmd)
 	clusterCmd.AddCommand(clusterTestEmailCmd)
+	clusterCmd.AddCommand(clusterEnableSSOCmd)
+	clusterCmd.AddCommand(clusterDisableSSOCmd)
+	clusterCmd.AddCommand(clusterSSOInfoCmd)
 }

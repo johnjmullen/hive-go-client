@@ -21,6 +21,7 @@ type User struct {
 	Role        string           `json:"role,omitempty"`
 	Tags        []string         `json:"tags,omitempty"`
 	Username    string           `json:"username,omitempty"`
+	Email       string           `json:"email,omitempty"`
 }
 
 func (user User) String() string {
@@ -96,7 +97,7 @@ func (user *User) Create(client *Client) (string, error) {
 	return result, err
 }
 
-//Update updates an existing user
+// Update updates an existing user
 func (user *User) Update(client *Client) (string, error) {
 	var result string
 	jsonValue, _ := json.Marshal(user)
@@ -107,7 +108,7 @@ func (user *User) Update(client *Client) (string, error) {
 	return result, err
 }
 
-//Delete deletes a user
+// Delete deletes a user
 func (user *User) Delete(client *Client) error {
 	if user.ID == "" {
 		return errors.New("ID cannot be empty")

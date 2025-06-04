@@ -128,6 +128,9 @@ var userListCmd = &cobra.Command{
 				if user.GroupName != "" {
 					info["groupname"] = user.GroupName
 				}
+				if user.Email != "" {
+					info["email"] = user.Email
+				}
 				list = append(list, info)
 			}
 			fmt.Println(formatString(list))

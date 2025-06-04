@@ -66,6 +66,15 @@ type ClusterBackup struct {
 	EndWindow   string `json:"endWindow"`
 }
 
+type ClusterSSO struct {
+	Enabled      bool   `json:"enabled"`
+	Provider     string `json:"provider"`
+	ClientID     string `json:"clientId"`
+	ClientSecret string `json:"clientSecret,omitempty"`
+	DiscoveryURL string `json:"discoveryUrl,omitempty"`
+	TenantID     string `json:"tenantId,omitempty"`
+}
+
 // Cluster record from the rest api
 type Cluster struct {
 	AdminPassword string   `json:"adminPassword"`
@@ -100,6 +109,7 @@ type Cluster struct {
 	Backup      *ClusterBackup `json:"backup,omitempty"`
 	Tags        []string       `json:"tags"`
 	EmailAlerts EmailAlerts    `json:"emailAlerts,omitempty"`
+	SSOProvider *ClusterSSO    `json:"ssoProvider,omitempty"`
 }
 
 func (cluster Cluster) String() string {
@@ -285,4 +295,29 @@ func (cluster Cluster) ClearEmailAlerts(client *Client) error {
 func (cluster Cluster) SendTestEmail(client *Client) error {
 	_, err := client.request("POST", "cluster/"+cluster.ID+"/sendTestEmail", nil)
 	return err
+}
+
+func (cluster Cluster) EnableSSO(client *Client, settings ClusterSSO) error {
+	jsonValue, err := json.Marshal(settings)
+	if err != nil {
+		return err
+	}
+	_, err = client.request("POST", "cluster/"+cluster.ID+"/enableSSO", jsonValue)
+	return err
+}
+
+func (cluster Cluster) DisableSSO(client *Client) error {
+	_, err := client.request("POST", "cluster/"+cluster.ID+"/disableSSO", nil)
+	return err
+}
+
+// SSOInfo returns the SSO information for the cluster
+func (cluster Cluster) SSOInfo(client *Client) (ClusterSSO, error) {
+	var sso ClusterSSO
+	body, err := client.request("GET", "cluster/"+cluster.ID+"/ssoInfo", nil)
+	if err != nil {
+		return sso, err
+	}
+	err = json.Unmarshal(body, &sso)
+	return sso, err
 }
