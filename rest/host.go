@@ -448,7 +448,7 @@ type IscsiDiscoverEntry struct {
 
 func (host Host) IscsiDiscover(client *Client, portal string) ([]IscsiDiscoverEntry, error) {
 	if client.CheckHostVersion("8.6.0") != nil {
-		return nil, errors.New("Host version must be 8.6.0 or higher")
+		return nil, errors.New("Host version must be 8.6.0 or greater")
 	}
 	jsonValue, _ := json.Marshal(map[string]interface{}{"portal": portal})
 	result, err := client.request("POST", "host/"+host.Hostid+"/iscsi/discover", jsonValue)
@@ -465,7 +465,7 @@ func (host Host) IscsiDiscover(client *Client, portal string) ([]IscsiDiscoverEn
 
 func (host Host) IscsiLogin(client *Client, portal string, target string, authMethod string, username string, password string) ([]IscsiSession, error) {
 	if client.CheckHostVersion("8.6.0") != nil {
-		return nil, errors.New("Host version must be 8.6.0 or higher")
+		return nil, errors.New("Host version must be 8.6.0 or greater")
 	}
 	data := map[string]interface{}{"portal": portal, "target": target, "authMethod": authMethod, "username": username, "password": password}
 	jsonValue, err := json.Marshal(data)
@@ -492,7 +492,7 @@ type IscsiSession struct {
 
 func (host Host) IscsiSessions(client *Client, portal string, target string) ([]IscsiSession, error) {
 	if client.CheckHostVersion("8.6.0") != nil {
-		return nil, errors.New("Host version must be 8.6.0 or higher")
+		return nil, errors.New("Host version must be 8.6.0 or greater")
 	}
 	values := url.Values{}
 	if portal != "" {
@@ -518,7 +518,7 @@ func (host Host) IscsiSessions(client *Client, portal string, target string) ([]
 
 func (host Host) IscsiLogout(client *Client, portal string, target string) error {
 	if client.CheckHostVersion("8.6.0") != nil {
-		return errors.New("Host version must be 8.6.0 or higher")
+		return errors.New("Host version must be 8.6.0 or greater")
 	}
 	jsonValue, _ := json.Marshal(map[string]interface{}{"portal": portal, "target": target})
 	_, err := client.request("POST", "host/"+host.Hostid+"/iscsi/logout", jsonValue)

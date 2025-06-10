@@ -188,12 +188,31 @@ func (pool *StoragePool) Start(client *Client) error {
 	return err
 }
 
+type StorageDisk struct {
+	StorageID string `json:"storageId"`
+	Filename  string `json:"filename"`
+	Format    string `json:"format"`
+}
+
 // CreateDisk creates a new disk in the storage pool
-func (pool *StoragePool) CreateDisk(client *Client, filename, format string, size uint) (*Task, error) {
+func (pool *StoragePool) CreateDisk(client *Client, filename, format string, size uint, backingFile *StorageDisk) (*Task, error) {
 	if pool.ID == "" {
 		return nil, errors.New("invalid Storage Pool")
 	}
-	jsonData := map[string]interface{}{"filename": filename, "size": size, "format": format}
+	jsonData := map[string]interface{}{
+		"filename": filename,
+		"size":     size,
+		"format":   format,
+	}
+	if backingFile != nil {
+		if client.CheckHostVersion("8.6.0") != nil {
+			return nil, errors.New("Host version must be 8.6.0 or greater for the backingFile options")
+		}
+		if format != "qcow2" {
+			return nil, errors.New("backing file can only be used with qcow2 format")
+		}
+		jsonData["backingFile"] = backingFile
+	}
 	jsonValue, err := json.Marshal(jsonData)
 	if err != nil {
 		return nil, err

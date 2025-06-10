@@ -210,6 +210,9 @@ var storageCreateDiskCmd = &cobra.Command{
 		viper.BindPFlag("filename", cmd.Flags().Lookup("filename"))
 		viper.BindPFlag("disk-format", cmd.Flags().Lookup("disk-format"))
 		viper.BindPFlag("disk-size", cmd.Flags().Lookup("disk-size"))
+		viper.BindPFlag("backing-storage", cmd.Flags().Lookup("backing-storage"))
+		viper.BindPFlag("backing-filename", cmd.Flags().Lookup("backing-filename"))
+		viper.BindPFlag("backing-format", cmd.Flags().Lookup("backing-format"))
 		bindTaskFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -217,7 +220,15 @@ var storageCreateDiskCmd = &cobra.Command{
 		if viper.GetBool("wait") && viper.GetBool("progress-bar") {
 			fmt.Println("\nConverting Disk " + viper.GetString("filename"))
 		}
-		handleTask(pool.CreateDisk(restClient, viper.GetString("filename"), viper.GetString("disk-format"), uint(viper.GetInt("disk-size"))))
+		var backingFile *rest.StorageDisk
+		if viper.GetString("backing-storage") != "" && viper.GetString("backing-filename") != "" {
+			backingFile = &rest.StorageDisk{
+				StorageID: viper.GetString("backing-storage"),
+				Filename:  viper.GetString("backing-filename"),
+				Format:    viper.GetString("backing-format"),
+			}
+		}
+		handleTask(pool.CreateDisk(restClient, viper.GetString("filename"), viper.GetString("disk-format"), uint(viper.GetInt("disk-size")), backingFile))
 	},
 }
 
@@ -539,6 +550,9 @@ func init() {
 	storageCreateDiskCmd.Flags().String("filename", "", "filename for the disk")
 	storageCreateDiskCmd.Flags().String("disk-format", "qcow2", "disk format ()")
 	storageCreateDiskCmd.Flags().Int("disk-size", 25, "size of the disk in GB")
+	storageCreateDiskCmd.Flags().String("backing-storage", "", "backing storage pool id")
+	storageCreateDiskCmd.Flags().String("backing-filename", "", "filename in the backing storage pool")
+	storageCreateDiskCmd.Flags().String("backing-format", "auto", "backing file format")
 	addTaskFlags(storageCreateDiskCmd)
 
 	storageCmd.AddCommand(storageDeleteFileCmd)
