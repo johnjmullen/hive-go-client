@@ -93,17 +93,59 @@ type Host struct {
 			Size int    `json:"size"`
 			Type string `json:"type"`
 		} `json:"memory"`
+		PciDevices []struct {
+			Bus                int    `json:"bus"`
+			DeviceClass        int    `json:"deviceClass"`
+			DeviceID           int    `json:"deviceId"`
+			Domain             int    `json:"domain"`
+			Func               int    `json:"func"`
+			IommuGroup         int    `json:"iommu_group"`
+			Mode               string `json:"mode"`
+			Path               string `json:"path"`
+			Slot               int    `json:"slot"`
+			VendorID           int    `json:"vendorId"`
+			MdevSupportedTypes map[string]struct {
+				Name               string `json:"name"`
+				Description        string `json:"description"`
+				AvailableInstances int    `json:"availableInstances"`
+			} `json:"mdevSupportedTypes,omitempty"`
+			Sriov *struct {
+				DriversAutoprobe uint `json:"drivers_autoprobe"` // 0 or 1
+				NumVfs           int  `json:"numvfs"`
+				TotalVfs         int  `json:"totalvfs"`
+				Offset           int  `json:"offset"`
+				Stride           int  `json:"stride"`
+				VFTotalMsix      int  `json:"vf_total_msix"`
+			} `json:"sriov,omitempty"`
+		} `json:"pciDevices"`
+		UsbDevices []struct {
+			Path           string `json:"path"`
+			IDVendor       int    `json:"idVendor"`
+			IDProduct      int    `json:"idProduct"`
+			Busnum         int    `json:"busnum"`
+			Devnum         int    `json:"devnum"`
+			Product        string `json:"product"`
+			Manufacturer   string `json:"manufacturer"`
+			Serial         string `json:"serial"`
+			DeviceClass    int    `json:"deviceClass"`
+			DeviceSubClass int    `json:"deviceSubClass"`
+		} `json:"usbDevices,omitempty"`
 		VideoCards []struct {
-			Bus         int    `json:"bus"`
-			DeviceClass int    `json:"deviceClass"`
-			DeviceID    int    `json:"deviceId"`
-			Domain      int    `json:"domain"`
-			Func        int    `json:"func"`
-			IommuGroup  int    `json:"iommu_group"`
-			Mode        string `json:"mode"`
-			Path        string `json:"path"`
-			Slot        int    `json:"slot"`
-			VendorID    int    `json:"vendorId"`
+			Bus                int    `json:"bus"`
+			DeviceClass        int    `json:"deviceClass"`
+			DeviceID           int    `json:"deviceId"`
+			Domain             int    `json:"domain"`
+			Func               int    `json:"func"`
+			IommuGroup         int    `json:"iommu_group"`
+			Mode               string `json:"mode"`
+			Path               string `json:"path"`
+			Slot               int    `json:"slot"`
+			VendorID           int    `json:"vendorId"`
+			MdevSupportedTypes map[string]struct {
+				Name               string `json:"name"`
+				Description        string `json:"description"`
+				AvailableInstances int    `json:"availableInstances"`
+			} `json:"mdevSupportedTypes,omitempty"`
 		} `json:"videoCards"`
 	} `json:"hardware"`
 	Hostid     string                 `json:"hostid"`
@@ -137,7 +179,9 @@ type Host struct {
 			} `json:"zram"`
 		} `json:"ram"`
 	} `json:"storage"`
-	Tags []string `json:"tags"`
+	GPU   GPUConfig              `json:"gpu,omitempty"`
+	Sriov map[string]SRIOVConfig `json:"sriov,omitempty"`
+	Tags  []string               `json:"tags"`
 }
 
 func (host Host) String() string {
@@ -391,6 +435,24 @@ func (host Host) DeleteNetwork(client *Client, name string) error {
 	return err
 }
 
+type GPUConfig struct {
+	AllowMdev        bool     `json:"allowMdev"`
+	AllowPCI         bool     `json:"allowPci"`
+	AllowSriov       bool     `json:"allowSriov"`
+	DeviceClasses    []int64  `json:"deviceClasses"`
+	DisableByCard    []string `json:"disableByCard"`
+	DisableByPath    []string `json:"disableByPath"`
+	AllowedMdevTypes []string `json:"allowedMdevTypes"`
+}
+
+type SRIOVConfig struct {
+	DriversAutoprobe uint `json:"sriov_drivers_autoprobe"` // 0 or 1
+	NumVfs           int  `json:"sriov_numvfs"`
+	Offset           int  `json:"sriov_offset,omitempty"`
+	Stride           int  `json:"sriov_stride,omitempty"`
+	TotalMsix        int  `json:"sriov_total_msix,omitempty"`
+}
+
 type HostNetworkInterface struct {
 	Name      string `json:"name"`
 	Address   string `json:"address"`
@@ -523,4 +585,32 @@ func (host Host) IscsiLogout(client *Client, portal string, target string) error
 	jsonValue, _ := json.Marshal(map[string]interface{}{"portal": portal, "target": target})
 	_, err := client.request("POST", "host/"+host.Hostid+"/iscsi/logout", jsonValue)
 	return err
+}
+
+// UpdateGPU updates settings from host.GPU
+func (host *Host) UpdateGPU(client *Client) (string, error) {
+	var result string
+	jsonValue, err := json.Marshal(host.GPU)
+	if err != nil {
+		return "", err
+	}
+	body, err := client.request("POST", "host/"+host.Hostid+"/gpu", jsonValue)
+	if err == nil {
+		result = string(body)
+	}
+	return result, err
+}
+
+// UpdateGPU updates settings from host.GPU
+func (host *Host) UpdateSriov(client *Client) (string, error) {
+	var result string
+	jsonValue, err := json.Marshal(host.Sriov)
+	if err != nil {
+		return "", err
+	}
+	body, err := client.request("POST", "host/"+host.Hostid+"/sriov", jsonValue)
+	if err == nil {
+		result = string(body)
+	}
+	return result, err
 }

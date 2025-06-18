@@ -164,16 +164,65 @@ type GuestMigrationMetadata struct {
 	MigratableXml       string `json:"migratableXml"`
 }
 
+type HostDevicePCI struct {
+	Domain  int  `json:"domain"`
+	Bus     int  `json:"bus"`
+	Slot    int  `json:"slot"`
+	Func    int  `json:"func"`
+	Managed bool `json:"managed"`
+}
+
+type HostDeviceMDEV struct {
+	UUID     string `json:"uuid"`
+	Model    string `json:"model,omitempty"`
+	MdevType string `json:"mdevType,omitempty"`
+}
+
+type HostDeviceUSB struct {
+	Bus    int `json:"bus"`
+	Device int `json:"device"`
+}
+
 // HostDevice is information about a device forwarded to the guest from the host
 type HostDevice struct {
-	Type    string `json:"type"`
-	Model   string `json:"model"`
-	Managed bool   `json:"managed"`
-	Domain  int    `json:"domain"`
-	Bus     int    `json:"bus"`
-	Slot    int    `json:"slot"`
-	Func    int    `json:"func"`
-	UUID    string `json:"uuid"`
+	Type     string `json:"type"`
+	Model    string `json:"model"`
+	Managed  bool   `json:"managed"`
+	Domain   int    `json:"domain"`
+	Bus      int    `json:"bus"`
+	Slot     int    `json:"slot"`
+	Func     int    `json:"func"`
+	UUID     string `json:"uuid"`
+	MdevType string `json:"mdevType,omitempty"`
+}
+
+func (device HostDevice) MarshalJSON() ([]byte, error) {
+	switch device.Type {
+	case "pci":
+		pci := HostDevicePCI{
+			Domain:  device.Domain,
+			Bus:     device.Bus,
+			Slot:    device.Slot,
+			Func:    device.Func,
+			Managed: device.Managed,
+		}
+		return json.Marshal(pci)
+	case "mdev":
+		mdev := HostDeviceMDEV{
+			UUID:     device.UUID,
+			Model:    device.Model,
+			MdevType: device.MdevType,
+		}
+		return json.Marshal(mdev)
+	case "usb":
+		usb := HostDeviceUSB{
+			Bus:    device.Bus,
+			Device: device.Slot, // USB devices use Slot for the device number
+		}
+		return json.Marshal(usb)
+	default:
+		return nil, fmt.Errorf("unknown device type: %s", device.Type)
+	}
 }
 
 // StateChronology state tracking for the guest

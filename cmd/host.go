@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -533,6 +534,98 @@ var hostIscsiLogoutCmd = &cobra.Command{
 	},
 }
 
+var hostUpdateGpu = &cobra.Command{
+	Use:   "update-gpu [file]",
+	Args:  cobra.ExactArgs(1),
+	Short: "Update GPU settings for a host",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		bindHostIDFlags(cmd, args)
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		var file *os.File
+		var err error
+		if args[0] == "-" {
+			file = os.Stdin
+		} else {
+			file, err = os.Open(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+		defer file.Close()
+		data, err := io.ReadAll(file)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		var gpuConfig rest.GPUConfig
+		err = unmarshal(data, &gpuConfig)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		host, err := getHost(cmd, args)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		host.GPU = gpuConfig
+		body, err := host.UpdateGPU(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(body)
+	},
+}
+
+var hostUpdateSriov = &cobra.Command{
+	Use:   "update-sriov [file]",
+	Args:  cobra.ExactArgs(1),
+	Short: "Update settings for sriov devices on a host",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		bindHostIDFlags(cmd, args)
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		var file *os.File
+		var err error
+		if args[0] == "-" {
+			file = os.Stdin
+		} else {
+			file, err = os.Open(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+		defer file.Close()
+		data, err := io.ReadAll(file)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		var config map[string]rest.SRIOVConfig
+		err = unmarshal(data, &config)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		host, err := getHost(cmd, args)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		host.Sriov = config
+		body, err := host.UpdateSriov(restClient)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(formatString(body))
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(hostCmd)
 	hostCmd.AddCommand(hostInfoCmd)
@@ -596,4 +689,8 @@ func init() {
 	addHostIDFlags(hostIscsiLogoutCmd)
 	hostIscsiLogoutCmd.Flags().String("portal", "", "portal")
 	hostIscsiLogoutCmd.Flags().String("target", "", "target")
+	hostCmd.AddCommand(hostUpdateGpu)
+	addHostIDFlags(hostUpdateGpu)
+	hostCmd.AddCommand(hostUpdateSriov)
+	addHostIDFlags(hostUpdateSriov)
 }
