@@ -33,7 +33,7 @@ type PoolGuestProfile struct {
 	Disks          []*PoolDisk         `json:"disks,omitempty"`
 	Firmware       string              `json:"firmware,omitempty"`
 	Gpu            bool                `json:"gpu"`
-	HostDevices    []*PoolHostDevice   `json:"hostDevices,omitempty"`
+	HostDevices    []*HostDevice       `json:"hostDevices,omitempty"`
 	Interfaces     []*PoolInterface    `json:"interfaces,omitempty"`
 	Mem            []int               `json:"mem,omitempty"`
 	OS             string              `json:"os,omitempty"`
@@ -45,17 +45,6 @@ type PoolGuestProfile struct {
 	BrokerOptions  *GuestBrokerOptions `json:"brokerOptions,omitempty"`
 	Secureboot     bool                `json:"secureboot"`
 	Machine        string              `json:"machine,omitempty"`
-}
-
-// PoolHostDevice a hostdevice to share with a virtual machine
-type PoolHostDevice struct {
-	Bus     int    `json:"bus"`
-	Domain  int    `json:"domain"`
-	Func    int    `json:"func"`
-	Managed bool   `json:"managed"`
-	Slot    int    `json:"slot"`
-	Type    string `json:"type"`
-	UUID    string `json:"uuid,omitempty"`
 }
 
 // PoolInterface network interface settings for a pool
