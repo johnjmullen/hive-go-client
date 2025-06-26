@@ -30,6 +30,7 @@ type Client struct {
 	UserAgent     string
 	httpClient    *http.Client
 	token         string
+	Context       context.Context
 }
 
 // SetToken sets the token directly instead of calling auth
