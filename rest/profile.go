@@ -15,27 +15,39 @@ type ProfileADConfig struct {
 	Username  string `json:"username,omitempty"`
 }
 
+type ProfileFabulatechOptions struct {
+	Scanner    bool `json:"scanner"`
+	WebCam     bool `json:"webCam"`
+	Printer    bool `json:"printer"`
+	Sound      bool `json:"sound"`
+	Biometrics bool `json:"biometrics"`
+	USB        bool `json:"usb"`
+	SerialPort bool `json:"serialPort"`
+}
+
 // ProfileBrokerOptions contains rdp settings for a profile
 type ProfileBrokerOptions struct {
-	AllowDesktopComposition   bool `json:"allowDesktopComposition"`
-	AudioCapture              bool `json:"audioCapture"`
-	DisableFullWindowDrag     bool `json:"disableFullWindowDrag"`
-	DisableMenuAnims          bool `json:"disableMenuAnims"`
-	DisablePrinter            bool `json:"disablePrinter"`
-	DisableThemes             bool `json:"disableThemes"`
-	DisableWallpaper          bool `json:"disableWallpaper"`
-	HideAuthenticationFailure bool `json:"hideAuthenticationFailure"`
-	InjectPassword            bool `json:"injectPassword"`
-	RedirectCSSP              bool `json:"redirectCSSP"`
-	RedirectClipboard         bool `json:"redirectClipboard"`
-	RedirectDisk              bool `json:"redirectDisk"`
-	RedirectPNP               bool `json:"redirectPNP"`
-	RedirectPrinter           bool `json:"redirectPrinter"`
-	RedirectSmartCard         bool `json:"redirectSmartCard"`
-	RedirectUSB               bool `json:"redirectUSB"`
-	SmartResize               bool `json:"smartResize"`
-	FailOnCertMismatch        bool `json:"failOnCertMismatch"`
-	EnableHTML5               bool `json:"enableHtml5"`
+	AllowDesktopComposition   bool                      `json:"allowDesktopComposition"`
+	AudioCapture              bool                      `json:"audioCapture"`
+	DisableFullWindowDrag     bool                      `json:"disableFullWindowDrag"`
+	DisableMenuAnims          bool                      `json:"disableMenuAnims"`
+	DisablePrinter            bool                      `json:"disablePrinter"`
+	DisableThemes             bool                      `json:"disableThemes"`
+	DisableWallpaper          bool                      `json:"disableWallpaper"`
+	HideAuthenticationFailure bool                      `json:"hideAuthenticationFailure"`
+	InjectPassword            bool                      `json:"injectPassword"`
+	RedirectCSSP              bool                      `json:"redirectCSSP"`
+	RedirectClipboard         bool                      `json:"redirectClipboard"`
+	RedirectDisk              bool                      `json:"redirectDisk"`
+	RedirectPNP               bool                      `json:"redirectPNP"`
+	RedirectPrinter           bool                      `json:"redirectPrinter"`
+	RedirectSmartCard         bool                      `json:"redirectSmartCard"`
+	RedirectUSB               bool                      `json:"redirectUSB"`
+	SmartResize               bool                      `json:"smartResize"`
+	FailOnCertMismatch        bool                      `json:"failOnCertMismatch"`
+	EnableHTML5               bool                      `json:"enableHtml5"`
+	EnableFabulatech          bool                      `json:"enableFabulatech"`
+	FabulatechOptions         *ProfileFabulatechOptions `json:"fabulatechOptions,omitempty"`
 }
 
 // ProfileUserVolumes contains user volume settings for a profile
